@@ -127,7 +127,7 @@ namespace SnappyLayout.UI
         {
             _sidebarCollapsed = collapsed;
             SidebarCol.Width = new GridLength(collapsed ? 74 : 265);
-            SidebarBorder.Padding = collapsed ? new Thickness(10, 12, 10, 12) : new Thickness(14);
+            SidebarBorder.Padding = collapsed ? new Thickness(10, 14, 10, 14) : new Thickness(14, 14, 14, 14);
             SidebarBrandText.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             BtnToggleSidebar.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             SidebarFooterExpanded.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
@@ -143,12 +143,13 @@ namespace SnappyLayout.UI
                 var meta = NavMeta[i];
                 string title = Loc.T(meta.LocKey);
                 btns[i].ToolTip = title;
+                btns[i].Height = 46;
 
                 var iconBadge = new Border
                 {
-                    Width = _sidebarCollapsed ? 34 : 28,
-                    Height = _sidebarCollapsed ? 34 : 28,
-                    CornerRadius = new CornerRadius(7),
+                    Width = 32,
+                    Height = 32,
+                    CornerRadius = new CornerRadius(8),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
@@ -159,7 +160,7 @@ namespace SnappyLayout.UI
                 var iconText = new TextBlock
                 {
                     Text = meta.Icon,
-                    FontSize = _sidebarCollapsed ? 17 : 14,
+                    FontSize = 16,
                     FontWeight = FontWeights.Bold,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
@@ -169,7 +170,7 @@ namespace SnappyLayout.UI
 
                 if (_sidebarCollapsed)
                 {
-                    btns[i].Padding = new Thickness(4, 5, 4, 5);
+                    btns[i].Padding = new Thickness(4, 6, 4, 6);
                     btns[i].HorizontalContentAlignment = HorizontalAlignment.Center;
                     btns[i].Content = iconBadge;
                 }

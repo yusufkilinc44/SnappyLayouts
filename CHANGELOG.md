@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.19] — 2026-11-19
+### Changed
+- Kept sidebar navigation icon sizes (`32×32`) and menu row heights (`46px`) identical between expanded and collapsed modes so icons never shift vertically when toggling or resizing.
+
+---
+
 ## [v0.18] — 2026-11-19
 ### Fixed
 - Fixed the version badge in the sidebar header getting clipped next to the sidebar collapse button (`☰`) by placing it neatly next to the `Active` status indicator.
