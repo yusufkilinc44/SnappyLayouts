@@ -67,6 +67,19 @@ namespace SnappyLayout.UI.Controls
         }
 
         /// <summary>
+        /// Tek bölgeli kutularda (ör. Sanal Monitör Tam Ekran) harici olarak seçili/vurgulu durumu açıp kapatır.
+        /// </summary>
+        public void SetForcedSelected(bool selected)
+        {
+            int hz = selected ? 0 : -1;
+            if (hz != _hoverZoneIndex)
+            {
+                _hoverZoneIndex = hz;
+                InvalidateVisual();
+            }
+        }
+
+        /// <summary>
         /// Pencere sürüklenirken (mouse capture başka penceredeyken) dışarıdan fare konumunu bildirip
         /// ilgili bölgeyi vurgular ve hedef dikdörtgeni döndürür.
         /// </summary>
@@ -179,8 +192,14 @@ namespace SnappyLayout.UI.Controls
             if (IsPermanentFull || Layout == null)
             {
                 bool hov = _hoverZoneIndex == 0;
-                var fill = IsPermanentFull ? (hov ? permHover : permFill) : (hov ? zoneHover : zoneFill);
-                var stroke = IsPermanentFull ? (hov ? Brushes.White : permStroke) : (hov ? zoneHoverStroke : zoneStroke);
+                // Win11 TopSnapBar stilinde Fiziksel Tam Ekran kutusu seçili değilken nötr görünür,
+                // yalnızca üzerine gelindiğinde yeşil olarak vurgulanır (seçiliymiş gibi kafa karışıklığı yaratmaz).
+                var fill = IsPermanentFull
+                    ? (hov ? permHover : (IsWin11Style ? zoneFill : permFill))
+                    : (hov ? zoneHover : zoneFill);
+                var stroke = IsPermanentFull
+                    ? (hov ? Brushes.White : (IsWin11Style ? zoneStroke : permStroke))
+                    : (hov ? zoneHoverStroke : zoneStroke);
                 dc.DrawRoundedRectangle(fill, new Pen(stroke, IsWin11Style ? 1.15 : 1.5), inner, radius, radius);
 
                 if (!IsWin11Style && inner.Width > 50 && inner.Height > 24)

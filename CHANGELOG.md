@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.24] — 2026-11-19
+### Fixed
+- **Clear Top-Edge Fullscreen Selection in Top Snap Bar:** Dragging a window to the very top edge now visually highlights the **Virtual Monitor Fullscreen** tile in accent blue as selected, while keeping the **Full Physical Screen** tile neutral until hovered so it no longer looks pre-selected.
+
+---
+
 ## [v0.23] — 2026-11-19
 ### Added / Fixed
 - **Virtual-Monitor-Aware Edge & Top-Edge Drag Snap:** Suppressed Windows's built-in edge/top-drag Aero Snap overlay (`SPI_SETWINARRANGING`, restored automatically on exit or pause) and replaced it with Snappy Layout's own translucent zone preview and snap behavior:

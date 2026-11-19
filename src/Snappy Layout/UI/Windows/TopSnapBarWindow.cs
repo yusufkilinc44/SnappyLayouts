@@ -181,7 +181,7 @@ namespace SnappyLayout.UI.Windows
                     ClearPending();
                     _zonePreview.HidePreview();
                     ShowForArea(area);
-                    // İmleç doğrudan en üst kenardaysa anında aktif sanal monitör tam ekran önizlemesini göster
+                    // İmleç doğrudan en üst kenardaysa anında aktif sanal monitör tam ekran önizlemesini ve ilk kutu seçimini göster
                     if (pt.Y <= wa.Top + (int)Math.Round(16 * scale))
                     {
                         var barHwnd = new WindowInteropHelper(this).Handle;
@@ -191,6 +191,8 @@ namespace SnappyLayout.UI.Windows
                         _pendingIsVirtualFull = true;
                         _pendingIsPhysicalFull = false;
                         _lastEdgePreviewRect = fullPx;
+                        if (_tiles.Count > 0 && _tiles[0].IsVirtualFull)
+                            _tiles[0].Control.SetForcedSelected(true);
                         _zonePreview.ShowRect(fullPx, isPhysicalFull: false, barHwnd);
                     }
                     return;
@@ -298,7 +300,7 @@ namespace SnappyLayout.UI.Windows
 
             if (!hitAny)
             {
-                // İmleç en üst kenardayken (herhangi bir kutu üzerinde değilken) aktif sanal monitörde Tam Ekran önizlemesi göster
+                // İmleç en üst kenardayken (herhangi bir kutu üzerinde değilken) aktif sanal monitörde Tam Ekran önizlemesi ve ilk kutu seçimini göster
                 int topFullscreenBand = (int)Math.Round(16 * scale);
                 if (pt.Y <= wa.Top + topFullscreenBand)
                 {
@@ -308,6 +310,9 @@ namespace SnappyLayout.UI.Windows
                     _pendingRelRect = new Rect(0, 0, 1, 1);
                     _pendingIsVirtualFull = true;
                     _pendingIsPhysicalFull = false;
+
+                    if (_tiles.Count > 0 && _tiles[0].IsVirtualFull)
+                        _tiles[0].Control.SetForcedSelected(true);
 
                     if (!_lastEdgePreviewRect.HasValue ||
                         _lastEdgePreviewRect.Value.Left != fullPx.Left ||
