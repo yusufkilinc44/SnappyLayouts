@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.22] — 2026-11-19
+### Changed
+- **UK Flag for English:** Updated the English language selector flag icon to the United Kingdom (Union Jack) flag.
+
+---
+
 ## [v0.21] — 2026-11-19
 ### Changed / Added
 - **Zero-Shift Sidebar Expand/Collapse:** Unified sidebar padding, fixed icon columns, and footer layout so expanding or collapsing the left sidebar only reveals or hides text labels and dropdowns while keeping every icon's `(X, Y)` coordinates pixel-locked.

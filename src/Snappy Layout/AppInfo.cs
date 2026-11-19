@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.21";
+        public const string Version = "0.22";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.22", "19.11.2026",
+             "İngilizce dil seçimi bayrağı Birleşik Krallık (UK / Union Jack) bayrağı olarak güncellendi.",
+             "Updated the English language selector flag icon to the United Kingdom (Union Jack) flag."),
             ("0.21", "19.11.2026",
              "Sol menü genişletme/daraltma (expand/collapse) tam sabit koordinatlı hale getirildi: geçişte yalnızca metinler ve açılır listeler gizlenip açılır, tüm ikonların (X, Y) konumları piksel düzeyinde sabit kalır. Daraltılmış modda aktif dil bayrağı, tema ikonu, sınır çizgileri ve duraklatma butonları tek tıkla açılır menüyle tam erişilebilir yapıldı.",
              "Unified the left sidebar expand/collapse layout so icon (X, Y) coordinates stay pixel-locked while only labels and dropdowns show/hide. Added clickable active language flag and theme icon menus in collapsed mode so every expanded sidebar control remains directly accessible in collapsed mode."),

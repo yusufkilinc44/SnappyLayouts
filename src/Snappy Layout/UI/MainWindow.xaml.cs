@@ -128,11 +128,8 @@ namespace SnappyLayout.UI
             _sidebarCollapsed = collapsed;
             // Sabit sol/sağ padding (12px) + 50px ikon sütunu = 74px -> tüm ikonların X ve Y koordinatı %100 sabit kalır!
             SidebarCol.Width = new GridLength(collapsed ? 74 : 265);
-            SidebarBorder.Padding = collapsed ? new Thickness(10, 14, 10, 14) : new Thickness(14, 14, 14, 14);
             SidebarBrandText.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             BtnToggleSidebar.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
-            SidebarFooterExpanded.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
-            SidebarFooterCompact.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
             QuickLangCombo.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             QuickThemeCombo.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             RefreshNavButtonContents();
@@ -156,7 +153,6 @@ namespace SnappyLayout.UI
                     Width = 32,
                     Height = 32,
                     CornerRadius = new CornerRadius(8),
-                    HorizontalAlignment = HorizontalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center
                 };
@@ -175,16 +171,10 @@ namespace SnappyLayout.UI
                 iconText.SetResourceReference(TextBlock.ForegroundProperty, meta.AccentBrushKey);
                 iconBadge.Child = iconText;
 
-                if (_sidebarCollapsed)
                 var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
                 sp.Children.Add(iconBadge);
                 var lbl = new TextBlock
                 {
-                    btns[i].Padding = new Thickness(4, 6, 4, 6);
-                    btns[i].HorizontalContentAlignment = HorizontalAlignment.Center;
-                    btns[i].Content = iconBadge;
-                }
-                else
                     Text = title,
                     FontSize = 13,
                     VerticalAlignment = VerticalAlignment.Center,
@@ -289,22 +279,6 @@ namespace SnappyLayout.UI
                 string label = choice == LanguageChoice.System ? Loc.T("LangSystem") : nativeName;
                 var mi = new MenuItem
                 {
-                    btns[i].Padding = new Thickness(8, 6, 10, 6);
-                    btns[i].HorizontalContentAlignment = HorizontalAlignment.Stretch;
-                    var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-                    sp.Children.Add(iconBadge);
-                    var lbl = new TextBlock
-                    {
-                        Text = title,
-                        FontSize = 13,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(10, 0, 0, 0),
-                        TextTrimming = TextTrimming.CharacterEllipsis
-                    };
-                    lbl.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
-                    sp.Children.Add(lbl);
-                    btns[i].Content = sp;
-                }
                     Header = label,
                     Icon = BuildFlagIcon(choice),
                     IsChecked = Storage.Data.Settings.Language == choice
@@ -367,20 +341,7 @@ namespace SnappyLayout.UI
             QuickThemeCombo.Items.Add(Loc.T("ThemeDark"));
             QuickThemeCombo.SelectedIndex = (int)Storage.Data.Settings.Theme;
 
-            BtnQuickShowBorders.Content = "◫  " + Loc.T("VmShowBordersNow");
-            BtnQuickShowBorders.SetResourceReference(Control.BackgroundProperty, "NavVirtualBgBrush");
-            BtnQuickShowBorders.SetResourceReference(Control.BorderBrushProperty, "NavVirtualBrush");
-            BtnQuickShowBorders.SetResourceReference(Control.ForegroundProperty, "NavVirtualBrush");
             RefreshFooterButtons();
-
-            BtnPauseResume.Content = paused ? ("▶  " + Loc.T("Resume")) : ("⏸  " + Loc.T("Pause"));
-            BtnPauseResume.SetResourceReference(Control.BackgroundProperty, paused ? "NavSettingsBgBrush" : "NavHotkeysBgBrush");
-            BtnPauseResume.SetResourceReference(Control.BorderBrushProperty, paused ? "NavSettingsBrush" : "NavHotkeysBrush");
-            BtnPauseResume.SetResourceReference(Control.ForegroundProperty, paused ? "NavSettingsBrush" : "NavHotkeysBrush");
-
-            BtnCompactBorders.ToolTip = Loc.T("VmShowBordersNow");
-            BtnCompactPause.Content = paused ? "▶" : "⏸";
-            BtnCompactPause.ToolTip = paused ? Loc.T("Resume") : Loc.T("Pause");
 
             _suppressQuickEvents = false;
             UpdateNavButtonHighlight();
@@ -497,27 +458,23 @@ namespace SnappyLayout.UI
 
             switch (lang)
             {
-                case LanguageChoice.English: // United States (US) Flag
+                case LanguageChoice.English: // United Kingdom (Union Jack) Flag
                 {
-                    var red = B("#B22234");
-                    var navy = B("#3C3B6E");
-                    AddRect(canvas, 0, 0, W, H, Brushes.White);
-                    double sh = H / 7.0;
-                    for (int s = 0; s < 7; s += 2)
-                        AddRect(canvas, 0, s * sh, W, sh + 0.2, red);
-                    double cw = 10.0, ch = sh * 4.0;
-                    AddRect(canvas, 0, 0, cw, ch, navy);
-                    // Crisp white star dots inside navy canton
-                    double[] xs1 = { 1.6, 4.4, 7.2 };
-                    double[] ys1 = { 1.3, 4.1, 6.8 };
-                    foreach (double y in ys1)
-                        foreach (double x in xs1)
-                            AddEllipse(canvas, x, y, 1.3, 1.3, Brushes.White);
-                    double[] xs2 = { 3.0, 5.8 };
-                    double[] ys2 = { 2.7, 5.4 };
-                    foreach (double y in ys2)
-                        foreach (double x in xs2)
-                            AddEllipse(canvas, x, y, 1.3, 1.3, Brushes.White);
+                    var navy = B("#012169");
+                    var red = B("#C8102E");
+                    AddRect(canvas, 0, 0, W, H, navy);
+                    // White diagonal saltire (St Andrew's Cross)
+                    canvas.Children.Add(new System.Windows.Shapes.Line { X1 = 0, Y1 = 0, X2 = W, Y2 = H, Stroke = Brushes.White, StrokeThickness = 3.2 });
+                    canvas.Children.Add(new System.Windows.Shapes.Line { X1 = W, Y1 = 0, X2 = 0, Y2 = H, Stroke = Brushes.White, StrokeThickness = 3.2 });
+                    // Red diagonal saltire (St Patrick's Cross)
+                    canvas.Children.Add(new System.Windows.Shapes.Line { X1 = 0, Y1 = 0, X2 = W, Y2 = H, Stroke = red, StrokeThickness = 1.3 });
+                    canvas.Children.Add(new System.Windows.Shapes.Line { X1 = W, Y1 = 0, X2 = 0, Y2 = H, Stroke = red, StrokeThickness = 1.3 });
+                    // White fimbriation for St George's Cross
+                    AddRect(canvas, (W - 5.0) / 2.0, 0, 5.0, H, Brushes.White);
+                    AddRect(canvas, 0, (H - 5.0) / 2.0, W, 5.0, Brushes.White);
+                    // Red St George's Cross
+                    AddRect(canvas, (W - 2.8) / 2.0, 0, 2.8, H, red);
+                    AddRect(canvas, 0, (H - 2.8) / 2.0, W, 2.8, red);
                     break;
                 }
                 case LanguageChoice.Turkish: // Turkey Flag (official proportions + 5-pointed star)
