@@ -1,8 +1,8 @@
-# Snappy Layout — Technical Architecture
+# Snappy Layouts — Technical Architecture
 
 **Author:** **YUSUF KILINÇ — November 2026**
 
-This document describes the low-level Win32, DWM, Shcore, COM, and WPF architecture powering **Snappy Layout**.
+This document describes the low-level Win32, DWM, Shcore, COM, and WPF architecture powering **Snappy Layouts**.
 
 ---
 
@@ -10,7 +10,7 @@ This document describes the low-level Win32, DWM, Shcore, COM, and WPF architect
 
 On Windows 11, hovering over a window's Maximize button (`HTMAXBUTTON`) or dragging a window to the top edge of the screen causes `explorer.exe` (`twinui.dll`) to display `XamlExplorerHostIslandWindow`. Simply writing `0` to `EnableSnapAssistFlyout` and `EnableSnapBar` under `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced` is insufficient on its own because `explorer.exe` caches these values in memory inside `CSettingsCache` on startup.
 
-Snappy Layout prevents native Snap overlays from flashing or colliding via a **4-layer strategy**:
+Snappy Layouts prevents native Snap overlays from flashing or colliding via a **4-layer strategy**:
 
 1. **ImmersiveShell `ISettingsCache` COM Refresh:**
    - Instantiates `CLSID_ImmersiveShell` (`{C2F03A33-21F5-47FA-B4BB-156362A2F239}`) via `CoCreateInstance`, queries `IServiceProvider`, and requests `SID_SettingsCache` (`{86FB57A6-3C81-4F40-A971-6280BE4E526E}` / `{E78295EF-4439-494F-9D40-16E91A4CBF03}`) for `IID_ISettingsCache` (`{B1BED1AE-63DA-4687-8063-C89EC276D28A}`).
@@ -18,11 +18,11 @@ Snappy Layout prevents native Snap overlays from flashing or colliding via a **4
 2. **`SettingsCacheChangeMessage` Broadcast:**
    - Broadcasts `RegisterWindowMessage("SettingsCacheChangeMessage")` and `WM_SETTINGCHANGE` via `SendNotifyMessage(HWND_BROADCAST, ...)`.
 3. **`MainWindowWndProc` `HTMAXBUTTON` Interception:**
-   - On Snappy Layout's own `MainWindow`, `MainWindowWndProc` intercepts `WM_NCHITTEST`. When `DefWindowProc` returns `HTMAXBUTTON` while no mouse button is pressed, it notifies `MaximizeHoverWatcher` directly and returns `HTBORDER` to Windows so DWM never starts its native Snap Flyout timer on `MainWindow`. When the user clicks (`VK_LBUTTON`), `HTMAXBUTTON` passes through normally.
+   - On Snappy Layouts's own `MainWindow`, `MainWindowWndProc` intercepts `WM_NCHITTEST`. When `DefWindowProc` returns `HTMAXBUTTON` while no mouse button is pressed, it notifies `MaximizeHoverWatcher` directly and returns `HTBORDER` to Windows so DWM never starts its native Snap Flyout timer on `MainWindow`. When the user clicks (`VK_LBUTTON`), `HTMAXBUTTON` passes through normally.
 4. **Zero-Latency `EVENT_OBJECT_SHOW` Hook:**
    - `WindowEventService` registers `SetWinEventHook(EVENT_OBJECT_CREATE, EVENT_OBJECT_SHOW, ...)`. Whenever the user is hovering a Maximize button or actively dragging a window (`IsDraggingWindow`), any `XamlExplorerHostIslandWindow` or `Shell_LightDismissOverlay` is immediately hidden and moved off-screen (`SWP_HIDEWINDOW | SWP_ASYNCWINDOWPOS`) before DWM composites a frame.
 
-When Snappy Layout exits cleanly, `RestoreWindowsNativeFlyout()` restores the original registry values and refreshes `ISettingsCache`.
+When Snappy Layouts exits cleanly, `RestoreWindowsNativeFlyout()` restores the original registry values and refreshes `ISettingsCache`.
 
 ---
 

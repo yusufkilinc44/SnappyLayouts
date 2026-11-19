@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature or enhancement for Snappy Layout
+about: Suggest a new feature or enhancement for Snappy Layouts
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''

@@ -88,10 +88,19 @@ namespace SnappyLayout.Core
             string rootCls = NativeMethods.GetClassName(root);
             if (NativeSnapSuppressor.IsNativeSnapWindowClass(rootCls))
             {
-                NativeSnapSuppressor.SuppressWindowInstant(root);
-                root = FindTopTargetWindowAtPoint(p);
-                child = root;
-                if (root == IntPtr.Zero) return IntPtr.Zero;
+                // Yalnızca gerçek Snap Flyout/Bar popup'ıysa ve yakın zamanda maksimize tuşu üzerindeysek bastır;
+                // Task View / Sanal Masaüstü Seçici / Başlat Menüsü pencerelerine ASLA dokunma!
+                if (IsRecentlyHoveringMaxButton() && NativeSnapSuppressor.IsNativeSnapPopup(root))
+                {
+                    NativeSnapSuppressor.SuppressWindowInstant(root);
+                    root = FindTopTargetWindowAtPoint(p);
+                    child = root;
+                    if (root == IntPtr.Zero) return IntPtr.Zero;
+                }
+                else
+                {
+                    return IntPtr.Zero;
+                }
             }
 
             if (GetProcessId(root) == (uint)Environment.ProcessId)

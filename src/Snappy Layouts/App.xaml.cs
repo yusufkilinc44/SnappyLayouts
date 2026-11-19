@@ -33,6 +33,26 @@ namespace SnappyLayout
 
         public bool Paused { get; set; }
 
+        public void SetPaused(bool paused)
+        {
+            Paused = paused;
+            if (HoverWatcher != null) HoverWatcher.Enabled = !paused;
+            if (paused)
+            {
+                Flyout?.Hide();
+                TopSnapBar?.Hide();
+                Overlay?.Refresh();
+                NativeSnapSuppressor.RestoreWindowsNativeFlyout();
+            }
+            else
+            {
+                if (Storage.Data?.Settings?.FlyoutEnabled == true)
+                    NativeSnapSuppressor.SuppressWindowsNativeFlyout();
+                Overlay?.Refresh();
+            }
+            RebuildTrayMenu();
+        }
+
         private Mutex _singleInstanceMutex;
         private EventWaitHandle _shutdownEvent;
         private Forms.NotifyIcon _trayIcon;
@@ -61,6 +81,7 @@ namespace SnappyLayout
             }, null, -1, true);
 
             Storage.Load();
+            StartupService.CleanupLegacy();
             if (Storage.Data.Settings.HoverDelayMs == 450 || Storage.Data.Settings.HoverDelayMs == 220)
                 Storage.Data.Settings.HoverDelayMs = 140;
             Loc.Apply(Storage.Data.Settings.Language);
@@ -289,7 +310,7 @@ namespace SnappyLayout
             {
                 Icon = CreateTrayIcon(),
                 Visible = true,
-                Text = $"Snappy Layout {AppInfo.VersionText}"
+                Text = $"Snappy Layouts {AppInfo.VersionText}"
             };
             _trayIcon.DoubleClick += (s, e) => Dispatcher.BeginInvoke(new Action(ShowMainWindow));
 
@@ -301,11 +322,16 @@ namespace SnappyLayout
         {
             if (_trayIcon == null) return;
             var menu = new Forms.ContextMenuStrip();
-            menu.Items.Add($"Snappy Layout {AppInfo.VersionText}").Enabled = false;
+            menu.Items.Add($"Snappy Layouts {AppInfo.VersionText}").Enabled = false;
             menu.Items.Add(new Forms.ToolStripSeparator());
             menu.Items.Add(Loc.T("TrayOpen"), null, (s, e) => Dispatcher.BeginInvoke(new Action(ShowMainWindow)));
             menu.Items.Add(Loc.T("TrayShowFlyout"), null, (s, e) => Dispatcher.BeginInvoke(new Action(ShowFlyoutForForegroundOrSelf)));
             menu.Items.Add(Loc.T("TrayShowBorders"), null, (s, e) => Dispatcher.BeginInvoke(new Action(() => Overlay.Flash())));
+            menu.Items.Add(Paused ? Loc.T("Resume") : Loc.T("Pause"), null, (s, e) => Dispatcher.BeginInvoke(new Action(() =>
+            {
+                SetPaused(!Paused);
+                MainWindow?.RefreshSidebarChrome();
+            })));
             menu.Items.Add(new Forms.ToolStripSeparator());
             menu.Items.Add(Loc.T("TrayExit"), null, (s, e) => Dispatcher.BeginInvoke(new Action(ExitApplication)));
             _trayIcon.ContextMenuStrip = menu;
@@ -325,6 +351,12 @@ namespace SnappyLayout
                 g.DrawRectangle(pen, 17, 17, 8, 7);
             }
             return Icon.FromHandle(bmp.GetHicon());
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            NativeSnapSuppressor.RestoreWindowsNativeFlyout();
+            base.OnExit(e);
         }
 
         public void ExitApplication()

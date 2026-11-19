@@ -43,7 +43,7 @@ namespace SnappyLayout.UI
             InitializeComponent();
 
             SidebarVersionText.Text = AppInfo.VersionText;
-            Title = $"Snappy Layout {AppInfo.VersionText}";
+            Title = $"Snappy Layouts {AppInfo.VersionText}";
 
             var mons = MonitorService.GetMonitors(true);
             _selectedPhysicalMonitor = mons.FirstOrDefault(m => m.IsPrimary) ?? mons.First();
@@ -324,7 +324,7 @@ namespace SnappyLayout.UI
             menu.IsOpen = true;
         }
 
-        private void RefreshSidebarChrome()
+        public void RefreshSidebarChrome()
         {
             _suppressQuickEvents = true;
             SidebarVersionText.Text = AppInfo.VersionText;
@@ -617,7 +617,7 @@ namespace SnappyLayout.UI
         private void OnPauseResumeClick(object sender, RoutedEventArgs e)
         {
             if (App.Instance == null) return;
-            App.Instance.Paused = !App.Instance.Paused;
+            App.Instance.SetPaused(!App.Instance.Paused);
             RefreshSidebarChrome();
         }
 
@@ -770,7 +770,7 @@ namespace SnappyLayout.UI
                 btnCopySiblings.Click += (s, e) =>
                 {
                     AreaService.CopyLayoutsToSiblingVirtualMonitors(_selectedPreviewArea);
-                    MessageBox.Show(this, Loc.T("CopiedToSiblingsMsg"), "Snappy Layout", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(this, Loc.T("CopiedToSiblingsMsg"), "Snappy Layouts", MessageBoxButton.OK, MessageBoxImage.Information);
                 };
                 Grid.SetColumn(btnCopySiblings, 1);
                 step2Header.Children.Add(btnCopySiblings);
@@ -934,7 +934,7 @@ namespace SnappyLayout.UI
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(6, 0, 0, 0)
             };
-            btnLockedDel.Click += (s, e) => MessageBox.Show(this, Loc.T("CannotDeletePermanent"), "Snappy Layout", MessageBoxButton.OK, MessageBoxImage.Information);
+            btnLockedDel.Click += (s, e) => MessageBox.Show(this, Loc.T("CannotDeletePermanent"), "Snappy Layouts", MessageBoxButton.OK, MessageBoxImage.Information);
 
             Grid.SetColumn(permPreview, 0);
             Grid.SetColumn(permInfo, 1);
@@ -2453,7 +2453,7 @@ namespace SnappyLayout.UI
                         App.Instance?.Overlay?.Refresh();
                         RebuildAllPages();
                     }
-                    catch (Exception ex) { MessageBox.Show(this, ex.Message, "Snappy Layout", MessageBoxButton.OK, MessageBoxImage.Error); }
+                    catch (Exception ex) { MessageBox.Show(this, ex.Message, "Snappy Layouts", MessageBoxButton.OK, MessageBoxImage.Error); }
                 }
             };
             ioRow.Children.Add(btnExp);
@@ -2670,7 +2670,7 @@ namespace SnappyLayout.UI
             var heroLeft = new StackPanel();
             var appTitle = new TextBlock
             {
-                Text = $"Snappy Layout {AppInfo.VersionText}",
+                Text = $"Snappy Layouts {AppInfo.VersionText}",
                 FontSize = 22,
                 FontWeight = FontWeights.Bold
             };
@@ -2727,7 +2727,7 @@ namespace SnappyLayout.UI
                 ? new (string Title, string Body)[]
                 {
                     ("1. Pencerelerin Maksimize Tuşu Üzerinde Yerleşim Menüsü (Snap Flyout)",
-                     "• Herhangi bir pencerenin sağ üstteki Büyüt (Maximize) tuşu üzerine fareyle gelip kısa süre beklediğinizde (veya Ctrl+Alt+Z kısayoluna bastığınızda) Snappy Layout'ın özelleştirilmiş yerleşim menüsü açılır.\n" +
+                     "• Herhangi bir pencerenin sağ üstteki Büyüt (Maximize) tuşu üzerine fareyle gelip kısa süre beklediğinizde (veya Ctrl+Alt+Z kısayoluna bastığınızda) Snappy Layouts'ın özelleştirilmiş yerleşim menüsü açılır.\n" +
                      "• Açılan menüdeki kutulardan birine tıkladığınızda pencere anında o bölgeye yerleştirilir.\n" +
                      "• Tüm yerleşim kutuları o anki monitörün (veya sanal monitörün) gerçek en/boy oranına (16:9, 21:9 ultra-wide, dikey vb.) birebir uygun çizilir."),
                     ("2. Yerleşim Düzenlerini Silme, Ekleme ve Sınırsız Sütun/Satır Bölme",
@@ -2757,11 +2757,11 @@ namespace SnappyLayout.UI
                 : new (string Title, string Body)[]
                 {
                     ("1. Maximize Button Hover Flyout (Custom Snap Layouts)",
-                     "• Hover over any window's Maximize button (or press Ctrl+Alt+Z) to open Snappy Layout's custom layout flyout.\n" +
+                     "• Hover over any window's Maximize button (or press Ctrl+Alt+Z) to open Snappy Layouts's custom layout flyout.\n" +
                      "• Click any zone box in the flyout to immediately snap the window into that zone.\n" +
                      "• All layout boxes and diagrams match the true aspect ratio (16:9, 21:9 ultra-wide, portrait, or virtual monitor ratio) of the target screen."),
                     ("2. Deleting Defaults, Adding Layouts & Unlimited Columns/Rows",
-                     "• Snappy Layout starts with default Windows layouts, which can be freely edited or deleted.\n" +
+                     "• Snappy Layouts starts with default Windows layouts, which can be freely edited or deleted.\n" +
                      "• Click '+ Add New Layout' and use '+ Column' / '+ Row' to divide the screen into as many columns and rows as you want.\n" +
                      "• Drag inner grid lines or enter custom percentages for unequal column/row sizes, and drag-select cells to merge them."),
                     ("3. Virtual Monitors (Side-by-Side Equal or Unequal Splits)",

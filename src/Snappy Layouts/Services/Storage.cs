@@ -7,10 +7,11 @@ using SnappyLayout.Models;
 
 namespace SnappyLayout.Services
 {
-    /// <summary>Tüm ayarları %AppData%\Snappy Layout\settings.json dosyasında saklar.</summary>
+    /// <summary>Tüm ayarları %AppData%\Snappy Layouts\settings.json dosyasında saklar.</summary>
     public static class Storage
     {
-        public static string Folder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Snappy Layout");
+        public static string Folder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Snappy Layouts");
+        public static string LegacyFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Snappy Layout");
         public static string FilePath => Path.Combine(Folder, "settings.json");
 
         public static AppData Data { get; private set; }
@@ -30,6 +31,17 @@ namespace SnappyLayout.Services
         {
             try
             {
+                // Eski "Snappy Layout" klasöründen otomatik ayar geçişi ve eski klasörün temizlenmesi
+                if (Directory.Exists(LegacyFolder))
+                {
+                    string legacyPath = Path.Combine(LegacyFolder, "settings.json");
+                    if (!File.Exists(FilePath) && File.Exists(legacyPath))
+                    {
+                        Directory.CreateDirectory(Folder);
+                        File.Copy(legacyPath, FilePath, false);
+                    }
+                    try { Directory.Delete(LegacyFolder, recursive: true); } catch { }
+                }
                 if (File.Exists(FilePath))
                 {
                     var json = File.ReadAllText(FilePath);

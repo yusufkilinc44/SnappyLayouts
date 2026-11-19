@@ -71,8 +71,7 @@ namespace SnappyLayout.Core
             if (Storage.Data?.Settings?.FlyoutEnabled != true) return false;
             if (App.Current != null && ((App)App.Current).Paused) return false;
 
-            string cls = SnappyLayout.Native.NativeMethods.GetClassName(hwnd);
-            if (!NativeSnapSuppressor.IsNativeSnapWindowClass(cls)) return false;
+            if (!NativeSnapSuppressor.IsNativeSnapPopup(hwnd)) return false;
 
             bool flyoutVisible = App.Instance?.Flyout?.IsVisible ?? false;
             bool topBarVisible = App.Instance?.TopSnapBar?.IsVisible ?? false;

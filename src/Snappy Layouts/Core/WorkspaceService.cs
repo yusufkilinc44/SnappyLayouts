@@ -159,7 +159,7 @@ namespace SnappyLayout.Core
                     }
                     if (hwnd == IntPtr.Zero) { failed++; continue; }
                     used.Add(hwnd);
-                    await PlaceAppAsync(hwnd, app, scope, m);
+                    await PlaceAppAsync(hwnd, app, scope, m, ws.ScopeSegment);
                     placed++;
                 }
                 catch (Exception ex)
@@ -171,18 +171,33 @@ namespace SnappyLayout.Core
             return (placed, launched, failed);
         }
 
-        private static async Task PlaceAppAsync(IntPtr hwnd, SavedApp app, RECT scope, MonitorInfo m)
+        private static async Task PlaceAppAsync(IntPtr hwnd, SavedApp app, RECT scope, MonitorInfo m, int scopeSegment)
         {
+            // Çalışma alanı, mevcut Snap Layout şablonları sonradan değişmiş veya silinmiş olsa bile
+            // pencereleri her zaman kaydedildiği kesin konumlara (ws.Weights + scope + X/Y/W/H) yerleştirir.
             if (app.IsMaximized)
             {
-                WindowPlacer.PhysicalMaximize(hwnd, m);
+                if (scopeSegment >= 0)
+                    WindowPlacer.Place(hwnd, scope, activate: true);
+                else
+                    WindowPlacer.PhysicalMaximize(hwnd, m);
                 return;
             }
+            int left = scope.Left + (int)Math.Round(app.X * scope.Width);
+            int top = scope.Top + (int)Math.Round(app.Y * scope.Height);
+            int right = scope.Left + (int)Math.Round((app.X + app.W) * scope.Width);
+            int bottom = scope.Top + (int)Math.Round((app.Y + app.H) * scope.Height);
+
+            // Monitör çözünürlüğü hafif değiştiyse bile pencere ekran dışına taşmasın
+            var wa = m.WorkArea;
+            if (right - left < 120) right = Math.Min(wa.Right, left + 400);
+            if (bottom - top < 80) bottom = Math.Min(wa.Bottom, top + 300);
             var target = new RECT(
-                scope.Left + (int)Math.Round(app.X * scope.Width),
-                scope.Top + (int)Math.Round(app.Y * scope.Height),
-                scope.Left + (int)Math.Round((app.X + app.W) * scope.Width),
-                scope.Top + (int)Math.Round((app.Y + app.H) * scope.Height));
+                Math.Clamp(left, wa.Left, Math.Max(wa.Left, wa.Right - 120)),
+                Math.Clamp(top, wa.Top, Math.Max(wa.Top, wa.Bottom - 80)),
+                Math.Clamp(right, wa.Left + 120, wa.Right),
+                Math.Clamp(bottom, wa.Top + 80, wa.Bottom));
+
             WindowPlacer.Place(hwnd, target, activate: true);
             // Bazı uygulamalar açıldıktan hemen sonra kendi kayıtlı konumlarına döner → tekrar uygula
             await Task.Delay(600);

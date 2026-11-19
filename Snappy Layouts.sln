@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snappy Layout", "src\Snappy Layout\Snappy Layout.csproj", "{8F6A3B91-4E5D-4A2C-9B10-7C8D2E1A5F34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snappy Layouts", "src\Snappy Layouts\Snappy Layouts.csproj", "{8F6A3B91-4E5D-4A2C-9B10-7C8D2E1A5F34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -72,7 +72,7 @@ namespace SnappyLayout.UI.Windows
         public void UpdateVisibility(bool recreate = false)
         {
             var s = Storage.Data?.Settings;
-            if (s == null || !s.VirtualMonitorsEnabled)
+            if (s == null || !s.VirtualMonitorsEnabled || (App.Instance?.Paused ?? false))
             {
                 CloseAll();
                 return;

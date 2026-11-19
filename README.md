@@ -1,22 +1,22 @@
-# Snappy Layout v0.24
+# Snappy Layouts v0.25
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
 [![Languages](https://img.shields.io/badge/UI%20Languages-8%20Languages%20(EN%20%7C%20TR%20%7C%20ES%20%7C%20PT%20%7C%20ZH%20%7C%20FR%20%7C%20DE%20%7C%20RU)-6366F1)](#6-per-monitor-v2-dynamic-dpi-localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v0.24-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v0.25-3B82F6)](CHANGELOG.md)
 
 **Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
-**Snappy Layout** is a native-feeling window management, customizable Snap Layouts, side-by-side Virtual Monitors, and Workspace automation utility for **Windows 10 and Windows 11**, built with **.NET 10 (WPF)** and low-level **Win32 / DWM / Shcore / COM** APIs.
+**Snappy Layouts** is a native-feeling window management, customizable Snap Layouts, side-by-side Virtual Monitors, and Workspace automation utility for **Windows 10 and Windows 11**, built with **.NET 10 (WPF)** and low-level **Win32 / DWM / Shcore / COM** APIs.
 
 ---
 
 ## Key Features
 
 ### 1. Native-Style Maximize Hover Flyout & Top-of-Screen Drag Snap Bar
-- **Maximize Button Hover Flyout (`SnapFlyoutWindow`):** Hover over any window's Maximize button (including Snappy Layout's own main window) or press `Ctrl + Alt + Z` to open a Windows 11-styled layout menu positioned cleanly **below** the Maximize button without covering it.
+- **Maximize Button Hover Flyout (`SnapFlyoutWindow`):** Hover over any window's Maximize button (including Snappy Layouts's own main window) or press `Ctrl + Alt + Z` to open a Windows 11-styled layout menu positioned cleanly **below** the Maximize button without covering it.
 - **Top-of-Screen Drag Snap Bar (`TopSnapBarWindow`):** Drag any window to the top edge of any physical or virtual monitor to reveal a sleek horizontal Windows 11-style Snap Bar. Hover any zone for a live translucent preview and release the mouse button to snap immediately.
 - **Zero-Flash Native Windows 11 Suppression:** Automatically suppresses Windows 11's built-in Snap Flyout and Snap Bar (`XamlExplorerHostIslandWindow`) using a 4-layer approach (`ImmersiveShell` `ISettingsCache` COM refresh, registry flags, `MainWindow` `WndProc` `HTMAXBUTTON` filtering, and synchronous `EVENT_OBJECT_SHOW` hooks) so the native and custom overlays never collide or flicker.
 - **Always Matches Windows Theme:** Regardless of whether you choose Light or Dark theme for the management UI, both the Maximize Flyout and Top Drag Snap Bar always follow your active **Windows system theme**.
@@ -79,7 +79,7 @@ flowchart TD
         NSS["NativeSnapSuppressor (ImmersiveShell ISettingsCache COM & Registry)"]
         TM["ThemeManager (Fluent & Windows System Theme Engine)"]
         LOC["Loc (English / Turkish Localization)"]
-        ST["Storage (%AppData%\\Snappy Layout\\settings.json)"]
+        ST["Storage (%AppData%\\Snappy Layouts\\settings.json)"]
         NM["NativeMethods & DisplayConfig (User32, DWM, Shcore, CCD API)"]
     end
 
@@ -104,8 +104,8 @@ For a deep technical dive into the Win32, COM, DWM, and Per-Monitor V2 DPI imple
 
 ```text
 Snappy Layouts/
-├── Snappy Layout.sln                  # Visual Studio Solution File
-├── Baslat-Snappy Layout.bat           # Quick launcher for Release build
+├── Snappy Layouts.sln                  # Visual Studio Solution File
+├── Baslat-Snappy Layouts.bat           # Quick launcher for Release build
 ├── README.md                          # Project documentation
 ├── ARCHITECTURE.md                    # Technical architecture & Win32/COM internals
 ├── CHANGELOG.md                       # Version history (v0.1 → v0.12)
@@ -114,8 +114,8 @@ Snappy Layouts/
 ├── LICENSE                            # MIT License
 ├── .github/                           # GitHub Actions CI & Issue/PR templates
 └── src/
-    └── Snappy Layout/
-        ├── Snappy Layout.csproj       # .NET 10.0 WPF Project File
+    └── Snappy Layouts/
+        ├── Snappy Layouts.csproj       # .NET 10.0 WPF Project File
         ├── app.manifest               # Per-Monitor V2 DPI manifest
         ├── AppInfo.cs                 # Version metadata & changelog
         ├── App.xaml / App.xaml.cs     # Lifecycle, System Tray, Single-Instance Mutex
@@ -164,13 +164,13 @@ Snappy Layouts/
 ```powershell
 git clone https://github.com/yusufkilinc44/SnappyLayouts.git
 cd SnappyLayouts
-dotnet build "Snappy Layout.sln" -c Release
+dotnet build "Snappy Layouts.sln" -c Release
 ```
 
 ### Run
-Launch via the included batch file `Baslat-Snappy Layout.bat` or directly via the .NET CLI:
+Launch via the included batch file `Baslat-Snappy Layouts.bat` or directly via the .NET CLI:
 ```powershell
-dotnet run --project "src/Snappy Layout/Snappy Layout.csproj" -c Release
+dotnet run --project "src/Snappy Layouts/Snappy Layouts.csproj" -c Release
 ```
 
 ---
@@ -187,7 +187,7 @@ dotnet run --project "src/Snappy Layout/Snappy Layout.csproj" -c Release
 | Move active window to previous Virtual Monitor | `Ctrl + Alt + ←` |
 | Restore active window to previous bounds | `Ctrl + Alt + ↓` |
 | Toggle Virtual Monitors on / off | `Ctrl + Alt + V` |
-| Open Snappy Layout Control Panel | `Ctrl + Alt + S` |
+| Open Snappy Layouts Control Panel | `Ctrl + Alt + S` |
 
 All shortcuts can be customized or cleared in the **Keyboard Shortcuts** tab, and custom global hotkeys can also be assigned to any saved **Virtual Monitor Preset** or **Workspace**.
 

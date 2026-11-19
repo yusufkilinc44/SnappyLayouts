@@ -1,7 +1,15 @@
 # Changelog
 
-All notable changes to **Snappy Layout** are documented in this file.  
+All notable changes to **Snappy Layouts** are documented in this file.  
 **Versioning Policy:** Each change increments the version by `0.1` (`v0.1` → `v0.2` → ...), transitioning to `v1.0` for production release.
+
+---
+
+## [v0.25] — 2026-11-19
+### Changed / Fixed
+- **Renamed to Snappy Layouts:** Renamed the application, solution, project, launcher, UI strings, and documentation to **Snappy Layouts** (with automatic one-time migration of existing `%AppData%\Snappy Layout\settings.json` so no saved layouts or workspaces are lost).
+- **Reliable Restore of Windows Native Snap Layouts on Pause & Exit:** Pausing (from sidebar or system tray) or exiting Snappy Layouts now immediately restores `EnableSnapAssistFlyout`, `EnableSnapBar`, `WindowArrangementActive`, and `SPI_SETWINARRANGING` so Windows 11's native Snap Layouts and Aero Snap resume immediately.
+- **Fixed Windows 11 Virtual Desktops Switcher & Workspaces Placement:** Narrowed native snap popup suppression (`IsNativeSnapPopup`) so Windows 11's Task View / Virtual Desktops switcher (`Win + Tab` / taskbar Desktops) is never hidden when the mouse moves over it. Ensured Workspaces & Apps always place windows at their exact saved coordinates even if Snap Layouts were modified or deleted later.
 
 ---
 
@@ -13,7 +21,7 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ## [v0.23] — 2026-11-19
 ### Added / Fixed
-- **Virtual-Monitor-Aware Edge & Top-Edge Drag Snap:** Suppressed Windows's built-in edge/top-drag Aero Snap overlay (`SPI_SETWINARRANGING`, restored automatically on exit or pause) and replaced it with Snappy Layout's own translucent zone preview and snap behavior:
+- **Virtual-Monitor-Aware Edge & Top-Edge Drag Snap:** Suppressed Windows's built-in edge/top-drag Aero Snap overlay (`SPI_SETWINARRANGING`, restored automatically on exit or pause) and replaced it with Snappy Layouts's own translucent zone preview and snap behavior:
   - Dragging any window to the **far left or far right edge** of a physical monitor previews and snaps to the corresponding **50% half of the leftmost or rightmost virtual monitor** (instead of 50% of the entire physical screen).
   - Dragging any window to the **very top edge** previews and snaps directly to **100% Virtual Monitor Fullscreen** of whichever virtual monitor the cursor is currently over (while moving slightly down into the Top Snap Bar still lets you choose any layout zone).
 - **Fixed Collapsed Sidebar Icon Clipping:** Widened the collapsed sidebar rail (`78px`) and tuned nav button padding (`9px`) so the `32×32` icon badges render completely with zero right-edge clipping at any DPI.
@@ -94,7 +102,7 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ## [v0.11] — 2026-11-19
 ### Added
-- **Top-of-Screen Drag Snap Bar (`TopSnapBarWindow`):** Dragging any window to the top edge of any physical or virtual monitor suppresses Windows 11's native Snap Bar and displays Snappy Layout's custom horizontal Snap Bar with live zone previews and drop-to-snap support.
+- **Top-of-Screen Drag Snap Bar (`TopSnapBarWindow`):** Dragging any window to the top edge of any physical or virtual monitor suppresses Windows 11's native Snap Bar and displays Snappy Layouts's custom horizontal Snap Bar with live zone previews and drop-to-snap support.
 ### Changed
 - **Native Windows 11 Visual Design:** Redesigned both `SnapFlyoutWindow` and `TopSnapBarWindow` to closely match Windows 11's native Snap Layouts aesthetic (neutral `#2C2C2C` / `#F3F3F3` surface, frameless rounded zone tiles, Windows Accent Blue `#0078D4` hover highlight).
 
@@ -118,7 +126,7 @@ All notable changes to **Snappy Layout** are documented in this file.
 ---
 
 ## [v0.8] — 2026-11-18
-- Enabled Snappy Layout's custom Snap Flyout and virtual monitor maximize/zone snapping on Snappy Layout's own `MainWindow` maximize button.
+- Enabled Snappy Layouts's custom Snap Flyout and virtual monitor maximize/zone snapping on Snappy Layouts's own `MainWindow` maximize button.
 
 ---
 
@@ -133,7 +141,7 @@ All notable changes to **Snappy Layout** are documented in this file.
 ---
 
 ## [v0.5] — 2026-11-17
-- Standardized application name, folder structure, project files, and source code namespaces to `Snappy Layout`.
+- Standardized application name, folder structure, project files, and source code namespaces to `Snappy Layouts`.
 
 ---
 

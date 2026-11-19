@@ -77,7 +77,7 @@ namespace SnappyLayout.Core
             var info = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
             POINT pt = info.pt;
 
-            // Eğer tıklama Snappy Layout Flyout penceresinin içindeyse engelleme
+            // Eğer tıklama Snappy Layouts Flyout penceresinin içindeyse engelleme
             if (app.Flyout != null && app.Flyout.IsVisible)
             {
                 var flyHwnd = new WindowInteropHelper(app.Flyout).Handle;

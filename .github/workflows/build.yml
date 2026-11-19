@@ -1,4 +1,4 @@
-name: Build Snappy Layout (.NET 10 WPF)
+name: Build Snappy Layouts (.NET 10 WPF)
 
 on:
   push:
@@ -22,13 +22,13 @@ jobs:
           include-prerelease: true
 
       - name: Restore dependencies
-        run: dotnet restore "Snappy Layout.sln"
+        run: dotnet restore "Snappy Layouts.sln"
 
       - name: Build Release
-        run: dotnet build "Snappy Layout.sln" --configuration Release --no-restore
+        run: dotnet build "Snappy Layouts.sln" --configuration Release --no-restore
 
       - name: Upload Release Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Snappy-Layout-Release
-          path: src/Snappy Layout/bin/Release/net10.0-windows/
+          path: src/Snappy Layouts/bin/Release/net10.0-windows/

@@ -229,7 +229,7 @@ namespace SnappyLayout.Services
             ["HkAction_PrevSegment"] = "Aktif pencereyi önceki sanal monitöre taşı",
             ["HkAction_RestoreWindow"] = "Aktif pencereyi önceki boyutuna döndür",
             ["HkAction_ToggleVirtual"] = "Sanal monitörleri etkinleştir / devre dışı bırak",
-            ["HkAction_OpenSettings"] = "Snappy Layout yönetim penceresini aç",
+            ["HkAction_OpenSettings"] = "Snappy Layouts yönetim penceresini aç",
             ["HkChange"] = "Kısayol Ata",
             ["HkClear"] = "Kaldır",
             ["HkPressKeys"] = "Lütfen istediğiniz tuş kombinasyonuna basın (Örn: Ctrl + Alt + Z)...",
@@ -249,12 +249,12 @@ namespace SnappyLayout.Services
             ["ThemeSystem"] = "Windows Teması (Varsayılan)",
             ["ThemeLight"] = "Açık Tema (Light)",
             ["ThemeDark"] = "Koyu Tema (Dark)",
-            ["SetFlyoutEnabled"] = "Pencerelerin maksimize tuşu üzerine gelindiğinde Snappy Layout yerleşim menüsünü göster",
+            ["SetFlyoutEnabled"] = "Pencerelerin maksimize tuşu üzerine gelindiğinde Snappy Layouts yerleşim menüsünü göster",
             ["SetHoverDelay"] = "Maksimize tuşu üzerinde bekleme süresi (ms):",
             ["SetZoneGap"] = "Yerleşim bölgeleri arasındaki boşluk (px):",
             ["SetVirtualMax"] = "Sanal monitör aktifken pencerede Tam Ekran (Maximize) tuşuna basıldığında o sanal monitör içinde tam ekran yap",
             ["SetShiftBypass"] = "Shift tuşuna basılı tutarak Tam Ekran'a basıldığında sanal monitörü atla ve gerçek fiziksel monitörü kapla",
-            ["SetStartWithWin"] = "Windows başladığında Snappy Layout'ı otomatik başlat",
+            ["SetStartWithWin"] = "Windows başladığında Snappy Layouts'ı otomatik başlat",
             ["SetWsOpenMode"] = "Çalışma alanı açılırken varsayılan davranış:",
             ["WsModeAsk"] = "Her seferinde sor (Mevcut Masaüstü / Yeni Masaüstü)",
             ["WsModeCurrent"] = "Her zaman mevcut masaüstünde aç",
@@ -266,7 +266,7 @@ namespace SnappyLayout.Services
 
             // Yardım & Hakkında Sekmesi
             ["HelpTitle"] = "Kullanım Kılavuzu ve Hakkında",
-            ["HelpSubtitle"] = "Snappy Layout'ın tüm özelliklerini adım adım nasıl kullanacağınızı aşağıda bulabilirsiniz.",
+            ["HelpSubtitle"] = "Snappy Layouts'ın tüm özelliklerini adım adım nasıl kullanacağınızı aşağıda bulabilirsiniz.",
 
             // Flyout (Maksimize Üstü Açılır Pencere)
             ["FlyoutHeader"] = "Pencere Yerleşimi Seçin",
@@ -280,7 +280,7 @@ namespace SnappyLayout.Services
             ["FlyoutShowBorders"] = "Sınırları Göster",
 
             // Tepsi Menüsü
-            ["TrayOpen"] = "Snappy Layout Yönetim Panelini Aç",
+            ["TrayOpen"] = "Snappy Layouts Yönetim Panelini Aç",
             ["TrayShowFlyout"] = "Aktif Pencere İçin Yerleşim Menüsü",
             ["TrayShowBorders"] = "Sanal Monitör Sınırlarını Göster",
             ["TrayExit"] = "Çıkış",
@@ -434,7 +434,7 @@ namespace SnappyLayout.Services
             ["HkAction_PrevSegment"] = "Move active window to previous virtual monitor",
             ["HkAction_RestoreWindow"] = "Restore active window to previous size",
             ["HkAction_ToggleVirtual"] = "Enable / disable virtual monitors",
-            ["HkAction_OpenSettings"] = "Open Snappy Layout manager window",
+            ["HkAction_OpenSettings"] = "Open Snappy Layouts manager window",
             ["HkChange"] = "Set Shortcut",
             ["HkClear"] = "Clear",
             ["HkPressKeys"] = "Press the desired key combination (e.g. Ctrl + Alt + Z)...",
@@ -454,12 +454,12 @@ namespace SnappyLayout.Services
             ["ThemeSystem"] = "Windows Theme (Default)",
             ["ThemeLight"] = "Light Theme",
             ["ThemeDark"] = "Dark Theme",
-            ["SetFlyoutEnabled"] = "Show Snappy Layout layout flyout when hovering over a window's maximize button",
+            ["SetFlyoutEnabled"] = "Show Snappy Layouts layout flyout when hovering over a window's maximize button",
             ["SetHoverDelay"] = "Maximize button hover delay (ms):",
             ["SetZoneGap"] = "Gap between snapped window zones (px):",
             ["SetVirtualMax"] = "When virtual monitors are active, pressing Maximize/Fullscreen fills the current virtual monitor",
             ["SetShiftBypass"] = "Holding Shift while clicking Maximize bypasses virtual monitor and fills the real physical monitor",
-            ["SetStartWithWin"] = "Start Snappy Layout automatically when Windows starts",
+            ["SetStartWithWin"] = "Start Snappy Layouts automatically when Windows starts",
             ["SetWsOpenMode"] = "Default behavior when opening a Workspace:",
             ["WsModeAsk"] = "Always ask (Current Desktop / New Desktop)",
             ["WsModeCurrent"] = "Always open on current desktop",
@@ -471,7 +471,7 @@ namespace SnappyLayout.Services
 
             // Help & About Tab
             ["HelpTitle"] = "User Guide & About",
-            ["HelpSubtitle"] = "Step-by-step instructions for every feature in Snappy Layout.",
+            ["HelpSubtitle"] = "Step-by-step instructions for every feature in Snappy Layouts.",
 
             // Flyout
             ["FlyoutHeader"] = "Choose Window Snap Layout",
@@ -485,7 +485,7 @@ namespace SnappyLayout.Services
             ["FlyoutShowBorders"] = "Show Borders",
 
             // Tray
-            ["TrayOpen"] = "Open Snappy Layout Control Panel",
+            ["TrayOpen"] = "Open Snappy Layouts Control Panel",
             ["TrayShowFlyout"] = "Show Layout Flyout for Active Window",
             ["TrayShowBorders"] = "Highlight Virtual Monitor Borders",
             ["TrayExit"] = "Exit",

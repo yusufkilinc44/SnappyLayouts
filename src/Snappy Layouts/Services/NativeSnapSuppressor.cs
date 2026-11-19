@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using SnappyLayout.Core;
 using SnappyLayout.Native;
 using static SnappyLayout.Native.NativeMethods;
 
@@ -8,7 +9,7 @@ namespace SnappyLayout.Services
 {
     /// <summary>
     /// Windows 11'in yerleşik maksimize tuşu üstü Snap Layouts menüsünü (EnableSnapAssistFlyout / EnableSnapBar)
-    /// Snappy Layout çalışırken devre dışı bırakır; Snappy Layout kapatıldığında veya duraklatıldığında eski haline döndürür.
+    /// Snappy Layouts çalışırken devre dışı bırakır; Snappy Layouts kapatıldığında veya duraklatıldığında eski haline döndürür.
     /// Ayrıca ImmersiveShell SettingsCache COM servisini tetikleyerek Explorer yeniden başlatılmadan anında devreye girmesini sağlar.
     /// </summary>
     public static class NativeSnapSuppressor
@@ -65,8 +66,8 @@ namespace SnappyLayout.Services
                 {
                     if (key.GetValue("EnableSnapAssistFlyout") is int v1 && v1 != 0) _origSnapAssistFlyout = v1;
                     if (key.GetValue("EnableSnapBar") is int v2 && v2 != 0) _origSnapBar = v2;
-                    if (SystemParametersInfo(SPI_GETWINARRANGING, 0, out bool origArr, 0))
-                        _origWinArranging = origArr;
+                    if (SystemParametersInfo(SPI_GETWINARRANGING, 0, out bool origArr, 0) && origArr)
+                        _origWinArranging = true;
                     _applied = true;
                 }
 
@@ -88,16 +89,19 @@ namespace SnappyLayout.Services
 
         public static void RestoreWindowsNativeFlyout()
         {
-            if (!_applied) return;
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey(ExplorerAdvancedKey, writable: true);
-                if (key == null) return;
+                if (key != null)
+                {
+                    key.SetValue("EnableSnapAssistFlyout", _origSnapAssistFlyout ?? 1, RegistryValueKind.DWord);
+                    key.SetValue("EnableSnapBar", _origSnapBar ?? 1, RegistryValueKind.DWord);
+                }
 
-                key.SetValue("EnableSnapAssistFlyout", _origSnapAssistFlyout ?? 1, RegistryValueKind.DWord);
-                key.SetValue("EnableSnapBar", _origSnapBar ?? 1, RegistryValueKind.DWord);
+                using var deskKey = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", writable: true);
+                deskKey?.SetValue("WindowArrangementActive", "1", RegistryValueKind.String);
 
-                // Windows'un kendi kenara sürükleme (Aero Snap) ayarını eski haline döndür
+                // Windows'un kendi kenara/tepeye sürükleme (Aero Snap) ve Snap Layouts ayarlarını anında geri yükle
                 SystemParametersInfo(SPI_SETWINARRANGING, (_origWinArranging ?? true) ? 1u : 0u, IntPtr.Zero, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
 
                 RefreshExplorerSettingsCache();
@@ -114,6 +118,32 @@ namespace SnappyLayout.Services
             return cls == "XamlExplorerHostIslandWindow" || cls == "Shell_LightDismissOverlay";
         }
 
+        /// <summary>
+        /// Yalnızca Windows 11'in gerçek Snap Layouts Flyout veya üst Snap Bar pencerelerini tanımlar.
+        /// Task View (Win+Tab), Sanal Masaüstü Seçici (Desktops), Başlat Menüsü, Bildirim Merkezi gibi
+        /// diğer XamlExplorerHostIslandWindow pencerelerine KESİNLİKLE dokunmaz.
+        /// </summary>
+        public static bool IsNativeSnapPopup(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return false;
+            string cls = NativeMethods.GetClassName(hwnd);
+            if (!IsNativeSnapWindowClass(cls)) return false;
+
+            if (!GetWindowRect(hwnd, out var r) || r.Width <= 0 || r.Height <= 0) return false;
+            var mon = MonitorService.FromPoint(r.Center);
+            if (mon == null) return false;
+
+            // Tam ekran Task View / Sanal Masaüstü görünümüne ASLA dokunma
+            if (r.Width >= mon.Bounds.Width * 0.80 && r.Height >= mon.Bounds.Height * 0.80)
+                return false;
+
+            // Görev çubuğu üstünden açılan Desktops seçici / Başlat / Hızlı Ayarlar / Takvim pencerelerine ASLA dokunma
+            if (r.Bottom >= mon.WorkArea.Bottom - 24 && r.Top > mon.WorkArea.Top + 120)
+                return false;
+
+            return true;
+        }
+
         public static void SuppressWindowInstant(IntPtr h)
         {
             if (h == IntPtr.Zero) return;
@@ -127,7 +157,7 @@ namespace SnappyLayout.Services
         }
 
         /// <summary>
-        /// Eğer Windows'un kendi XamlExplorerHostIslandWindow Snap Flyout penceresi açılmışsa anında kapatır.
+        /// Eğer Windows'un kendi Snap Layouts Flyout / Snap Bar penceresi açılmışsa anında kapatır.
         /// </summary>
         public static void DismissActiveNativeFlyout()
         {
@@ -136,8 +166,7 @@ namespace SnappyLayout.Services
                 EnumWindows((h, l) =>
                 {
                     if (!IsWindowVisible(h)) return true;
-                    string cls = NativeMethods.GetClassName(h);
-                    if (IsNativeSnapWindowClass(cls))
+                    if (IsNativeSnapPopup(h))
                     {
                         SuppressWindowInstant(h);
                     }

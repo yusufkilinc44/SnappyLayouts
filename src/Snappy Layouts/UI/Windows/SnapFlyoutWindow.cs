@@ -275,7 +275,7 @@ namespace SnappyLayout.UI.Windows
         private void ResetHoverStatus()
         {
             if (_currentArea == null) return;
-            _hoverStatusText.Text = $"{_currentArea.Label}  •  Snappy Layout {AppInfo.VersionText}";
+            _hoverStatusText.Text = $"{_currentArea.Label}  •  Snappy Layouts {AppInfo.VersionText}";
         }
 
         private void CheckAutoClose(object sender, EventArgs e)
