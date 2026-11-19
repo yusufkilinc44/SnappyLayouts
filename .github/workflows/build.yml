@@ -1,11 +1,16 @@
-name: Build Snappy Layouts (.NET 10 WPF)
+name: Build & Release Snappy Layouts (.NET 10 WPF)
 
 on:
   push:
     branches: [ "main", "master" ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -27,8 +32,33 @@ jobs:
       - name: Build Release
         run: dotnet build "Snappy Layouts.sln" --configuration Release --no-restore
 
-      - name: Upload Release Artifact
+      - name: Determine Version
+        id: ver
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $v = $env:GITHUB_REF_NAME.TrimStart('v')
+          } else {
+            [xml]$csproj = Get-Content "src/Snappy Layouts/Snappy Layouts.csproj"
+            $v = $csproj.Project.PropertyGroup.InformationalVersion
+          }
+          echo "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Publish Portable ZIP & Windows Installer (Setup.exe)
+        shell: pwsh
+        run: .\installer\build-release.ps1 -Version "${{ steps.ver.outputs.version }}"
+
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Snappy-Layout-Release
-          path: src/Snappy Layouts/bin/Release/net10.0-windows/
+          name: SnappyLayouts-v${{ steps.ver.outputs.version }}
+          path: dist/*
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/SnappyLayouts-v${{ steps.ver.outputs.version }}-Setup.exe
+            dist/SnappyLayouts-v${{ steps.ver.outputs.version }}-Portable-win-x64.zip
