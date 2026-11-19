@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.18] — 2026-11-19
+### Fixed
+- Fixed the version badge in the sidebar header getting clipped next to the sidebar collapse button (`☰`) by placing it neatly next to the `Active` status indicator.
+
+---
+
 ## [v0.17] — 2026-11-19
 ### Added / Changed / Fixed
 - **8 Languages & Vector Country Flags:** Added Spanish, Portuguese, Chinese (Simplified), French, German, and Russian alongside English (new default) and Turkish, complete with crisp vector flag icons in both sidebar and Settings dropdowns.
