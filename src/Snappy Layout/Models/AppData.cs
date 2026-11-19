@@ -5,7 +5,7 @@ using System.Linq;
 namespace SnappyLayout.Models
 {
     public enum ThemeChoice { System, Light, Dark }
-    public enum LanguageChoice { System, Turkish, English }
+    public enum LanguageChoice { System, English, Turkish, Spanish, Portuguese, Chinese, French, German, Russian }
     public enum WorkspaceOpenMode { Ask, CurrentDesktop, NewDesktop }
 
     /// <summary>Kısayol tuşu (RegisterHotKey modifier + sanal tuş kodu).</summary>
@@ -121,7 +121,7 @@ namespace SnappyLayout.Models
 
     public class AppSettings
     {
-        public LanguageChoice Language { get; set; } = LanguageChoice.System;
+        public LanguageChoice Language { get; set; } = LanguageChoice.English;
         public ThemeChoice Theme { get; set; } = ThemeChoice.System;
         public bool StartWithWindows { get; set; } = false;
         public bool FlyoutEnabled { get; set; } = true;

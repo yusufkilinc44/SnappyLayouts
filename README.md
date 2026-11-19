@@ -1,11 +1,11 @@
-# Snappy Layout v0.16
+# Snappy Layout v0.17
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
-[![Languages](https://img.shields.io/badge/UI%20Languages-English%20%7C%20Turkish-6366F1)](#localization--theming)
+[![Languages](https://img.shields.io/badge/UI%20Languages-8%20Languages%20(EN%20%7C%20TR%20%7C%20ES%20%7C%20PT%20%7C%20ZH%20%7C%20FR%20%7C%20DE%20%7C%20RU)-6366F1)](#6-per-monitor-v2-dynamic-dpi-localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v0.16-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v0.17-3B82F6)](CHANGELOG.md)
 
 **Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
@@ -47,7 +47,8 @@
 
 ### 6. Per-Monitor V2 Dynamic DPI, Localization & Theming
 - **Two-Pass Dynamic DPI & DWM Frame Compensation:** Seamlessly moves and previews windows across monitors with mixed DPI scales (`100%`, `125%`, `150%`, `175%`, `200%`) with zero pixel drift, compensating for invisible DWM window borders (`DWMWA_EXTENDED_FRAME_BOUNDS`) and `WM_DPICHANGED` rescaling.
-- **Localization:** Full **English** and **Turkish** UI language support (automatically defaults to your Windows display language).
+- **Localization (8 Languages with Country Flags):** Full UI support for **English** (default), **Turkish**, **Spanish**, **Portuguese**, **Chinese (Simplified)**, **French**, **German**, and **Russian** with crisp vector flag icons in the language selector.
+- **Responsive Colorful UI:** Per-section accent colors and a collapsible left sidebar with bold icon badges when resizing the management window into narrow zones.
 - **Theming:** **System (Windows)**, **Light**, and **Dark** themes for the management app, with automatic Windows system theme sync for Snap overlays.
 
 ---

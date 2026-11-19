@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.16";
+        public const string Version = "0.17";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.17", "19.11.2026",
+             "8 dil desteği (İngilizce varsayılan, Türkçe, İspanyolca, Portekizce, Çince, Fransızca, Almanca, Rusça) ve vektörel ülke bayrakları eklendi. Monitör en/boy oranları standart 16:9, 16:10, 21:9, 32:9, 4:3 biçimine dönüştürüldü. Önizleme kutuları çok daha şeffaf/yumuşak yapıldı ve Notepad gibi pencerelerin altında kalma / kırpılma sorunu giderildi. Sol menü pencere küçüldüğünde renkli ikonlarla daraltılabilir (collapsible) hale getirildi, uygulama genel olarak renklendirildi ve yazar/yıl bilgisi yalnızca Yardım & Hakkında sekmesine alındı.",
+             "Added 8-language localization (English default, Turkish, Spanish, Portuguese, Chinese, French, German, Russian) with crisp vector country flags. Formatted monitor aspect ratios as standard ratios (16:9, 16:10, 21:9, 32:9, 4:3). Made Snap preview overlays softer/more transparent and fixed overlay clipping/Z-order over Notepad. Added responsive collapsible left sidebar with vibrant colored icons, enriched app-wide accent colors, and kept author/year info exclusively in the Help & About section."),
             ("0.16", "19.11.2026",
              "Yan yana birden fazla sanal monitörü kapsayan Birleşik Tam Ekran (Span: ◫ 1+2, ◫ 2+3 ve Shift+Tık) özelliği hem Snap Flyout hem de üst sürükleme Snap Bar'a eklendi. Ayrıca WH_MOUSE_LL tabanlı MaximizeClickInterceptor ile sanal monitör aktifken Maksimize tuşuna basıldığında önce fiziksel monitörde büyüyüp sonra küçülme efekti kaldırılarak pencerenin doğrudan sanal monitörde tam ekran olması sağlandı.",
              "Added Multi-Virtual-Monitor Spanning (one-click ◫ 1+2 / ◫ 2+3 chips, Shift+Click range spanning in Snap Flyout, and adjacent span drop tiles in Top Snap Bar). Added WH_MOUSE_LL MaximizeClickInterceptor so clicking a window's Maximize button goes directly to Virtual Monitor Fullscreen without flashing to full physical screen first."),

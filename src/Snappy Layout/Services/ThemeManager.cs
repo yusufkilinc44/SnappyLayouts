@@ -74,6 +74,18 @@ namespace SnappyLayout.Services
                 SetBrush(r, "PermanentSubtleBrush", "#0F382C");
                 SetBrush(r, "WarningBrush", "#F59E0B");
                 SetBrush(r, "DangerBrush", "#EF4444");
+                SetBrush(r, "NavLayoutsBrush", "#3B82F6");
+                SetBrush(r, "NavLayoutsBgBrush", "#162A4C");
+                SetBrush(r, "NavVirtualBrush", "#06B6D4");
+                SetBrush(r, "NavVirtualBgBrush", "#0E3442");
+                SetBrush(r, "NavWorkspacesBrush", "#A855F7");
+                SetBrush(r, "NavWorkspacesBgBrush", "#2B1847");
+                SetBrush(r, "NavHotkeysBrush", "#F59E0B");
+                SetBrush(r, "NavHotkeysBgBrush", "#3B280D");
+                SetBrush(r, "NavSettingsBrush", "#10B981");
+                SetBrush(r, "NavSettingsBgBrush", "#0F382C");
+                SetBrush(r, "NavHelpBrush", "#F43F5E");
+                SetBrush(r, "NavHelpBgBrush", "#3E1522");
                 SetBrush(r, "ZoneFillBrush", "#24344D");
                 SetBrush(r, "ZoneHoverBrush", "#3B82F6");
                 SetBrush(r, "ZoneStrokeBrush", "#5B7AA6");
@@ -122,6 +134,18 @@ namespace SnappyLayout.Services
                 SetBrush(r, "PermanentSubtleBrush", "#D1FAE5");
                 SetBrush(r, "WarningBrush", "#D97706");
                 SetBrush(r, "DangerBrush", "#DC2626");
+                SetBrush(r, "NavLayoutsBrush", "#2563EB");
+                SetBrush(r, "NavLayoutsBgBrush", "#DBEAFE");
+                SetBrush(r, "NavVirtualBrush", "#0891B2");
+                SetBrush(r, "NavVirtualBgBrush", "#CFFAFE");
+                SetBrush(r, "NavWorkspacesBrush", "#7C3AED");
+                SetBrush(r, "NavWorkspacesBgBrush", "#EDE9FE");
+                SetBrush(r, "NavHotkeysBrush", "#D97706");
+                SetBrush(r, "NavHotkeysBgBrush", "#FEF3C7");
+                SetBrush(r, "NavSettingsBrush", "#059669");
+                SetBrush(r, "NavSettingsBgBrush", "#D1FAE5");
+                SetBrush(r, "NavHelpBrush", "#E11D48");
+                SetBrush(r, "NavHelpBgBrush", "#FFE4E6");
                 SetBrush(r, "ZoneFillBrush", "#CBD5E1");
                 SetBrush(r, "ZoneHoverBrush", "#2563EB");
                 SetBrush(r, "ZoneStrokeBrush", "#475569");
@@ -148,6 +172,18 @@ namespace SnappyLayout.Services
                 SetBrush(r, "ControlFillColorSecondaryBrush", "#E2E8F0");
                 SetBrush(r, "ControlStrokeColorDefaultBrush", "#94A3B8");
             }
+
+            // Canlı marka gradyan fırçası (Logo, başlıklar ve vurgu şeritleri için)
+            var grad = new LinearGradientBrush
+            {
+                StartPoint = new Point(0, 0),
+                EndPoint = new Point(1, 1)
+            };
+            grad.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#2563EB"), 0.0));
+            grad.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#7C3AED"), 0.55));
+            grad.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#06B6D4"), 1.0));
+            grad.Freeze();
+            r["BrandGradientBrush"] = grad;
         }
 
         /// <summary>

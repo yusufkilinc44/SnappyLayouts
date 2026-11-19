@@ -123,7 +123,7 @@ namespace SnappyLayout.UI.Controls
 
                 string title = $"{Loc.T("VirtualMonitor")} #{i + 1}";
                 string sub1 = $"{pct:0.0}%  ({pxW} × {PhysicalHeightPx} px)";
-                string sub2 = $"{Loc.T("AspectRatio")}: {segAspect:0.00}:1";
+                string sub2 = $"{Loc.T("AspectRatio")}: {SnappyLayout.Core.MonitorService.FormatAspectRatio(segAspect)}";
 
                 var ftTitle = new FormattedText(title, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                     new Typeface("Segoe UI Bold"), 13, textPrimary, dpi);

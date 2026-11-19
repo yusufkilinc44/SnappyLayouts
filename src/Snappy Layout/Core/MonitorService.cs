@@ -22,6 +22,8 @@ namespace SnappyLayout.Core
         public uint Dpi = 96;
         public double Scale => Dpi / 96.0;
         public double Aspect => WorkArea.Height == 0 ? 1.777 : (double)WorkArea.Width / WorkArea.Height;
+        public double FullAspect => Bounds.Height == 0 ? 1.777 : (double)Bounds.Width / Bounds.Height;
+        public string AspectLabel => MonitorService.FormatAspectRatio(FullAspect);
 
         public string HardwareName => FriendlyName ?? DeviceName?.TrimStart('\\', '.') ?? $"Monitor {Index}";
 
@@ -69,6 +71,9 @@ namespace SnappyLayout.Core
         public bool IsVirtual => SegmentIndex >= 0 && SegmentCount > 1;
         public bool IsSpan => IsVirtual && SegmentEndIndex > SegmentIndex;
         public double Aspect => Rect.Height == 0 ? 1.777 : (double)Rect.Width / Rect.Height;
+        public string AspectLabel => IsVirtual
+            ? MonitorService.FormatAspectRatio(Aspect)
+            : Monitor.AspectLabel;
 
         /// <summary>Bu fiziksel veya sanal monitöre özel pencere yerleşim düzenlerinin saklama anahtarı.</summary>
         public string LayoutKey => IsVirtual
@@ -92,8 +97,8 @@ namespace SnappyLayout.Core
             get
             {
                 if (IsVirtual)
-                    return $"{Loc.T("VirtualMonitor")} #{SegmentIndex + 1} ({Rect.Width}×{Rect.Height} px • {Aspect:0.00}:1)";
-                return $"{Loc.T("FullPhysicalMonitor")} ({Rect.Width}×{Rect.Height} px • {Aspect:0.00}:1)";
+                    return $"{Loc.T("VirtualMonitor")} #{SegmentIndex + 1} ({Rect.Width}×{Rect.Height} px • {AspectLabel})";
+                return $"{Loc.T("FullPhysicalMonitor")} ({Rect.Width}×{Rect.Height} px • {AspectLabel})";
             }
         }
     }
@@ -175,6 +180,69 @@ namespace SnappyLayout.Core
         public static MonitorInfo FromPoint(POINT p) => FromHandle(MonitorFromPoint(p, MONITOR_DEFAULTTONEAREST));
         public static MonitorInfo FromRect(RECT r) => FromHandle(MonitorFromRect(ref r, MONITOR_DEFAULTTONEAREST));
         public static MonitorInfo FindByKey(string key) => GetMonitors().FirstOrDefault(m => string.Equals(m.Key, key, StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>
+        /// En/boy oranını 1.58:1 gibi ondalık değer yerine 16:9, 16:10, 21:9, 32:9, 3:2, 4:3 gibi
+        /// bilinen standart oran biçimine dönüştürür.
+        /// </summary>
+        public static string FormatAspectRatio(double aspect)
+        {
+            if (aspect <= 0 || double.IsNaN(aspect) || double.IsInfinity(aspect)) return "16:9";
+
+            var known = new (double Ratio, string Label)[]
+            {
+                (32.0 / 9.0, "32:9"),
+                (21.0 / 9.0, "21:9"),
+                (16.0 / 9.0, "16:9"),
+                (16.0 / 10.0, "16:10"),
+                (3.0 / 2.0, "3:2"),
+                (4.0 / 3.0, "4:3"),
+                (5.0 / 4.0, "5:4"),
+                (1.0, "1:1"),
+                (4.0 / 5.0, "4:5"),
+                (3.0 / 4.0, "3:4"),
+                (2.0 / 3.0, "2:3"),
+                (10.0 / 16.0, "10:16"),
+                (9.0 / 16.0, "9:16"),
+                (9.0 / 21.0, "9:21"),
+            };
+
+            string bestKnown = null;
+            double bestDiff = double.MaxValue;
+            foreach (var (r, label) in known)
+            {
+                double relDiff = Math.Abs(aspect - r) / r;
+                if (relDiff < bestDiff)
+                {
+                    bestDiff = relDiff;
+                    bestKnown = label;
+                }
+            }
+            if (bestDiff <= 0.075) return bestKnown;
+
+            // Bilinen oranlara yakın değilse en yakın küçük tam sayı oranını (örn. 5:6, 7:9) bul
+            int bestW = 1, bestH = 1;
+            double bestErr = double.MaxValue;
+            for (int h = 1; h <= 12; h++)
+            {
+                int w = Math.Max(1, (int)Math.Round(aspect * h));
+                double err = Math.Abs((double)w / h - aspect);
+                if (err < bestErr)
+                {
+                    bestErr = err;
+                    bestW = w;
+                    bestH = h;
+                }
+            }
+            int g = Gcd(bestW, bestH);
+            return $"{bestW / g}:{bestH / g}";
+        }
+
+        private static int Gcd(int a, int b)
+        {
+            while (b != 0) { int t = a % b; a = b; b = t; }
+            return Math.Max(1, a);
+        }
     }
 
     /// <summary>

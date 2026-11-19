@@ -5,6 +5,15 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.17] — 2026-11-19
+### Added / Changed / Fixed
+- **8 Languages & Vector Country Flags:** Added Spanish, Portuguese, Chinese (Simplified), French, German, and Russian alongside English (new default) and Turkish, complete with crisp vector flag icons in both sidebar and Settings dropdowns.
+- **Standard Aspect Ratio Formatting:** Monitor and virtual monitor aspect ratios are now displayed in familiar standard formats (`16:9`, `16:10`, `21:9`, `32:9`, `4:3`, `3:2`, etc.) instead of decimals like `1.58:1`.
+- **Softer Preview Overlays & Z-Order / Width Fix:** Made blue and green snap preview overlays even more transparent and pastel, and fixed an issue where `SnapZonePreviewOverlay` clipped or failed to cover windows like Notepad on ultrawide monitors.
+- **Collapsible Colorful Sidebar & Enriched Palette:** Made the left navigation sidebar automatically collapse into a crisp icon rail on smaller window widths (with manual toggle), added per-section vibrant accent colors across tabs, headers, and primary actions, and kept author/year credits exclusively in the Help & About section.
+
+---
+
 ## [v0.16] — 2026-11-19
 ### Added
 - **Multi-Virtual-Monitor Spanning (`1+2`, `2+3`, `Shift+Click`):** On monitors split into 3 or more virtual monitors, added one-click adjacent span chips (`◫ 1+2`, `◫ 2+3`, etc.) and `Shift + Click` range spanning in `SnapFlyoutWindow`, plus adjacent span drop tiles in `TopSnapBarWindow`, allowing a window to maximize across multiple side-by-side virtual monitors with live preview.

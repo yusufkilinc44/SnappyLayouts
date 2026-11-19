@@ -289,7 +289,7 @@ namespace SnappyLayout
             {
                 Icon = CreateTrayIcon(),
                 Visible = true,
-                Text = $"Snappy Layout {AppInfo.VersionText} — {AppInfo.Author}"
+                Text = $"Snappy Layout {AppInfo.VersionText}"
             };
             _trayIcon.DoubleClick += (s, e) => Dispatcher.BeginInvoke(new Action(ShowMainWindow));
 
@@ -301,7 +301,7 @@ namespace SnappyLayout
         {
             if (_trayIcon == null) return;
             var menu = new Forms.ContextMenuStrip();
-            menu.Items.Add($"Snappy Layout {AppInfo.VersionText} • {AppInfo.Author} ({AppInfo.AuthorDateTr})").Enabled = false;
+            menu.Items.Add($"Snappy Layout {AppInfo.VersionText}").Enabled = false;
             menu.Items.Add(new Forms.ToolStripSeparator());
             menu.Items.Add(Loc.T("TrayOpen"), null, (s, e) => Dispatcher.BeginInvoke(new Action(ShowMainWindow)));
             menu.Items.Add(Loc.T("TrayShowFlyout"), null, (s, e) => Dispatcher.BeginInvoke(new Action(ShowFlyoutForForegroundOrSelf)));

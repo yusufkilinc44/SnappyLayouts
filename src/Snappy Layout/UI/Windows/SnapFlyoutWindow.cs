@@ -557,6 +557,11 @@ namespace SnappyLayout.UI.Windows
         {
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
+            SizeToContent = SizeToContent.Manual;
+            MinWidth = 0;
+            MinHeight = 0;
+            MaxWidth = double.PositiveInfinity;
+            MaxHeight = double.PositiveInfinity;
             AllowsTransparency = true;
             Background = Brushes.Transparent;
             ShowInTaskbar = false;
@@ -568,8 +573,10 @@ namespace SnappyLayout.UI.Windows
             _box = new Border
             {
                 CornerRadius = new CornerRadius(8),
-                BorderThickness = new Thickness(2),
-                Margin = new Thickness(4)
+                BorderThickness = new Thickness(1.5),
+                Margin = new Thickness(4),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch
             };
             Content = _box;
         }
@@ -583,27 +590,34 @@ namespace SnappyLayout.UI.Windows
 
         public void ShowRect(RECT r, bool isPhysicalFull, IntPtr insertAfterHwnd = default)
         {
-            var col = isPhysicalFull ? Color.FromRgb(16, 185, 129) : Color.FromRgb(0, 120, 212);
-            _box.Background = new SolidColorBrush(Color.FromArgb(30, col.R, col.G, col.B));
-            _box.BorderBrush = new SolidColorBrush(Color.FromArgb(155, col.R, col.G, col.B));
+            // Daha yumuşak ve daha şeffaf pastel mavi / yeşil önizleme
+            var col = isPhysicalFull ? Color.FromRgb(52, 211, 153) : Color.FromRgb(96, 165, 250);
+            _box.Background = new SolidColorBrush(Color.FromArgb(18, col.R, col.G, col.B));
+            _box.BorderBrush = new SolidColorBrush(Color.FromArgb(115, col.R, col.G, col.B));
 
             if (!IsVisible) Show();
             var hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd != IntPtr.Zero)
             {
-                IntPtr zTarget = insertAfterHwnd != IntPtr.Zero ? insertAfterHwnd : HWND_TOPMOST;
-                // 1. Geçiş: hedef monitöre taşı (farklı DPI'lı monitöre geçerken WM_DPICHANGED tetiklenir)
-                SetWindowPos(hwnd, zTarget, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                // 1. Geçiş: hedef monitöre HWND_TOPMOST olarak taşı (Notepad dahil tüm pencerelerin üstünde olsun!)
+                SetWindowPos(hwnd, HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
-                // Yeni monitörün DPI ölçeğine göre WPF mantıksal (DIP) boyutunu senkronize et
-                var targetMon = MonitorService.FromRect(r);
-                double scale = targetMon != null && targetMon.Scale > 0.1 ? targetMon.Scale : 1.0;
-                Width = Math.Max(10, r.Width / scale);
-                Height = Math.Max(10, r.Height / scale);
+                // Pencerenin şu anki gerçek DPI değerini okuyup WPF mantıksal boyutunu sınırsız olarak eşitle
+                uint winDpi = GetDpiForWindow(hwnd);
+                double actualScale = winDpi >= 96 ? (winDpi / 96.0) : 1.0;
+                Width = Math.Max(10, r.Width / actualScale);
+                Height = Math.Max(10, r.Height / actualScale);
+                UpdateLayout();
 
-                // 2. Geçiş: WM_DPICHANGED yeniden ölçeklemesinden sonra tam fiziksel piksel sınırlarına oturt
-                // ve Flyout/SnapBar penceresinin hemen altında tut (asla Flyout'un üstüne çıkıp flicker yapmasın)
-                SetWindowPos(hwnd, zTarget, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                // 2. Geçiş: WM_DPICHANGED sonrası tam fiziksel piksel sınırlarına oturt
+                SetWindowPos(hwnd, HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+                // Flyout / SnapBar penceresini önizlemenin hemen üstünde tut
+                if (insertAfterHwnd != IntPtr.Zero)
+                {
+                    SetWindowPos(insertAfterHwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                }
             }
         }
 

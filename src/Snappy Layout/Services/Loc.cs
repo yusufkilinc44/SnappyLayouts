@@ -20,37 +20,49 @@ namespace SnappyLayout.Services
         [DllImport("kernel32.dll")]
         private static extern ushort GetUserDefaultUILanguage();
 
-        private static bool _isTurkish = DetectWindowsTurkish();
+        private static string _currentCode = "en";
 
-        public static bool IsTurkish => _isTurkish;
+        public static string CurrentCode => _currentCode;
+        public static bool IsTurkish => _currentCode == "tr";
 
-        public static bool DetectWindowsTurkish()
+        public static bool DetectWindowsTurkish() => DetectWindowsLanguageCode() == "tr";
+
+        public static string DetectWindowsLanguageCode()
         {
             try
             {
-                // Önce Windows UI dilini kontrol et (0x041F = tr-TR, birincil dil 0x1F = Türkçe)
                 ushort langId = GetUserDefaultUILanguage();
-                if ((langId & 0x3FF) == 0x1F) return true;
-                var ui = CultureInfo.InstalledUICulture?.TwoLetterISOLanguageName;
-                if (string.Equals(ui, "tr", StringComparison.OrdinalIgnoreCase)) return true;
-                var cur = CultureInfo.CurrentUICulture?.TwoLetterISOLanguageName;
-                if (string.Equals(cur, "tr", StringComparison.OrdinalIgnoreCase)) return true;
-                var fmt = CultureInfo.CurrentCulture?.TwoLetterISOLanguageName;
-                if (string.Equals(fmt, "tr", StringComparison.OrdinalIgnoreCase)) return true;
+                int primary = langId & 0x3FF;
+                if (primary == 0x1F) return "tr";
+                if (primary == 0x0A) return "es";
+                if (primary == 0x16) return "pt";
+                if (primary == 0x04) return "zh";
+                if (primary == 0x0C) return "fr";
+                if (primary == 0x07) return "de";
+                if (primary == 0x19) return "ru";
+
+                string ui = (CultureInfo.CurrentUICulture?.TwoLetterISOLanguageName ?? "").ToLowerInvariant();
+                if (ui == "tr" || ui == "es" || ui == "pt" || ui == "zh" || ui == "fr" || ui == "de" || ui == "ru")
+                    return ui;
             }
             catch { }
-            return false;
+            return "en";
         }
 
         public static void Apply(LanguageChoice choice)
         {
-            bool tr = choice switch
+            _currentCode = choice switch
             {
-                LanguageChoice.Turkish => true,
-                LanguageChoice.English => false,
-                _ => DetectWindowsTurkish()
+                LanguageChoice.English => "en",
+                LanguageChoice.Turkish => "tr",
+                LanguageChoice.Spanish => "es",
+                LanguageChoice.Portuguese => "pt",
+                LanguageChoice.Chinese => "zh",
+                LanguageChoice.French => "fr",
+                LanguageChoice.German => "de",
+                LanguageChoice.Russian => "ru",
+                _ => DetectWindowsLanguageCode()
             };
-            _isTurkish = tr;
             Instance.PropertyChanged?.Invoke(Instance, new PropertyChangedEventArgs("Item[]"));
             LanguageChanged?.Invoke();
         }
@@ -59,9 +71,13 @@ namespace SnappyLayout.Services
 
         public static string T(string key)
         {
-            var dict = _isTurkish ? Tr : En;
-            if (dict.TryGetValue(key, out var val)) return val;
-            if (En.TryGetValue(key, out val)) return val;
+            if (_currentCode == "tr" && Tr.TryGetValue(key, out var trVal)) return trVal;
+            if (_currentCode != "en" && _currentCode != "tr")
+            {
+                var extra = LocExtraLanguages.Get(_currentCode);
+                if (extra != null && extra.TryGetValue(key, out var exVal)) return exVal;
+            }
+            if (En.TryGetValue(key, out var enVal)) return enVal;
             return key;
         }
 

@@ -25,13 +25,25 @@ namespace SnappyLayout.UI
         private SnapLayout _selectedLayout;
         private MonitorInfo _selectedPhysicalMonitor;
         private bool _suppressQuickEvents;
+        private bool _sidebarCollapsed = false;
+        private bool? _manualSidebarCollapse = null;
+
+        private static readonly (string Icon, string LocKey, string AccentBrushKey, string BgBrushKey)[] NavMeta =
+        {
+            ("⊞", "NavLayouts", "NavLayoutsBrush", "NavLayoutsBgBrush"),
+            ("◫", "NavVirtualMonitors", "NavVirtualBrush", "NavVirtualBgBrush"),
+            ("🚀", "NavWorkspaces", "NavWorkspacesBrush", "NavWorkspacesBgBrush"),
+            ("⌨", "NavHotkeys", "NavHotkeysBrush", "NavHotkeysBgBrush"),
+            ("⚙", "NavSettings", "NavSettingsBrush", "NavSettingsBgBrush"),
+            ("❓", "NavHelp", "NavHelpBrush", "NavHelpBgBrush"),
+        };
 
         public MainWindow()
         {
             InitializeComponent();
 
             SidebarVersionText.Text = AppInfo.VersionText;
-            Title = $"Snappy Layout {AppInfo.VersionText} — {AppInfo.Author} ({AppInfo.AuthorDateTr})";
+            Title = $"Snappy Layout {AppInfo.VersionText}";
 
             var mons = MonitorService.GetMonitors(true);
             _selectedPhysicalMonitor = mons.FirstOrDefault(m => m.IsPrimary) ?? mons.First();
@@ -50,10 +62,13 @@ namespace SnappyLayout.UI
             {
                 WindowPlacer.MainWindowHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
                 ThemeManager.ApplyWindowChrome(this);
+                UpdateResponsiveSidebar();
                 RefreshSidebarChrome();
                 RebuildAllPages();
                 SelectTab(0);
             };
+
+            SizeChanged += (s, e) => UpdateResponsiveSidebar();
 
             Loc.LanguageChanged += () => Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -92,6 +107,93 @@ namespace SnappyLayout.UI
             return IntPtr.Zero;
         }
 
+        private void OnToggleSidebarClick(object sender, RoutedEventArgs e)
+        {
+            _manualSidebarCollapse = !_sidebarCollapsed;
+            ApplySidebarCollapsed(_manualSidebarCollapse.Value);
+        }
+
+        private void UpdateResponsiveSidebar()
+        {
+            bool shouldCollapse = _manualSidebarCollapse ?? (ActualWidth > 0 && ActualWidth < 960);
+            if (ActualWidth > 0 && ActualWidth < 820) shouldCollapse = true;
+            if (shouldCollapse != _sidebarCollapsed)
+            {
+                ApplySidebarCollapsed(shouldCollapse);
+            }
+        }
+
+        private void ApplySidebarCollapsed(bool collapsed)
+        {
+            _sidebarCollapsed = collapsed;
+            SidebarCol.Width = new GridLength(collapsed ? 74 : 265);
+            SidebarBorder.Padding = collapsed ? new Thickness(10, 12, 10, 12) : new Thickness(14);
+            SidebarBrandText.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+            BtnToggleSidebar.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+            SidebarFooterExpanded.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+            SidebarFooterCompact.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
+            RefreshNavButtonContents();
+        }
+
+        private void RefreshNavButtonContents()
+        {
+            var btns = new[] { BtnNavLayouts, BtnNavVirtual, BtnNavWorkspaces, BtnNavHotkeys, BtnNavSettings, BtnNavHelp };
+            for (int i = 0; i < btns.Length; i++)
+            {
+                var meta = NavMeta[i];
+                string title = Loc.T(meta.LocKey);
+                btns[i].ToolTip = title;
+
+                var iconBadge = new Border
+                {
+                    Width = _sidebarCollapsed ? 34 : 28,
+                    Height = _sidebarCollapsed ? 34 : 28,
+                    CornerRadius = new CornerRadius(7),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                iconBadge.SetResourceReference(Border.BackgroundProperty, meta.BgBrushKey);
+                iconBadge.SetResourceReference(Border.BorderBrushProperty, meta.AccentBrushKey);
+                iconBadge.BorderThickness = new Thickness(1);
+
+                var iconText = new TextBlock
+                {
+                    Text = meta.Icon,
+                    FontSize = _sidebarCollapsed ? 17 : 14,
+                    FontWeight = FontWeights.Bold,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                iconText.SetResourceReference(TextBlock.ForegroundProperty, meta.AccentBrushKey);
+                iconBadge.Child = iconText;
+
+                if (_sidebarCollapsed)
+                {
+                    btns[i].Padding = new Thickness(4, 5, 4, 5);
+                    btns[i].HorizontalContentAlignment = HorizontalAlignment.Center;
+                    btns[i].Content = iconBadge;
+                }
+                else
+                {
+                    btns[i].Padding = new Thickness(8, 6, 10, 6);
+                    btns[i].HorizontalContentAlignment = HorizontalAlignment.Stretch;
+                    var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                    sp.Children.Add(iconBadge);
+                    var lbl = new TextBlock
+                    {
+                        Text = title,
+                        FontSize = 13,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(10, 0, 0, 0),
+                        TextTrimming = TextTrimming.CharacterEllipsis
+                    };
+                    lbl.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+                    sp.Children.Add(lbl);
+                    btns[i].Content = sp;
+                }
+            }
+        }
+
         private void RefreshSidebarChrome()
         {
             _suppressQuickEvents = true;
@@ -100,18 +202,8 @@ namespace SnappyLayout.UI
             SidebarStatusText.Text = paused ? Loc.T("Paused") : Loc.T("Active");
             SidebarStatusText.SetResourceReference(TextBlock.ForegroundProperty, paused ? "WarningBrush" : "PermanentBrush");
 
-            BtnNavLayouts.Content = "⊞   " + Loc.T("NavLayouts");
-            BtnNavVirtual.Content = "◫   " + Loc.T("NavVirtualMonitors");
-            BtnNavWorkspaces.Content = "🚀   " + Loc.T("NavWorkspaces");
-            BtnNavHotkeys.Content = "⌨   " + Loc.T("NavHotkeys");
-            BtnNavSettings.Content = "⚙   " + Loc.T("NavSettings");
-            BtnNavHelp.Content = "❓   " + Loc.T("NavHelp");
-
-            QuickLangCombo.Items.Clear();
-            QuickLangCombo.Items.Add(Loc.T("LangSystem"));
-            QuickLangCombo.Items.Add(Loc.T("LangTr"));
-            QuickLangCombo.Items.Add(Loc.T("LangEn"));
-            QuickLangCombo.SelectedIndex = (int)Storage.Data.Settings.Language;
+            RefreshNavButtonContents();
+            PopulateLanguageCombo(QuickLangCombo, Storage.Data.Settings.Language);
 
             QuickThemeCombo.Items.Clear();
             QuickThemeCombo.Items.Add(Loc.T("ThemeSystem"));
@@ -120,9 +212,168 @@ namespace SnappyLayout.UI
             QuickThemeCombo.SelectedIndex = (int)Storage.Data.Settings.Theme;
 
             BtnQuickShowBorders.Content = "◫  " + Loc.T("VmShowBordersNow");
+            BtnQuickShowBorders.SetResourceReference(Control.BackgroundProperty, "NavVirtualBgBrush");
+            BtnQuickShowBorders.SetResourceReference(Control.BorderBrushProperty, "NavVirtualBrush");
+            BtnQuickShowBorders.SetResourceReference(Control.ForegroundProperty, "NavVirtualBrush");
+
             BtnPauseResume.Content = paused ? ("▶  " + Loc.T("Resume")) : ("⏸  " + Loc.T("Pause"));
+            BtnPauseResume.SetResourceReference(Control.BackgroundProperty, paused ? "NavSettingsBgBrush" : "NavHotkeysBgBrush");
+            BtnPauseResume.SetResourceReference(Control.BorderBrushProperty, paused ? "NavSettingsBrush" : "NavHotkeysBrush");
+            BtnPauseResume.SetResourceReference(Control.ForegroundProperty, paused ? "NavSettingsBrush" : "NavHotkeysBrush");
+
+            BtnCompactBorders.ToolTip = Loc.T("VmShowBordersNow");
+            BtnCompactPause.Content = paused ? "▶" : "⏸";
+            BtnCompactPause.ToolTip = paused ? Loc.T("Resume") : Loc.T("Pause");
+
             _suppressQuickEvents = false;
             UpdateNavButtonHighlight();
+        }
+
+        private static readonly (LanguageChoice Choice, string NativeName)[] LanguageEntries =
+        {
+            (LanguageChoice.System, ""),
+            (LanguageChoice.English, "English"),
+            (LanguageChoice.Turkish, "Türkçe"),
+            (LanguageChoice.Spanish, "Español"),
+            (LanguageChoice.Portuguese, "Português"),
+            (LanguageChoice.Chinese, "中文 (简体)"),
+            (LanguageChoice.French, "Français"),
+            (LanguageChoice.German, "Deutsch"),
+            (LanguageChoice.Russian, "Русский"),
+        };
+
+        private static void PopulateLanguageCombo(ComboBox combo, LanguageChoice selected)
+        {
+            combo.Items.Clear();
+            int selIdx = 1; // Default English
+            for (int i = 0; i < LanguageEntries.Length; i++)
+            {
+                var (choice, nativeName) = LanguageEntries[i];
+                string label = choice == LanguageChoice.System ? Loc.T("LangSystem") : nativeName;
+
+                var itemPanel = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                itemPanel.Children.Add(BuildFlagIcon(choice));
+                var txt = new TextBlock
+                {
+                    Text = label,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(7, 0, 0, 0)
+                };
+                txt.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+                itemPanel.Children.Add(txt);
+
+                var cbi = new ComboBoxItem { Content = itemPanel, Tag = choice };
+                combo.Items.Add(cbi);
+                if (choice == selected) selIdx = i;
+            }
+            combo.SelectedIndex = selIdx;
+        }
+
+        private static UIElement BuildFlagIcon(LanguageChoice lang)
+        {
+            var border = new Border
+            {
+                Width = 20,
+                Height = 14,
+                CornerRadius = new CornerRadius(2.5),
+                BorderThickness = new Thickness(0.6),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(120, 128, 128, 128)),
+                ClipToBounds = true,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            if (lang == LanguageChoice.System)
+            {
+                border.Background = new SolidColorBrush(Color.FromRgb(59, 130, 246));
+                border.Child = new TextBlock
+                {
+                    Text = "🌐",
+                    FontSize = 9.5,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                return border;
+            }
+
+            var g = new Grid();
+            static SolidColorBrush B(string hex) => new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+
+            switch (lang)
+            {
+                case LanguageChoice.English: // UK/EN Union flag simplified
+                    g.Background = B("#012169");
+                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = Brushes.White, Height = 4.2, VerticalAlignment = VerticalAlignment.Center });
+                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = Brushes.White, Width = 4.2, HorizontalAlignment = HorizontalAlignment.Center });
+                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = B("#C8102E"), Height = 2.4, VerticalAlignment = VerticalAlignment.Center });
+                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = B("#C8102E"), Width = 2.4, HorizontalAlignment = HorizontalAlignment.Center });
+                    break;
+                case LanguageChoice.Turkish: // Red + white crescent & star
+                    g.Background = B("#E30A17");
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = Brushes.White, Width = 6.5, Height = 6.5, Margin = new Thickness(-5, 0, 0, 0) });
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#E30A17"), Width = 5.2, Height = 5.2, Margin = new Thickness(-3.3, 0, 0, 0) });
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = Brushes.White, Width = 2.4, Height = 2.4, Margin = new Thickness(3.8, 0, 0, 0) });
+                    break;
+                case LanguageChoice.Spanish: // Red - Yellow - Red horizontal
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    var es1 = new System.Windows.Shapes.Rectangle { Fill = B("#AA151B") }; Grid.SetRow(es1, 0);
+                    var es2 = new System.Windows.Shapes.Rectangle { Fill = B("#F1BF00") }; Grid.SetRow(es2, 1);
+                    var es3 = new System.Windows.Shapes.Rectangle { Fill = B("#AA151B") }; Grid.SetRow(es3, 2);
+                    g.Children.Add(es1); g.Children.Add(es2); g.Children.Add(es3);
+                    break;
+                case LanguageChoice.Portuguese: // Green (40%) - Red (60%) vertical + gold emblem
+                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
+                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) });
+                    var pt1 = new System.Windows.Shapes.Rectangle { Fill = B("#006600") }; Grid.SetColumn(pt1, 0);
+                    var pt2 = new System.Windows.Shapes.Rectangle { Fill = B("#FF0000") }; Grid.SetColumn(pt2, 1);
+                    var ptDot = new System.Windows.Shapes.Ellipse { Fill = B("#FFCC00"), Width = 4.6, Height = 4.6, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5.8, 0, 0, 0) };
+                    Grid.SetColumnSpan(ptDot, 2);
+                    g.Children.Add(pt1); g.Children.Add(pt2); g.Children.Add(ptDot);
+                    break;
+                case LanguageChoice.Chinese: // Red + gold star
+                    g.Background = B("#DE2910");
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 4.5, Height = 4.5, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(2.5, 2.2, 0, 0) });
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 1.6, Height = 1.6, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(8.2, 1.5, 0, 0) });
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 1.6, Height = 1.6, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(9.3, 3.8, 0, 0) });
+                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 1.6, Height = 1.6, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(8.2, 6.0, 0, 0) });
+                    break;
+                case LanguageChoice.French: // Blue - White - Red vertical
+                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    var fr1 = new System.Windows.Shapes.Rectangle { Fill = B("#002395") }; Grid.SetColumn(fr1, 0);
+                    var fr2 = new System.Windows.Shapes.Rectangle { Fill = Brushes.White }; Grid.SetColumn(fr2, 1);
+                    var fr3 = new System.Windows.Shapes.Rectangle { Fill = B("#ED2939") }; Grid.SetColumn(fr3, 2);
+                    g.Children.Add(fr1); g.Children.Add(fr2); g.Children.Add(fr3);
+                    break;
+                case LanguageChoice.German: // Black - Red - Gold horizontal
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    var de1 = new System.Windows.Shapes.Rectangle { Fill = B("#111111") }; Grid.SetRow(de1, 0);
+                    var de2 = new System.Windows.Shapes.Rectangle { Fill = B("#DD0000") }; Grid.SetRow(de2, 1);
+                    var de3 = new System.Windows.Shapes.Rectangle { Fill = B("#FFCE00") }; Grid.SetRow(de3, 2);
+                    g.Children.Add(de1); g.Children.Add(de2); g.Children.Add(de3);
+                    break;
+                case LanguageChoice.Russian: // White - Blue - Red horizontal
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    var ru1 = new System.Windows.Shapes.Rectangle { Fill = Brushes.White }; Grid.SetRow(ru1, 0);
+                    var ru2 = new System.Windows.Shapes.Rectangle { Fill = B("#0039A6") }; Grid.SetRow(ru2, 1);
+                    var ru3 = new System.Windows.Shapes.Rectangle { Fill = B("#D52B1E") }; Grid.SetRow(ru3, 2);
+                    g.Children.Add(ru1); g.Children.Add(ru2); g.Children.Add(ru3);
+                    break;
+            }
+
+            border.Child = g;
+            return border;
         }
 
         private void OnNavClick(object sender, RoutedEventArgs e)
@@ -152,8 +403,8 @@ namespace SnappyLayout.UI
                 btns[i].FontWeight = active ? FontWeights.Bold : FontWeights.Normal;
                 if (active)
                 {
-                    btns[i].SetResourceReference(Control.BackgroundProperty, "AccentSubtleBrush");
-                    btns[i].SetResourceReference(Control.BorderBrushProperty, "AccentBrush");
+                    btns[i].SetResourceReference(Control.BackgroundProperty, NavMeta[i].BgBrushKey);
+                    btns[i].SetResourceReference(Control.BorderBrushProperty, NavMeta[i].AccentBrushKey);
                 }
                 else
                 {
@@ -166,9 +417,12 @@ namespace SnappyLayout.UI
         private void OnQuickLangChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_suppressQuickEvents || QuickLangCombo.SelectedIndex < 0) return;
-            Storage.Data.Settings.Language = (LanguageChoice)QuickLangCombo.SelectedIndex;
-            Storage.Save();
-            Loc.Apply(Storage.Data.Settings.Language);
+            if (QuickLangCombo.SelectedItem is ComboBoxItem cbi && cbi.Tag is LanguageChoice choice)
+            {
+                Storage.Data.Settings.Language = choice;
+                Storage.Save();
+                Loc.Apply(choice);
+            }
         }
 
         private void OnQuickThemeChanged(object sender, SelectionChangedEventArgs e)
@@ -243,6 +497,9 @@ namespace SnappyLayout.UI
                 Padding = new Thickness(12, 6, 12, 6),
                 FontWeight = FontWeights.SemiBold
             };
+            btnTestFlyout.SetResourceReference(Control.BackgroundProperty, "NavWorkspacesBgBrush");
+            btnTestFlyout.SetResourceReference(Control.BorderBrushProperty, "NavWorkspacesBrush");
+            btnTestFlyout.SetResourceReference(Control.ForegroundProperty, "NavWorkspacesBrush");
             btnTestFlyout.Click += (s, e) => App.Instance?.ShowFlyoutForForegroundOrSelf();
             Grid.SetColumn(btnTestFlyout, 1);
             step1Header.Children.Add(btnTestFlyout);
@@ -274,8 +531,8 @@ namespace SnappyLayout.UI
                 var mSub = new TextBlock
                 {
                     Text = vmCnt > 1
-                        ? $"◫ {vmCnt} {Loc.T("VirtualMonitor")} aktif"
-                        : $"🖥 {Loc.T("FullPhysicalMonitor")} ({m.Aspect:0.00}:1)",
+                        ? $"◫ {vmCnt} {Loc.T("VirtualMonitor")}"
+                        : $"🖥 {Loc.T("FullPhysicalMonitor")} ({m.AspectLabel})",
                     FontSize = 11,
                     Margin = new Thickness(0, 2, 0, 0)
                 };
@@ -417,7 +674,7 @@ namespace SnappyLayout.UI
 
             var bannerTb = new TextBlock
             {
-                Text = $"🎯 {Loc.T("ActiveTargetBanner")}  {_selectedPreviewArea.Label}   •   {Loc.T("AspectRatio")}: {_selectedPreviewArea.Aspect:0.00}:1   •   {Loc.T("DpiScale")}: {Math.Round(_selectedPreviewArea.Monitor.Scale * 100)}%",
+                Text = $"🎯 {Loc.T("ActiveTargetBanner")}  {_selectedPreviewArea.Label}   •   {Loc.T("AspectRatio")}: {_selectedPreviewArea.AspectLabel}   •   {Loc.T("DpiScale")}: {Math.Round(_selectedPreviewArea.Monitor.Scale * 100)}%",
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 12
             };
@@ -512,6 +769,9 @@ namespace SnappyLayout.UI
             // 2) Liste Araç Çubuğu (+ Yeni Ekle, Varsayılanları Yükle, Tümünü Sil) — Yalnızca seçili alana etki eder!
             var listBtnWrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 10) };
             var btnNew = new Button { Content = Loc.T("NewLayout"), Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 0, 6, 6), FontWeight = FontWeights.SemiBold };
+            btnNew.SetResourceReference(Control.BackgroundProperty, "NavLayoutsBgBrush");
+            btnNew.SetResourceReference(Control.BorderBrushProperty, "NavLayoutsBrush");
+            btnNew.SetResourceReference(Control.ForegroundProperty, "NavLayoutsBrush");
             btnNew.Click += (s, e) =>
             {
                 string prefix = Loc.IsTurkish ? "Özel Pencere Düzeni " : "Custom Window Layout ";
@@ -1160,7 +1420,7 @@ namespace SnappyLayout.UI
                 var vmCount = AreaService.GetStoredWeights(m).Count;
                 var t2 = new TextBlock
                 {
-                    Text = $"{Loc.T("AspectRatio")}: {m.Aspect:0.00}:1   •   {Loc.T("VirtualMonitor")}: {vmCount}",
+                    Text = $"{Loc.T("AspectRatio")}: {m.AspectLabel}   •   {Loc.T("VirtualMonitor")}: {vmCount}",
                     FontSize = 11.5,
                     Margin = new Thickness(0, 3, 0, 0)
                 };
@@ -1218,6 +1478,9 @@ namespace SnappyLayout.UI
             }
 
             var btnAddVm = new Button { Content = Loc.T("VmAdd"), Padding = new Thickness(12, 6, 12, 6), Margin = new Thickness(0, 0, 8, 6), FontWeight = FontWeights.SemiBold };
+            btnAddVm.SetResourceReference(Control.BackgroundProperty, "NavVirtualBgBrush");
+            btnAddVm.SetResourceReference(Control.BorderBrushProperty, "NavVirtualBrush");
+            btnAddVm.SetResourceReference(Control.ForegroundProperty, "NavVirtualBrush");
             btnAddVm.Click += (s, e) =>
             {
                 var w = AreaService.GetStoredWeights(_selectedPhysicalMonitor);
@@ -1904,15 +2167,15 @@ namespace SnappyLayout.UI
             }
 
             var langCombo = new ComboBox { Padding = new Thickness(8, 5, 8, 5) };
-            langCombo.Items.Add(Loc.T("LangSystem"));
-            langCombo.Items.Add(Loc.T("LangTr"));
-            langCombo.Items.Add(Loc.T("LangEn"));
-            langCombo.SelectedIndex = (int)s.Language;
+            PopulateLanguageCombo(langCombo, s.Language);
             langCombo.SelectionChanged += (sender, e) =>
             {
-                s.Language = (LanguageChoice)langCombo.SelectedIndex;
-                Storage.Save();
-                Loc.Apply(s.Language);
+                if (langCombo.SelectedItem is ComboBoxItem cbi && cbi.Tag is LanguageChoice choice)
+                {
+                    s.Language = choice;
+                    Storage.Save();
+                    Loc.Apply(choice);
+                }
             };
             AddFormRow(0, Loc.T("SetLanguage"), langCombo);
 
@@ -2064,7 +2327,7 @@ namespace SnappyLayout.UI
                 var vmWeights = AreaService.GetStoredWeights(m);
                 var t2 = new TextBlock
                 {
-                    Text = $"({m.Bounds.Left}, {m.Bounds.Top})  •  {m.WorkArea.Width}×{m.WorkArea.Height} px  •  DPI: {m.Dpi} ({Math.Round(m.Scale * 100)}%)  •  {Loc.T("AspectRatio")}: {m.Aspect:0.00}:1  •  {Loc.T("VirtualMonitor")}: {vmWeights.Count}",
+                    Text = $"({m.Bounds.Left}, {m.Bounds.Top})  •  {m.WorkArea.Width}×{m.WorkArea.Height} px  •  DPI: {m.Dpi} ({Math.Round(m.Scale * 100)}%)  •  {Loc.T("AspectRatio")}: {m.AspectLabel}  •  {Loc.T("VirtualMonitor")}: {vmWeights.Count}",
                     FontSize = 11.5,
                     Margin = new Thickness(0, 2, 0, 0)
                 };
@@ -2393,14 +2656,64 @@ namespace SnappyLayout.UI
 
         private UIElement MakePageHeader(string title, string subtitle)
         {
-            var sp = new StackPanel { Margin = new Thickness(0, 0, 0, 14) };
-            var t = new TextBlock { Text = title, FontSize = 22, FontWeight = FontWeights.Bold };
+            // Aktif sekmeye göre renkli başlık şeridi
+            var meta = NavMeta[Math.Clamp(_activeTabIndex, 0, NavMeta.Length - 1)];
+            if (title == Loc.T("LayoutsTitle")) meta = NavMeta[0];
+            else if (title == Loc.T("VmTitle")) meta = NavMeta[1];
+            else if (title == Loc.T("WsTitle")) meta = NavMeta[2];
+            else if (title == Loc.T("HkTitle")) meta = NavMeta[3];
+            else if (title == Loc.T("SetTitle")) meta = NavMeta[4];
+            else if (title == Loc.T("HelpTitle")) meta = NavMeta[5];
+
+            var outer = new StackPanel { Margin = new Thickness(0, 0, 0, 14) };
+            var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+
+            var badge = new Border
+            {
+                Width = 38,
+                Height = 38,
+                CornerRadius = new CornerRadius(10),
+                BorderThickness = new Thickness(1.2),
+                Margin = new Thickness(0, 0, 12, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            badge.SetResourceReference(Border.BackgroundProperty, meta.BgBrushKey);
+            badge.SetResourceReference(Border.BorderBrushProperty, meta.AccentBrushKey);
+
+            var ico = new TextBlock
+            {
+                Text = meta.Icon,
+                FontSize = 18,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            ico.SetResourceReference(TextBlock.ForegroundProperty, meta.AccentBrushKey);
+            badge.Child = ico;
+
+            var textStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            var t = new TextBlock { Text = title, FontSize = 21, FontWeight = FontWeights.Bold };
             t.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
-            var s = new TextBlock { Text = subtitle, FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) };
+            var s = new TextBlock { Text = subtitle, FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 2, 0, 0) };
             s.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
-            sp.Children.Add(t);
-            sp.Children.Add(s);
-            return sp;
+            textStack.Children.Add(t);
+            textStack.Children.Add(s);
+
+            row.Children.Add(badge);
+            row.Children.Add(textStack);
+            outer.Children.Add(row);
+
+            var accentBar = new Border
+            {
+                Height = 2.5,
+                CornerRadius = new CornerRadius(2),
+                Margin = new Thickness(0, 10, 0, 0),
+                Opacity = 0.7
+            };
+            accentBar.SetResourceReference(Border.BackgroundProperty, meta.AccentBrushKey);
+            outer.Children.Add(accentBar);
+
+            return outer;
         }
 
         private TextBlock MakeSectionLabel(string text)
