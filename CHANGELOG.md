@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.15] — 2026-11-19
+### Changed
+- **Subtler Preview Overlays:** Increased transparency of the blue (virtual monitor / zone) and green (physical monitor) live preview boxes (`SnapZonePreviewOverlay`) for a lighter, less intrusive visual highlight.
+
+---
+
 ## [v0.14] — 2026-11-19
 ### Fixed / Changed
 - **Zero-Flicker Snap Flyout:** Fixed rapid flickering and layout/button shifting when hovering near the right edge of `Full Physical Screen` or other buttons in `SnapFlyoutWindow` by locking the flyout width during rebuilds (preventing `SizeToContent` width oscillation on status text updates) and keeping `SnapZonePreviewOverlay` strictly behind the Flyout/Snap Bar in Z-order.

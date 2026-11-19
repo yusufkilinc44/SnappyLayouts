@@ -522,8 +522,8 @@ namespace SnappyLayout.UI.Windows
         public void ShowRect(RECT r, bool isPhysicalFull, IntPtr insertAfterHwnd = default)
         {
             var col = isPhysicalFull ? Color.FromRgb(16, 185, 129) : Color.FromRgb(0, 120, 212);
-            _box.Background = new SolidColorBrush(Color.FromArgb(60, col.R, col.G, col.B));
-            _box.BorderBrush = new SolidColorBrush(Color.FromArgb(220, col.R, col.G, col.B));
+            _box.Background = new SolidColorBrush(Color.FromArgb(30, col.R, col.G, col.B));
+            _box.BorderBrush = new SolidColorBrush(Color.FromArgb(155, col.R, col.G, col.B));
 
             if (!IsVisible) Show();
             var hwnd = new WindowInteropHelper(this).Handle;
