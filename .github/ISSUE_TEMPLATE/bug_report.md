@@ -1,23 +1,23 @@
 ---
-name: Hata Bildirimi / Bug Report
-about: Snappy Layout içinde karşılaştığınız bir hatayı bildirin
+name: Bug Report
+about: Report an issue or unexpected behavior in Snappy Layout
 title: "[BUG] "
 labels: bug
 assignees: ''
 ---
 
-### Hata Özeti (Bug Description)
-Karşılaştığınız sorunu kısaca açıklayın.
+### Bug Description
+A clear and concise description of what went wrong.
 
-### Adımlar (Steps to Reproduce)
-1. '...' sekmesine gidin
-2. '...' düğmesine tıklayın
-3. Oluşan durumu gözlemleyin
+### Steps to Reproduce
+1. Go to '...'
+2. Click or hover on '...'
+3. Observe the behavior
 
-### Beklenen Davranış (Expected Behavior)
-Olması gereken davranışı açıklayın.
+### Expected Behavior
+What you expected to happen.
 
-### Ortam Bilgileri (Environment)
-- **Snappy Layout Sürümü:** (Örn: v0.9)
-- **Windows Sürümü:** (Örn: Windows 11 24H2)
-- **Monitör & DPI Kurulumu:** (Örn: 3440×1440 @ 125% + 2520×1680 @ 175%)
+### Environment
+- **Snappy Layout Version:** (e.g., v0.12)
+- **Windows Version:** (e.g., Windows 11 24H2)
+- **Monitors & DPI Scaling:** (e.g., 3440×1440 @ 125% + 2520×1680 @ 175%)

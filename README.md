@@ -3,93 +3,91 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
+[![Languages](https://img.shields.io/badge/UI%20Languages-English%20%7C%20Turkish-6366F1)](#localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-v0.12-3B82F6)](CHANGELOG.md)
 
-**Yazar / Tasarım & Programlama (Author / Design & Programming):** **YUSUF KILINÇ — Kasım 2026 (November 2026)**
+**Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
-> 🇹🇷 **Türkçe açıklama aşağıdadır** • 🇬🇧 **English documentation is included below**
-
----
-
-## 🇹🇷 Türkçe Dokümantasyon
-
-### Genel Bakış
-**Snappy Layout**, Windows 10 ve Windows 11 için geliştirilmiş; **maksimize (büyüt) tuşu üzerinde açılan tamamen özelleştirilebilir pencere yerleşim menüsü (Snap Flyout)**, **tek bir fiziksel monitörü yan yana eşit veya eşit olmayan oranlarda bölen Sanal Monitör sistemi**, **çalışma alanı (uygulama + pencere konumu + tarayıcı URL) kaydedici** ve **Per-Monitor V2 dinamik DPI motoru** sunan güçlü bir masaüstü pencere yöneticisidir.
+**Snappy Layout** is a native-feeling window management, customizable Snap Layouts, side-by-side Virtual Monitors, and Workspace automation utility for **Windows 10 and Windows 11**, built with **.NET 10 (WPF)** and low-level **Win32 / DWM / Shcore / COM** APIs.
 
 ---
 
-### Temel Özellikler
+## Key Features
 
-#### 1. Maksimize Tuşu Üzerinde Özelleştirilmiş Yerleşim Menüsü (Snap Flyout)
-- Herhangi bir pencerenin (Snappy Layout'un kendi ana penceresi dahil) sağ üstteki **Büyüt (Maximize)** tuşu üzerine fareyle gelindiğinde veya `Ctrl + Alt + Z` kısayoluyla **Snappy Layout Flyout** menüsü açılır.
-- **Windows Orijinal Snap Layouts Bastırma:** Windows 11'in yerleşik `XamlExplorerHostIslandWindow` menüsü; Kayıt Defteri (`EnableSnapAssistFlyout`, `EnableSnapBar`), `ImmersiveShell` `ISettingsCache` COM servisi, `WndProc` `HTMAXBUTTON` filtrelemesi ve `EVENT_OBJECT_SHOW` anlık kancasıyla tamamen devre dışı bırakılır. İki menü asla üst üste binmez veya yanıp sönmez.
-- **Maksimize Tuşunu Kapatmayan Konumlandırma:** Flyout penceresi, tıpkı Windows'un orijinal menüsü gibi başlık çubuğunun / maksimize tuşunun hemen altında açılır; maksimize tuşunun üzerini kapatmaz.
-- **Her Zaman Windows Teması:** Uygulama arayüzü hangi temada (Açık / Koyu) olursa olsun, pencerelerin maksimize tuşu üzerinde açılan Flyout menüsü her zaman doğrudan **Windows sistem temasını** kullanır.
-- **Canlı Hedef Önizleme:** Flyout içindeki herhangi bir bölge kutusunun üzerine gelindiğinde, pencerenin ekranda yerleşeceği tam alan yarı saydam bir çerçeveyle canlı olarak gösterilir.
+### 1. Native-Style Maximize Hover Flyout & Top-of-Screen Drag Snap Bar
+- **Maximize Button Hover Flyout (`SnapFlyoutWindow`):** Hover over any window's Maximize button (including Snappy Layout's own main window) or press `Ctrl + Alt + Z` to open a Windows 11-styled layout menu positioned cleanly **below** the Maximize button without covering it.
+- **Top-of-Screen Drag Snap Bar (`TopSnapBarWindow`):** Drag any window to the top edge of any physical or virtual monitor to reveal a sleek horizontal Windows 11-style Snap Bar. Hover any zone for a live translucent preview and release the mouse button to snap immediately.
+- **Zero-Flash Native Windows 11 Suppression:** Automatically suppresses Windows 11's built-in Snap Flyout and Snap Bar (`XamlExplorerHostIslandWindow`) using a 4-layer approach (`ImmersiveShell` `ISettingsCache` COM refresh, registry flags, `MainWindow` `WndProc` `HTMAXBUTTON` filtering, and synchronous `EVENT_OBJECT_SHOW` hooks) so the native and custom overlays never collide or flicker.
+- **Always Matches Windows Theme:** Regardless of whether you choose Light or Dark theme for the management UI, both the Maximize Flyout and Top Drag Snap Bar always follow your active **Windows system theme**.
+- **Cross-Monitor Switching:** Switch between all connected physical monitors and their virtual monitors directly from the Maximize Flyout with live screen previews.
 
-#### 2. Yan Yana Sanal Monitörler (Eşit veya Eşit Olmayan Oranlar)
-- Tek bir fiziksel monitörü (özellikle `21:9`, `32:9` Ultra-Wide veya büyük 4K/5K ekranları) yazılımsal olarak yan yana istediğiniz sayıda **sanal monitöre** bölebilirsiniz.
-- **Esnek Oran Kontrolü:**
-  - Görsel monitör çubuğu üzerindeki ayırıcı çizgileri fareyle sola/sağa sürükleyerek,
-  - Oran kutularındaki **alt-üst sayı arttırma/azaltma (`▲` / `▼`)** butonlarını veya fare tekerleğini kullanarak,
-  - **`25%`, `33%`, `50%`, `66%`, `75%`, `100%`** hızlı seçim çiplerine tek tıkla basarak genişlikleri ayarlayabilirsiniz.
-- **Kayıtlı Sanal Monitör Şablonları (Presets):** Sık kullandığınız sanal monitör bölme oranlarını (`50% | 50%`, `33% | 33% | 33%`, `25% | 50% | 25%`, `40% | 60%` vb.) şablon olarak kaydedebilir, her şablonun yanındaki **gerçek en/boy oranlı görsel küçük önizleme şemasından** nasıl göründüğünü anında görebilir ve kısayol tuşu atayabilirsiniz.
-- **Sanal Monitör Sınır Çizgileri:** Pencere sürüklerken, ayar yaparken, `Ctrl + Alt + B` kısayoluyla veya sürekli olarak ekranda özelleştirilebilir renk ve kalınlıkta gösterilir.
+### 2. Side-by-Side Virtual Monitors (Equal or Asymmetric Widths)
+- Split any physical monitor (especially `21:9` / `32:9` ultrawide or large 4K/5K displays) into unlimited side-by-side **virtual monitors**.
+- **Flexible Ratio Adjustment:**
+  - Drag divider handles directly on the true-aspect-ratio monitor bar,
+  - Use the **`▲` / `▼` spinner buttons**, arrow keys, or mouse wheel on each percentage input,
+  - Click one of the built-in quick ratio chips (**`25%`**, **`33%`**, **`50%`**, **`66%`**, **`75%`**, **`100%`**).
+- **Saved Virtual Monitor Presets with Visual Thumbnails:** Save your favorite splits (`50% | 50%`, `33% | 33% | 33%`, `25% | 50% | 25%`, `40% | 60%`, etc.) with live aspect-ratio mini diagrams and assign global hotkeys to switch splits instantly.
+- **Customizable Virtual Monitor Borders:** Display high-contrast divider lines on screen while dragging windows, while editing ratios, on demand (`Ctrl + Alt + B`), or permanently, with configurable color and thickness.
 
-#### 3. Sanal Monitör Tam Ekran (`100%`) ve Silinemez Gerçek Fiziksel Tam Ekran
-- **Sanal Monitör Tam Ekran:** Sanal monitör aktifken bir pencerede Tam Ekran (Maximize) tuşuna basıldığında pencere tüm fiziksel monitörü değil, **yalnızca bulunduğu sanal monitörü** kaplar. Bu seçenek Flyout menüsünde ve yerleşim listesinde **her zaman alttaki yerleşim düzenlerinin en başında (`100%` kartı olarak)** yer alır.
-- **Gerçek Fiziksel Tam Ekran (Silinemez):** Sanal monitörler aktif olsa bile pencereyi gerçek fiziksel monitörün tamamına kaplatan sabit yerleşimdir (`Shift + Maximize` veya `Ctrl + Alt + Shift + ↑` ile de tetiklenebilir) ve silinemez.
+### 3. Virtual Monitor Full Screen (`100%`) & Permanent Physical Full Screen
+- **Virtual Monitor Full Screen:** When virtual monitors are active, clicking a window's Maximize button maximizes it **strictly inside its current virtual monitor**. This `100%` tile always appears first in the layout grid of both the Maximize Flyout and Top Drag Snap Bar.
+- **Permanent Physical Full Screen (Indeletable):** Always available (`Shift + Maximize`, `Ctrl + Alt + Shift + ↑`, or from the Flyout/Snap Bar) to maximize a window across the entire physical monitor even when virtual monitors are active.
 
-#### 4. Bağımsız Pencere Yerleşim Düzenleri & Sınırsız Izgara Düzenleyici
-- Her **fiziksel monitör** ve her **sanal monitör** birbirinden tamamen bağımsız pencere yerleşim düzeni listesine sahiptir (2 aşamalı seçim).
-- **Gerçek En/Boy Oranı (Aspect Ratio):** Tüm önizleme şemaları ve düzenleyici tuvali, seçili fiziksel veya sanal monitörün gerçek en/boy oranında (`16:9`, `21:9`, `32:9`, dikey portre vb.) çizilir.
-- **Sınırsız Sütun ve Satır:** İstediğiniz kadar sütun ve satır ekleyebilir, iç çizgileri sürükleyerek veya `▲`/`▼` butonları ve `%25, %33, %50, %66, %75, %100` hazır oran çipleriyle boyutlandırabilir, birden fazla hücreyi sürükleyip seçerek tek bölge halinde birleştirebilirsiniz (`Merge` / `Split`).
+### 4. Unlimited Grid & Zone Layout Editor (Per-Monitor & Per-Virtual-Monitor)
+- Every **physical monitor** and every **virtual monitor** maintains its own completely independent list of snap layouts.
+- **True Aspect Ratio Diagrams:** All previews and editor canvases render at the exact aspect ratio of the selected physical or virtual monitor (`16:9`, `21:9`, `32:9`, vertical portrait, etc.).
+- **Unlimited Rows & Columns:** Add/remove columns and rows, drag internal grid dividers, enter exact percentages with `▲`/`▼` controls or quick ratio chips, and drag-select adjacent cells to merge or right-click to split them.
+- **Orientation Filters:** Control which layouts appear on Standard (`16:9`/`16:10`), Ultrawide (`21:9`/`32:9`), and Portrait displays.
 
-#### 5. Çalışma Alanları (Workspaces) ve Tarayıcı URL Kaydı
-- O anki sanal monitör oranlarını, açık uygulamaları, pencerelerin ekran/bölge konumlarını, açık klasör yollarını ve **tarayıcıların (Chrome, Edge, Brave, Vivaldi, Opera, Firefox) aktif sekme URL adreslerini** kaydeder.
-- Kaydedilen çalışma alanını tek tıkla veya klavye kısayoluyla **Mevcut Masaüstünde** ya da otomatik oluşturulan **Yeni Sanal Masaüstünde (`Win + Ctrl + D`)** başlatır.
+### 5. Workspaces & Browser URL Capture
+- Capture your current virtual monitor layout along with open applications, window zone positions, Explorer folder paths, and **active browser tab URLs** (Chrome, Edge, Brave, Vivaldi, Opera, Firefox).
+- Restore any saved workspace with one click or a global hotkey — either on your **Current Desktop** or in a freshly created **Windows Virtual Desktop** (`Win + Ctrl + D`).
 
-#### 6. Per-Monitor V2 Dinamik DPI, TR/EN Dil ve Açık/Koyu Tema
-- **İki Aşamalı Dinamik DPI Yerleştirme:** `%100`, `%125`, `%150`, `%175`, `%200` gibi farklı ölçeklendirmeye sahip monitörler arasında pencere taşırken DWM görünmez çerçeve paylarını (`DWMWA_EXTENDED_FRAME_BOUNDS`) iki geçişte telafi ederek sıfır piksel kaymasıyla yerleştirir.
-- **Dil Desteği:** Türkçe ve İngilizce (varsayılan: Windows görüntüleme dili).
-- **Tema Desteği:** Açık (Light), Koyu (Dark) ve Windows Varsayılanı.
+### 6. Per-Monitor V2 Dynamic DPI, Localization & Theming
+- **Two-Pass Dynamic DPI & DWM Frame Compensation:** Seamlessly moves and previews windows across monitors with mixed DPI scales (`100%`, `125%`, `150%`, `175%`, `200%`) with zero pixel drift, compensating for invisible DWM window borders (`DWMWA_EXTENDED_FRAME_BOUNDS`) and `WM_DPICHANGED` rescaling.
+- **Localization:** Full **English** and **Turkish** UI language support (automatically defaults to your Windows display language).
+- **Theming:** **System (Windows)**, **Light**, and **Dark** themes for the management app, with automatic Windows system theme sync for Snap overlays.
 
 ---
 
-### Mimari Şema
+## Architecture Overview
 
 ```mermaid
 flowchart TD
-    subgraph UI["WPF Kullanıcı Arayüzü Katmanı (UI)"]
-        MW["MainWindow (6 Sekmeli Yönetim Paneli)"]
-        SF["SnapFlyoutWindow (Windows Temalı Maksimize Menüsü)"]
-        VBO["VirtualBorderOverlayManager (Sanal Monitör Sınır Çizgileri)"]
-        LPC["LayoutPreviewControl (Gerçek Oranlı Izgara & Önizleme)"]
-        VMB["VirtualMonitorBarControl (Sanal Monitör Bölücü & Mini Şema)"]
+    subgraph UI["WPF User Interface Layer"]
+        MW["MainWindow (6-Tab Control Panel)"]
+        SF["SnapFlyoutWindow (Windows 11 Maximize Flyout)"]
+        TSB["TopSnapBarWindow (Windows 11 Top Drag Snap Bar)"]
+        VBO["VirtualBorderOverlayManager (Screen Divider Overlays)"]
+        LPC["LayoutPreviewControl (True-Aspect Grid Editor & Win11 Tiles)"]
+        VMB["VirtualMonitorBarControl (Interactive Divider & Mini Presets)"]
     end
 
-    subgraph Core["Çekirdek Pencere & Monitör Motoru (Core)"]
-        MHW["MaximizeHoverWatcher (DPI-Bilinçli HTMAXBUTTON İzleyici)"]
-        WES["WindowEventService (WinEventHook: Maximize, MoveSize, Show)"]
-        WP["WindowPlacer (2 Aşamalı DPI & DWM Çerçeve Yerleştirici)"]
-        MS["MonitorService & AreaService (Fiziksel & Sanal Monitörler)"]
-        WS["WorkspaceService & WindowCatalog (Uygulama & URL Yakalayıcı)"]
-        HKS["HotkeyService (Global Klavye Kısayolları)"]
+    subgraph Core["Core Window & Monitor Engine"]
+        MHW["MaximizeHoverWatcher (DPI-Aware HTMAXBUTTON Tracker)"]
+        WES["WindowEventService (SetWinEventHook: Maximize, Drag, Show)"]
+        WP["WindowPlacer (Two-Pass DPI & DWM Extended Frame Placer)"]
+        MS["MonitorService & AreaService (Physical & Virtual Monitors)"]
+        WS["WorkspaceService & WindowCatalog (App & Browser URL Capture)"]
+        HKS["HotkeyService (Global RegisterHotKey Manager)"]
     end
 
-    subgraph Services["Servisler & Win32/COM Katmanı (Services & Native)"]
-        NSS["NativeSnapSuppressor (ImmersiveShell ISettingsCache COM & Kayıt Defteri)"]
-        TM["ThemeManager (Fluent & Windows Tema Yöneticisi)"]
-        LOC["Loc (TR / EN Yerelleştirme)"]
+    subgraph Services["Services & Native Win32/COM Layer"]
+        NSS["NativeSnapSuppressor (ImmersiveShell ISettingsCache COM & Registry)"]
+        TM["ThemeManager (Fluent & Windows System Theme Engine)"]
+        LOC["Loc (English / Turkish Localization)"]
         ST["Storage (%AppData%\\Snappy Layout\\settings.json)"]
         NM["NativeMethods & DisplayConfig (User32, DWM, Shcore, CCD API)"]
     end
 
     MHW --> SF
+    WES --> TSB
     WES --> WP
     WES --> NSS
     SF --> WP
+    TSB --> WP
     MW --> MS
     MW --> WS
     MW --> ST
@@ -97,115 +95,104 @@ flowchart TD
     NSS --> NM
 ```
 
+For a deep technical dive into the Win32, COM, DWM, and Per-Monitor V2 DPI implementation, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ---
 
-### Proje Klasör Yapısı
+## Project Structure
 
 ```text
 Snappy Layouts/
-├── Snappy Layout.sln                  # Visual Studio Çözüm Dosyası
-├── Baslat-Snappy Layout.bat           # Derlenmiş Release sürümünü hızlı başlatma betiği
-├── README.md                          # Proje dokümantasyonu (TR / EN)
-├── ARCHITECTURE.md                    # Teknik mimari ve Win32/COM detayları
-├── CHANGELOG.md                       # Sürüm geçmişi (v0.1 → v0.9)
-├── CONTRIBUTING.md                    # Katkıda bulunma ve sürüm politikası rehberi
-├── SECURITY.md                        # Güvenlik ve gizlilik politikası
-├── LICENSE                            # MIT Lisansı
-├── .github/                           # GitHub Actions CI ve Issue/PR şablonları
+├── Snappy Layout.sln                  # Visual Studio Solution File
+├── Baslat-Snappy Layout.bat           # Quick launcher for Release build
+├── README.md                          # Project documentation
+├── ARCHITECTURE.md                    # Technical architecture & Win32/COM internals
+├── CHANGELOG.md                       # Version history (v0.1 → v0.12)
+├── CONTRIBUTING.md                    # Contribution & versioning guidelines
+├── SECURITY.md                        # Security & local privacy policy
+├── LICENSE                            # MIT License
+├── .github/                           # GitHub Actions CI & Issue/PR templates
 └── src/
     └── Snappy Layout/
-        ├── Snappy Layout.csproj       # .NET 10.0 WPF Proje Dosyası
-        ├── app.manifest               # Per-Monitor V2 DPI bildirimi
-        ├── AppInfo.cs                 # Sürüm bilgisi ve değişiklik geçmişi
-        ├── App.xaml / App.xaml.cs     # Uygulama yaşam döngüsü, Tepsi İkonu, Tek Örnek (Mutex)
+        ├── Snappy Layout.csproj       # .NET 10.0 WPF Project File
+        ├── app.manifest               # Per-Monitor V2 DPI manifest
+        ├── AppInfo.cs                 # Version metadata & changelog
+        ├── App.xaml / App.xaml.cs     # Lifecycle, System Tray, Single-Instance Mutex
         ├── Core/
-        │   ├── HotkeyService.cs       # Global RegisterHotKey yönetimi
-        │   ├── MaximizeHoverWatcher.cs# Maksimize tuşu hover tespiti
-        │   ├── MonitorService.cs      # Fiziksel ve sanal monitör (SnapArea) hesaplamaları
-        │   ├── WindowCatalog.cs       # Açık pencereler, süreç yolları ve tarayıcı URL tespiti
-        │   ├── WindowEventService.cs  # SetWinEventHook (Maximize, Sürükleme, Native Flyout engelleme)
-        │   ├── WindowPlacer.cs        # DWM çerçeve telafili ve çoklu-DPI pencere yerleştirici
-        │   └── WorkspaceService.cs    # Çalışma alanı yakalama ve mevcut/yeni masaüstünde açma
+        │   ├── HotkeyService.cs       # Global RegisterHotKey service
+        │   ├── MaximizeHoverWatcher.cs# DPI-aware HTMAXBUTTON hover watcher
+        │   ├── MonitorService.cs      # Physical & Virtual Monitor (SnapArea) engine
+        │   ├── WindowCatalog.cs       # Window enumeration, process paths & browser URLs
+        │   ├── WindowEventService.cs  # WinEventHook (Maximize, Drag, Native Flyout suppression)
+        │   ├── WindowPlacer.cs        # Two-pass DPI & DWM frame-compensated window placer
+        │   └── WorkspaceService.cs    # Workspace capture & Current/New Desktop restore
         ├── Models/
-        │   ├── AppData.cs             # Ayarlar, sanal monitör şablonları, çalışma alanları modelleri
-        │   └── SnapLayout.cs          # Izgara, sütun/satır ağırlıkları ve bölge (ZoneCell) modelleri
+        │   ├── AppData.cs             # Settings, Virtual Presets & Workspace models
+        │   └── SnapLayout.cs          # Grid, column/row weights & ZoneCell models
         ├── Native/
-        │   ├── DisplayConfig.cs       # QueryDisplayConfig ile gerçek monitör adı okuma
-        │   └── NativeMethods.cs       # User32, DwmApi, Shcore, Kernel32, Ntdll P/Invoke tanımları
+        │   ├── DisplayConfig.cs       # QueryDisplayConfig friendly monitor names
+        │   └── NativeMethods.cs       # User32, DwmApi, Shcore, Kernel32, Ntdll P/Invoke
         ├── Services/
-        │   ├── Loc.cs                 # Türkçe / İngilizce dil sözlüğü
-        │   ├── NativeSnapSuppressor.cs# Windows 11 yerleşik Snap Flyout bastırıcı (COM + Registry)
-        │   ├── StartupService.cs      # Windows başlangıcında otomatik çalıştırma
-        │   ├── Storage.cs             # JSON tabanlı kalıcı ayar yönetimi ve günlükleme
-        │   └── ThemeManager.cs        # Açık / Koyu / Windows teması fırça yöneticisi
+        │   ├── Loc.cs                 # English & Turkish localization dictionary
+        │   ├── NativeSnapSuppressor.cs# Windows 11 native Snap Flyout/Bar suppressor
+        │   ├── StartupService.cs      # Run-at-Windows-startup registry service
+        │   ├── Storage.cs             # JSON persistence & diagnostic logging
+        │   └── ThemeManager.cs        # Light / Dark / Windows System theme manager
         └── UI/
-            ├── MainWindow.xaml(.cs)   # Ana yönetim penceresi
+            ├── MainWindow.xaml(.cs)   # Main 6-tab management interface
             ├── Controls/
-            │   ├── LayoutPreviewControl.cs      # Etkileşimli ızgara düzenleyici ve önizleme kontrolü
-            │   └── VirtualMonitorBarControl.cs  # Sanal monitör bölücü ve mini şablon önizleme
+            │   ├── LayoutPreviewControl.cs       # Grid editor & Windows 11 snap tiles
+            │   └── VirtualMonitorBarControl.cs   # Virtual monitor divider & mini previews
             └── Windows/
-                ├── HotkeyCaptureDialog.cs       # Tuş kombinasyonu yakalama penceresi
-                ├── SnapFlyoutWindow.cs          # Maksimize tuşu altında açılan yerleşim menüsü
-                ├── VirtualBorderOverlayManager.cs# Ekran üstü sanal monitör sınır çizgileri
-                └── WorkspaceDialogs.cs          # Çalışma alanı kaydetme ve uygulama diyalogları
+                ├── HotkeyCaptureDialog.cs        # Interactive hotkey recorder dialog
+                ├── SnapFlyoutWindow.cs           # Maximize button hover Snap Flyout
+                ├── TopSnapBarWindow.cs           # Top-of-screen drag Snap Bar
+                ├── VirtualBorderOverlayManager.cs# On-screen virtual monitor divider lines
+                └── WorkspaceDialogs.cs           # Workspace capture & launch dialogs
 ```
 
 ---
 
-### Kurulum ve Çalıştırma
+## Getting Started
 
-#### Gereksinimler
-- **İşletim Sistemi:** Windows 10 (1809+) veya Windows 11
-- **Çalışma Zamanı / SDK:** [.NET 10.0 SDK / Desktop Runtime](https://dotnet.microsoft.com/)
+### Prerequisites
+- **OS:** Windows 10 (1809+) or Windows 11
+- **SDK / Runtime:** [.NET 10.0 SDK / Desktop Runtime](https://dotnet.microsoft.com/)
 
-#### Kaynak Koddan Derleme
+### Build from Source
 ```powershell
 git clone https://github.com/yusufkilinc44/SnappyLayouts.git
-cd "SnappyLayouts"
-dotnet build "src/Snappy Layout/Snappy Layout.csproj" -c Release
+cd SnappyLayouts
+dotnet build "Snappy Layout.sln" -c Release
 ```
 
-#### Çalıştırma
-- Ana dizindeki `Baslat-Snappy Layout.bat` dosyasına çift tıklayarak veya:
+### Run
+Launch via the included batch file `Baslat-Snappy Layout.bat` or directly via the .NET CLI:
 ```powershell
 dotnet run --project "src/Snappy Layout/Snappy Layout.csproj" -c Release
 ```
-komutuyla başlatabilirsiniz.
 
 ---
 
-### Varsayılan Klavye Kısayolları
+## Default Keyboard Shortcuts
 
-| İşlem | Varsayılan Kısayol |
+| Action | Default Hotkey |
 | :--- | :--- |
-| Aktif pencere için yerleşim menüsünü (Flyout) aç | `Ctrl + Alt + Z` |
-| Sanal monitör sınır çizgilerini göster / gizle | `Ctrl + Alt + B` |
-| Aktif pencereyi bulunduğu sanal monitörde tam ekran yap | `Ctrl + Alt + ↑` |
-| Aktif pencereyi gerçek fiziksel monitörde tam ekran yap | `Ctrl + Alt + Shift + ↑` |
-| Aktif pencereyi sonraki sanal monitöre taşı | `Ctrl + Alt + →` |
-| Aktif pencereyi önceki sanal monitöre taşı | `Ctrl + Alt + ←` |
-| Aktif pencereyi önceki boyutuna döndür | `Ctrl + Alt + ↓` |
-| Sanal monitörleri etkinleştir / devre dışı bırak | `Ctrl + Alt + V` |
-| Snappy Layout yönetim penceresini aç | `Ctrl + Alt + S` |
+| Open Snap Layout Flyout for active window | `Ctrl + Alt + Z` |
+| Toggle Virtual Monitor border overlays | `Ctrl + Alt + B` |
+| Maximize active window inside its Virtual Monitor | `Ctrl + Alt + ↑` |
+| Maximize active window across Full Physical Monitor | `Ctrl + Alt + Shift + ↑` |
+| Move active window to next Virtual Monitor | `Ctrl + Alt + →` |
+| Move active window to previous Virtual Monitor | `Ctrl + Alt + ←` |
+| Restore active window to previous bounds | `Ctrl + Alt + ↓` |
+| Toggle Virtual Monitors on / off | `Ctrl + Alt + V` |
+| Open Snappy Layout Control Panel | `Ctrl + Alt + S` |
+
+All shortcuts can be customized or cleared in the **Keyboard Shortcuts** tab, and custom global hotkeys can also be assigned to any saved **Virtual Monitor Preset** or **Workspace**.
 
 ---
 
-## 🇬🇧 English Documentation
+## License
 
-### Overview
-**Snappy Layout** is a modern window layout, virtual monitor splitter, and workspace automation utility for Windows 10 and Windows 11 built with **.NET 10 WPF** and native Win32/DWM/Shcore APIs.
-
-### Key Highlights
-- **Custom Maximize Button Snap Flyout:** Appears directly below any window's Maximize button (without covering the button itself) and always matches the active **Windows system theme**.
-- **Zero-Flash Native Snap Suppression:** Suppresses Windows 11's built-in `XamlExplorerHostIslandWindow` via `ImmersiveShell` `ISettingsCache` COM refresh, registry flags, `WndProc` `HTMAXBUTTON` filtering on `MainWindow`, and synchronous `EVENT_OBJECT_SHOW` hooks.
-- **Side-by-Side Virtual Monitors:** Split any physical monitor into unlimited side-by-side virtual monitors with equal or non-equal widths using interactive drag dividers, `▲`/`▼` spinner buttons, or one-click `25%`, `33%`, `50%`, `66%`, `75%`, `100%` preset chips.
-- **Virtual Monitor Full Screen (`100%`) & Permanent Physical Full Screen:** Maximizing a window fills only its active virtual monitor, while the Virtual Monitor Full Screen card is always placed first among the layout cards. Permanent Physical Full Screen is always available (`Shift + Maximize` or `Ctrl + Alt + Shift + ↑`).
-- **Visual Ratio Thumbnails:** Every saved virtual monitor preset and window snap layout is rendered with a true-aspect-ratio visual diagram.
-- **Workspaces & Browser URL Capture:** Save virtual monitor ratios, open applications, window positions, and browser tab URLs, and restore them in the Current Desktop or a New Virtual Desktop (`Win + Ctrl + D`).
-
----
-
-## Lisans / License
-
-Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.  
-© 2026 **YUSUF KILINÇ** — Tüm hakları saklıdır.
+This project is licensed under the [MIT License](LICENSE).  
+© 2026 **YUSUF KILINÇ**

@@ -1,9 +1,9 @@
-## Değişiklik Özeti (Summary of Changes)
+## Summary of Changes
 - 
 
-## Sürüm Güncellemesi Kontrol Listesi (Checklist)
-- [ ] `AppInfo.cs` içinde sürüm numarası ve `History` güncellendi
-- [ ] `Snappy Layout.csproj` içinde `<Version>` ve `<InformationalVersion>` güncellendi
-- [ ] `CHANGELOG.md` ve `README.md` güncellendi
-- [ ] `Loc.cs` içinde Türkçe (`Tr`) ve İngilizce (`En`) çeviriler eklendi
-- [ ] `dotnet build "Snappy Layout.sln" -c Release` hatasız derlendi
+## Checklist
+- [ ] Updated version & changelog entry in `AppInfo.cs`
+- [ ] Updated `<Version>` and `<InformationalVersion>` in `Snappy Layout.csproj`
+- [ ] Updated `CHANGELOG.md` and `README.md`
+- [ ] Added both English (`En`) and Turkish (`Tr`) translations in `Loc.cs`
+- [ ] Verified `dotnet build "Snappy Layout.sln" -c Release` succeeds with 0 errors and 0 warnings

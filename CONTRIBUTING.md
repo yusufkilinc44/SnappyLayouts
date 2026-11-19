@@ -1,21 +1,25 @@
-# Katkıda Bulunma Rehberi (Contributing Guide)
+# Contributing to Snappy Layout
 
-**Snappy Layout** projesine ilgi gösterdiğiniz için teşekkür ederiz!
+Thank you for your interest in contributing to **Snappy Layout**!
 
-## Geliştirme Ortamı
-1. Windows 10 veya Windows 11 üzerinde **.NET 10.0 SDK** kurulu olmalıdır.
-2. Depoyu klonlayın:
+## Development Setup
+1. Install **.NET 10.0 SDK** on Windows 10 or Windows 11.
+2. Clone the repository:
    ```powershell
    git clone https://github.com/yusufkilinc44/SnappyLayouts.git
    cd SnappyLayouts
    ```
-3. Projeyi derleyin:
+3. Build the solution:
    ```powershell
    dotnet build "Snappy Layout.sln" -c Release
    ```
 
-## Sürüm ve Değişiklik Politikası
-- Her kod değişikliğinde sürüm numarası `0.1` artırılır (`v0.8` → `v0.9` vb.).
-- Sürüm numarası hem `src/Snappy Layout/AppInfo.cs` hem `src/Snappy Layout/Snappy Layout.csproj` hem de `CHANGELOG.md` ve `README.md` dosyalarında senkronize tutulmalıdır.
-- Her yeni özellik veya arayüz metni `src/Snappy Layout/Services/Loc.cs` içinde hem **Türkçe (`Tr`)** hem **İngilizce (`En`)** sözlüğe eklenmelidir.
-- Her kod ya da proje dosyası değişikliğinde GitHub deposu güncel tutulmalıdır.
+## Coding & Versioning Guidelines
+- **Versioning Policy:** Every functional change increments the version by `0.1` (`v0.11` → `v0.12`, etc.). Keep the version synchronized across:
+  - `src/Snappy Layout/AppInfo.cs`
+  - `src/Snappy Layout/Snappy Layout.csproj`
+  - `README.md`
+  - `CHANGELOG.md`
+- **Localization:** Every new user-facing string must be added to both the **English (`En`)** and **Turkish (`Tr`)** dictionaries in `src/Snappy Layout/Services/Loc.cs`.
+- **Multi-DPI Testing:** Any window positioning or overlay change must account for mixed-DPI monitor setups (`PerMonitorV2` + `WM_DPICHANGED`).
+- **Clean Builds:** Ensure both `Release` and `Debug` configurations build with zero errors and zero warnings before opening a Pull Request.

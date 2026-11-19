@@ -1,13 +1,13 @@
 ---
-name: Özellik İsteği / Feature Request
-about: Snappy Layout için yeni bir özellik veya iyileştirme önerin
+name: Feature Request
+about: Suggest a new feature or enhancement for Snappy Layout
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''
 ---
 
-### Özellik Özeti (Feature Summary)
-Önerdiğiniz özelliği açıklayın.
+### Feature Summary
+Describe the feature or improvement you would like to see.
 
-### Kullanım Senaryosu (Use Case)
-Bu özelliğin hangi senaryoda nasıl yardımcı olacağını belirtin.
+### Use Case
+Explain how this feature would help your workflow.
