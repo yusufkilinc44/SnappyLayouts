@@ -5,6 +5,13 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.14] — 2026-11-19
+### Fixed / Changed
+- **Zero-Flicker Snap Flyout:** Fixed rapid flickering and layout/button shifting when hovering near the right edge of `Full Physical Screen` or other buttons in `SnapFlyoutWindow` by locking the flyout width during rebuilds (preventing `SizeToContent` width oscillation on status text updates) and keeping `SnapZonePreviewOverlay` strictly behind the Flyout/Snap Bar in Z-order.
+- **Cleaner Flyout Label:** Removed `"(Indeletable)"` from the Snap Flyout's `Full Physical Screen` button so it only appears inside the main settings application.
+
+---
+
 ## [v0.13] — 2026-11-19
 ### Added
 - **Custom Physical Monitor Names:** Users can now assign custom friendly names to any physical monitor (from the Snap Layouts, Virtual Monitors, or Settings & DPI tabs) or reset back to the hardware name. Custom names persist in `settings.json` and appear everywhere across the UI, including the Maximize Snap Flyout.

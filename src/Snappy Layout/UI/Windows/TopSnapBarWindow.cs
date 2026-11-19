@@ -224,11 +224,11 @@ namespace SnappyLayout.UI.Windows
                             _pendingIsPhysicalFull = entry.IsPhysicalFull;
 
                             if (entry.IsPhysicalFull)
-                                _zonePreview.ShowRect(_currentArea.Monitor.WorkArea, true);
+                                _zonePreview.ShowRect(_currentArea.Monitor.WorkArea, true, hwnd);
                             else if (entry.IsVirtualFull)
-                                _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false);
+                                _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false, hwnd);
                             else
-                                _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, rel.Value), false);
+                                _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, rel.Value), false, hwnd);
                             continue;
                         }
                     }

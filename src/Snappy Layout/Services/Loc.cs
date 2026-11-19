@@ -255,7 +255,7 @@ namespace SnappyLayout.Services
             // Flyout (Maksimize Üstü Açılır Pencere)
             ["FlyoutHeader"] = "Pencere Yerleşimi Seçin",
             ["FlyoutVirtualFull"] = "Sanal Monitör Tam Ekran",
-            ["FlyoutPhysicalFull"] = "Gerçek Fiziksel Tam Ekran (Silinemez)",
+            ["FlyoutPhysicalFull"] = "Tam Fiziksel Ekran",
             ["FlyoutPhysicalMonitor"] = "Fiziksel Monitör:",
             ["FlyoutTargetArea"] = "Hedef Alan:",
             ["FlyoutOpenApp"] = "Ayarlar & Düzenleyici",
@@ -458,7 +458,7 @@ namespace SnappyLayout.Services
             // Flyout
             ["FlyoutHeader"] = "Choose Window Snap Layout",
             ["FlyoutVirtualFull"] = "Virtual Monitor Fullscreen",
-            ["FlyoutPhysicalFull"] = "Full Physical Screen (Indeletable)",
+            ["FlyoutPhysicalFull"] = "Full Physical Screen",
             ["FlyoutPhysicalMonitor"] = "Physical Monitor:",
             ["FlyoutTargetArea"] = "Target Area:",
             ["FlyoutOpenApp"] = "Settings & Editor",

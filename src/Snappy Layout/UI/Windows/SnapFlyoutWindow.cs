@@ -29,6 +29,7 @@ namespace SnappyLayout.UI.Windows
         private SnapArea _currentArea;
         private List<SnapArea> _monitorAreas = new List<SnapArea>();
 
+        private readonly Border _outerBorder;
         private readonly WrapPanel _monitorPillsPanel;
         private readonly WrapPanel _areaPillsPanel;
         private readonly WrapPanel _layoutsWrap;
@@ -38,6 +39,8 @@ namespace SnappyLayout.UI.Windows
         private readonly Button _btnOpenMain;
         private readonly DispatcherTimer _autoCloseTimer;
         private readonly SnapZonePreviewOverlay _zonePreview = new SnapZonePreviewOverlay();
+
+        private IntPtr SelfHwnd => new WindowInteropHelper(this).Handle;
 
         public SnapFlyoutWindow()
         {
@@ -55,18 +58,18 @@ namespace SnappyLayout.UI.Windows
             ThemeManager.ThemeChanged += () => ThemeManager.ApplyWindowsThemeToDictionary(Resources);
             ThemeManager.WindowsThemeChanged += () => ThemeManager.ApplyWindowsThemeToDictionary(Resources);
 
-            var outerBorder = new Border
+            _outerBorder = new Border
             {
                 CornerRadius = new CornerRadius(10),
                 BorderThickness = new Thickness(1),
                 // Üst kenar boşluğunu 2px tut ki maksimize tuşunun üstünü kapatmasın
                 Margin = new Thickness(12, 2, 12, 12),
                 Padding = new Thickness(12, 10, 12, 10),
-                MaxWidth = 560,
+                Width = 440,
                 Effect = new DropShadowEffect { BlurRadius = 24, ShadowDepth = 6, Opacity = 0.45, Color = Colors.Black }
             };
-            outerBorder.SetResourceReference(Border.BackgroundProperty, "Win11SurfaceBrush");
-            outerBorder.SetResourceReference(Border.BorderBrushProperty, "Win11BorderBrush");
+            _outerBorder.SetResourceReference(Border.BackgroundProperty, "Win11SurfaceBrush");
+            _outerBorder.SetResourceReference(Border.BorderBrushProperty, "Win11BorderBrush");
 
             var rootStack = new StackPanel { Orientation = Orientation.Vertical };
 
@@ -104,7 +107,7 @@ namespace SnappyLayout.UI.Windows
                 if (_currentArea?.Monitor != null)
                 {
                     _hoverStatusText.Text = Loc.T("FlyoutPhysicalFull");
-                    _zonePreview.ShowRect(_currentArea.Monitor.WorkArea, true);
+                    _zonePreview.ShowRect(_currentArea.Monitor.WorkArea, true, SelfHwnd);
                 }
             };
             _btnPhysicalFull.MouseLeave += (s, e) =>
@@ -151,6 +154,8 @@ namespace SnappyLayout.UI.Windows
             _hoverStatusText = new TextBlock
             {
                 FontSize = 11,
+                Height = 16,
+                TextWrapping = TextWrapping.NoWrap,
                 VerticalAlignment = VerticalAlignment.Center,
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 Margin = new Thickness(2, 0, 8, 0)
@@ -197,8 +202,8 @@ namespace SnappyLayout.UI.Windows
             footerBorder.Child = footerGrid;
             rootStack.Children.Add(footerBorder);
 
-            outerBorder.Child = rootStack;
-            Content = outerBorder;
+            _outerBorder.Child = rootStack;
+            Content = _outerBorder;
 
             _autoCloseTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(140) };
             _autoCloseTimer.Tick += CheckAutoClose;
@@ -328,7 +333,7 @@ namespace SnappyLayout.UI.Windows
                     mPill.MouseEnter += (s, e) =>
                     {
                         _hoverStatusText.Text = capturedMon.DisplayName;
-                        _zonePreview.ShowRect(capturedMon.WorkArea, true);
+                        _zonePreview.ShowRect(capturedMon.WorkArea, true, SelfHwnd);
                     };
                     mPill.MouseLeave += (s, e) =>
                     {
@@ -363,7 +368,7 @@ namespace SnappyLayout.UI.Windows
                     pill.MouseEnter += (s, e) =>
                     {
                         _hoverStatusText.Text = captured.Label;
-                        _zonePreview.ShowRect(captured.Rect, false);
+                        _zonePreview.ShowRect(captured.Rect, false, SelfHwnd);
                     };
                     pill.MouseLeave += (s, e) =>
                     {
@@ -388,6 +393,16 @@ namespace SnappyLayout.UI.Windows
             double aspect = _currentArea.Aspect;
             double boxH = 62;
             double boxW = Math.Clamp(boxH * Math.Clamp(aspect, 0.55, 2.6), 58, 148);
+
+            var areaLayouts = AreaService.GetLayoutsForArea(_currentArea);
+            var layouts = areaLayouts.Where(l => l.IsVisibleFor(aspect)).ToList();
+            if (layouts.Count == 0) layouts = areaLayouts.ToList();
+
+            // Sabit genişlik hesapla ki hover sırasında alt metin değişince pencere boyutu/konumu asla oynamasın (sıfır flicker)
+            int totalTiles = 1 + layouts.Count;
+            int colsPerRow = Math.Min(totalTiles, boxW > 115 ? 3 : 4);
+            double desiredW = colsPerRow * (boxW + 14) + 32;
+            _outerBorder.Width = Math.Clamp(desiredW, 380, 560);
 
             // Sanal Monitör Tam Ekran (100%) her zaman yerleşimlerin EN BAŞINDA yer alır
             string vmFullLabel = _currentArea.IsVirtual
@@ -415,7 +430,7 @@ namespace SnappyLayout.UI.Windows
                 else
                 {
                     _hoverStatusText.Text = vmFullLabel;
-                    _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false);
+                    _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false, SelfHwnd);
                 }
             };
             vmFullPreview.ZoneClicked += (relRect, cell) =>
@@ -427,10 +442,6 @@ namespace SnappyLayout.UI.Windows
                 }
             };
             _layoutsWrap.Children.Add(vmFullPreview);
-
-            var areaLayouts = AreaService.GetLayoutsForArea(_currentArea);
-            var layouts = areaLayouts.Where(l => l.IsVisibleFor(aspect)).ToList();
-            if (layouts.Count == 0) layouts = areaLayouts.ToList();
 
             foreach (var layout in layouts)
             {
@@ -456,7 +467,7 @@ namespace SnappyLayout.UI.Windows
                     else
                     {
                         _hoverStatusText.Text = capturedLayout.DisplayTitle;
-                        _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, relRect.Value), false);
+                        _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, relRect.Value), false, SelfHwnd);
                     }
                 };
                 preview.ZoneClicked += (relRect, cell) =>
@@ -508,7 +519,7 @@ namespace SnappyLayout.UI.Windows
             AddExStyle(hwnd, WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
         }
 
-        public void ShowRect(RECT r, bool isPhysicalFull)
+        public void ShowRect(RECT r, bool isPhysicalFull, IntPtr insertAfterHwnd = default)
         {
             var col = isPhysicalFull ? Color.FromRgb(16, 185, 129) : Color.FromRgb(0, 120, 212);
             _box.Background = new SolidColorBrush(Color.FromArgb(60, col.R, col.G, col.B));
@@ -518,8 +529,9 @@ namespace SnappyLayout.UI.Windows
             var hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd != IntPtr.Zero)
             {
+                IntPtr zTarget = insertAfterHwnd != IntPtr.Zero ? insertAfterHwnd : HWND_TOPMOST;
                 // 1. Geçiş: hedef monitöre taşı (farklı DPI'lı monitöre geçerken WM_DPICHANGED tetiklenir)
-                SetWindowPos(hwnd, HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                SetWindowPos(hwnd, zTarget, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
                 // Yeni monitörün DPI ölçeğine göre WPF mantıksal (DIP) boyutunu senkronize et
                 var targetMon = MonitorService.FromRect(r);
@@ -528,7 +540,8 @@ namespace SnappyLayout.UI.Windows
                 Height = Math.Max(10, r.Height / scale);
 
                 // 2. Geçiş: WM_DPICHANGED yeniden ölçeklemesinden sonra tam fiziksel piksel sınırlarına oturt
-                SetWindowPos(hwnd, HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                // ve Flyout/SnapBar penceresinin hemen altında tut (asla Flyout'un üstüne çıkıp flicker yapmasın)
+                SetWindowPos(hwnd, zTarget, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
             }
         }
 

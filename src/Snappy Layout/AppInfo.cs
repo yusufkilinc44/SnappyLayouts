@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.13";
+        public const string Version = "0.14";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.14", "19.11.2026",
+             "Maksimize üstü Snap Flyout penceresinde hover sırasında alt durum metni değiştiğinde pencere genişliğinin/konumunun oynaması ve butonların yanıp sönmesi (flicker) hatası sabit genişlik ve Z-sırası (önizleme katmanını Flyout'un hemen altında tutma) ile tamamen giderildi. Flyout'taki fiziksel tam ekran butonundan '(Silinemez) / (Indeletable)' ifadesi kaldırıldı (yalnızca ana uygulama içinde gösterilir).",
+             "Eliminated hover flickering and button/text jumping in SnapFlyoutWindow by locking the outer flyout width during rebuilds and placing SnapZonePreviewOverlay strictly behind the flyout/bar in Z-order. Removed '(Indeletable)' from the Snap Flyout button (kept only inside the main management app)."),
             ("0.13", "19.11.2026",
              "Fiziksel monitörlere özel isim verebilme özelliği eklendi (Yerleşim Düzenleri, Sanal Monitörler ve Ayarlar & DPI sekmelerinden düzenlenebilir; verilen isimler Flyout dahil tüm uygulamada kalıcı olarak gösterilir).",
              "Added custom naming for physical monitors (editable from Snap Layouts, Virtual Monitors, and Settings & DPI tabs; custom names persist in settings.json and appear everywhere including Snap Flyout)."),
