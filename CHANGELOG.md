@@ -4,6 +4,13 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.1] — 2026-11-19
+### Changed / Improved
+- **Standard Program Files Installation:** Updated the Inno Setup installer to install into `C:\Program Files\Snappy Layouts` instead of `%LocalAppData%\Programs`.
+- **Antivirus False-Positive Mitigation:** Switched the release package from compressed single-file self-extracting bundles to transparent multi-file self-contained binaries (and disabled solid archive packing in Inno Setup) so antivirus engines can inspect all DLLs cleanly.
+
+---
+
 ## [v1.0] — 2026-11-19
 ### Initial Production Release
 - **Windows 11-Style Maximize Hover Flyout & Top Drag Snap Bar:** Hover any window's Maximize button (`Ctrl + Alt + Z`) or drag a window to the top edge of any monitor to snap into customizable zones, virtual monitor fullscreen, multi-virtual-monitor spans (`1+2`, `2+3`, `Shift + Click`), or permanent full physical screen.

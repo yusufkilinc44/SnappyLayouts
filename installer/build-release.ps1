@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0"
+    [string]$Version = "1.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,15 +15,13 @@ Write-Host "=== Snappy Layouts v$Version Release Builder ===" -ForegroundColor C
 if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
 New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
 
-# 1) Publish self-contained single-file win-x64 binary (no .NET runtime required on target PC)
-Write-Host "`n[1/3] Publishing self-contained win-x64 executable..." -ForegroundColor Yellow
+# 1) Publish standard self-contained win-x64 files (unpacked PE binaries avoid AV single-file packer false positives)
+Write-Host "`n[1/3] Publishing self-contained win-x64 binaries..." -ForegroundColor Yellow
 dotnet publish $Proj `
     -c Release `
     -r win-x64 `
     --self-contained true `
-    -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:EnableCompressionInSingleFile=true `
+    -p:PublishSingleFile=false `
     -p:DebugType=None `
     -p:DebugSymbols=false `
     -o $PublishDir

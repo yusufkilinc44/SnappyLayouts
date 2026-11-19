@@ -1,11 +1,11 @@
-# Snappy Layouts v1.0
+# Snappy Layouts v1.1
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
 [![Languages](https://img.shields.io/badge/UI%20Languages-8%20Languages%20(EN%20%7C%20TR%20%7C%20ES%20%7C%20PT%20%7C%20ZH%20%7C%20FR%20%7C%20DE%20%7C%20RU)-6366F1)](#6-per-monitor-v2-dynamic-dpi-localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v1.0-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v1.1-3B82F6)](CHANGELOG.md)
 
 **Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
@@ -157,10 +157,10 @@ Snappy Layouts/
 ## Installation
 
 ### Option 1 — Windows Installer (Recommended)
-1. Download **`SnappyLayouts-v1.0-Setup.exe`** from the [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases) page.
-2. Run the installer — **no Administrator / UAC prompt required** (installs per-user to `%LocalAppData%\Programs\Snappy Layouts`, with optional Start Menu / Desktop shortcuts and *Start with Windows*).
+1. Download **`SnappyLayouts-v1.1-Setup.exe`** from the [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases) page.
+2. Run the installer — installs cleanly into **`C:\Program Files\Snappy Layouts`** with optional Start Menu / Desktop shortcuts and *Start with Windows*.
 3. No `.NET` runtime installation is required (fully self-contained).
-4. Can be cleanly uninstalled anytime via **Windows Settings → Installed Apps** (automatically restores native Windows Snap settings).
+4. Can be cleanly upgraded in-place (no uninstall required) or uninstalled anytime via **Windows Settings → Installed Apps** (automatically restores native Windows Snap settings).
 
 ### Option 2 — Portable ZIP (No Installation)
 1. Download **`SnappyLayouts-v1.0-Portable-win-x64.zip`** from [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases).
