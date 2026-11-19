@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.19";
+        public const string Version = "0.20";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.20", "19.11.2026",
+             "Tüm dil bayrakları (ABD/İngilizce, Türkiye ay-yıldız, İspanya arması, Portekiz arması, Çin 5 yıldızı, Fransa, Almanya, Rusya) tam piksel koordinatlı vektörel Canvas ile yeniden çizildi.",
+             "Redrew all 8 country flags with exact vector Canvas coordinates: US flag for English, authentic crescent & 5-pointed star for Turkey, Coat of Arms for Spain, armillary sphere & shield for Portugal, 5-star arc for China, and tricolors for France, Germany, and Russia."),
             ("0.19", "19.11.2026",
              "Sol menü genişletme/daraltma (expand/collapse) geçişlerinde tüm ikon boyutları (32×32) ve menü satır yükseklikleri (46px) sabitlenerek geçişte dikey kayma olmaması sağlandı.",
              "Locked sidebar navigation icon sizes (32×32) and row heights (46px) across expanded and collapsed modes so icons and menu rows never shift vertically when toggling."),

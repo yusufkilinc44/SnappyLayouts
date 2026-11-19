@@ -276,13 +276,14 @@ namespace SnappyLayout.UI
 
         private static UIElement BuildFlagIcon(LanguageChoice lang)
         {
+            const double W = 22.0, H = 15.0;
             var border = new Border
             {
-                Width = 20,
-                Height = 14,
+                Width = W,
+                Height = H,
                 CornerRadius = new CornerRadius(2.5),
                 BorderThickness = new Thickness(0.6),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(120, 128, 128, 128)),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(130, 128, 128, 128)),
                 ClipToBounds = true,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -293,7 +294,7 @@ namespace SnappyLayout.UI
                 border.Child = new TextBlock
                 {
                     Text = "🌐",
-                    FontSize = 9.5,
+                    FontSize = 10,
                     Foreground = Brushes.White,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
@@ -301,79 +302,143 @@ namespace SnappyLayout.UI
                 return border;
             }
 
-            var g = new Grid();
-            static SolidColorBrush B(string hex) => new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+            static SolidColorBrush B(string hex)
+            {
+                var br = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+                br.Freeze();
+                return br;
+            }
+
+            static void AddRect(Canvas c, double x, double y, double w, double h, Brush fill)
+            {
+                var r = new System.Windows.Shapes.Rectangle { Width = w, Height = h, Fill = fill };
+                Canvas.SetLeft(r, x);
+                Canvas.SetTop(r, y);
+                c.Children.Add(r);
+            }
+
+            static void AddEllipse(Canvas c, double x, double y, double w, double h, Brush fill)
+            {
+                var el = new System.Windows.Shapes.Ellipse { Width = w, Height = h, Fill = fill };
+                Canvas.SetLeft(el, x);
+                Canvas.SetTop(el, y);
+                c.Children.Add(el);
+            }
+
+            static void AddStar(Canvas c, double cx, double cy, double outerR, double innerR, Brush fill, double rotDeg = -90)
+            {
+                var pts = new PointCollection();
+                for (int i = 0; i < 10; i++)
+                {
+                    double ang = (rotDeg + i * 36.0) * Math.PI / 180.0;
+                    double rad = (i % 2 == 0) ? outerR : innerR;
+                    pts.Add(new Point(cx + Math.Cos(ang) * rad, cy + Math.Sin(ang) * rad));
+                }
+                c.Children.Add(new System.Windows.Shapes.Polygon { Points = pts, Fill = fill });
+            }
+
+            var canvas = new Canvas { Width = W, Height = H };
 
             switch (lang)
             {
-                case LanguageChoice.English: // UK/EN Union flag simplified
-                    g.Background = B("#012169");
-                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = Brushes.White, Height = 4.2, VerticalAlignment = VerticalAlignment.Center });
-                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = Brushes.White, Width = 4.2, HorizontalAlignment = HorizontalAlignment.Center });
-                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = B("#C8102E"), Height = 2.4, VerticalAlignment = VerticalAlignment.Center });
-                    g.Children.Add(new System.Windows.Shapes.Rectangle { Fill = B("#C8102E"), Width = 2.4, HorizontalAlignment = HorizontalAlignment.Center });
+                case LanguageChoice.English: // United States (US) Flag
+                {
+                    var red = B("#B22234");
+                    var navy = B("#3C3B6E");
+                    AddRect(canvas, 0, 0, W, H, Brushes.White);
+                    double sh = H / 7.0;
+                    for (int s = 0; s < 7; s += 2)
+                        AddRect(canvas, 0, s * sh, W, sh + 0.2, red);
+                    double cw = 10.0, ch = sh * 4.0;
+                    AddRect(canvas, 0, 0, cw, ch, navy);
+                    // Crisp white star dots inside navy canton
+                    double[] xs1 = { 1.6, 4.4, 7.2 };
+                    double[] ys1 = { 1.3, 4.1, 6.8 };
+                    foreach (double y in ys1)
+                        foreach (double x in xs1)
+                            AddEllipse(canvas, x, y, 1.3, 1.3, Brushes.White);
+                    double[] xs2 = { 3.0, 5.8 };
+                    double[] ys2 = { 2.7, 5.4 };
+                    foreach (double y in ys2)
+                        foreach (double x in xs2)
+                            AddEllipse(canvas, x, y, 1.3, 1.3, Brushes.White);
                     break;
-                case LanguageChoice.Turkish: // Red + white crescent & star
-                    g.Background = B("#E30A17");
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = Brushes.White, Width = 6.5, Height = 6.5, Margin = new Thickness(-5, 0, 0, 0) });
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#E30A17"), Width = 5.2, Height = 5.2, Margin = new Thickness(-3.3, 0, 0, 0) });
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = Brushes.White, Width = 2.4, Height = 2.4, Margin = new Thickness(3.8, 0, 0, 0) });
+                }
+                case LanguageChoice.Turkish: // Turkey Flag (official proportions + 5-pointed star)
+                {
+                    var red = B("#E30A17");
+                    AddRect(canvas, 0, 0, W, H, red);
+                    AddEllipse(canvas, 4.2, 3.3, 8.4, 8.4, Brushes.White);
+                    AddEllipse(canvas, 5.9, 4.1, 6.8, 6.8, red);
+                    AddStar(canvas, 13.8, 7.5, 2.3, 0.95, Brushes.White, -18);
                     break;
-                case LanguageChoice.Spanish: // Red - Yellow - Red horizontal
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    var es1 = new System.Windows.Shapes.Rectangle { Fill = B("#AA151B") }; Grid.SetRow(es1, 0);
-                    var es2 = new System.Windows.Shapes.Rectangle { Fill = B("#F1BF00") }; Grid.SetRow(es2, 1);
-                    var es3 = new System.Windows.Shapes.Rectangle { Fill = B("#AA151B") }; Grid.SetRow(es3, 2);
-                    g.Children.Add(es1); g.Children.Add(es2); g.Children.Add(es3);
+                }
+                case LanguageChoice.Spanish: // Spain Flag (1:2:1 + Coat of Arms / Escudo)
+                {
+                    var red = B("#AA151B");
+                    var gold = B("#F1BF00");
+                    AddRect(canvas, 0, 0, W, H * 0.25, red);
+                    AddRect(canvas, 0, H * 0.25, W, H * 0.50, gold);
+                    AddRect(canvas, 0, H * 0.75, W, H * 0.25, red);
+                    // Coat of arms (Escudo de España) on left-center of yellow band
+                    AddRect(canvas, 4.3, 5.0, 0.8, 4.6, B("#B8860B")); // Left pillar
+                    AddRect(canvas, 8.4, 5.0, 0.8, 4.6, B("#B8860B")); // Right pillar
+                    AddRect(canvas, 5.3, 5.4, 2.9, 3.8, red);          // Shield body
+                    AddRect(canvas, 6.7, 5.4, 1.5, 1.9, B("#E5E7EB")); // Shield quarter
+                    AddRect(canvas, 5.3, 7.3, 1.4, 1.9, gold);         // Shield quarter
+                    AddEllipse(canvas, 6.2, 6.8, 1.2, 1.2, B("#1D4ED8")); // Center escutcheon
+                    AddRect(canvas, 5.4, 4.3, 2.7, 1.0, B("#B45309")); // Crown
                     break;
-                case LanguageChoice.Portuguese: // Green (40%) - Red (60%) vertical + gold emblem
-                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
-                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) });
-                    var pt1 = new System.Windows.Shapes.Rectangle { Fill = B("#006600") }; Grid.SetColumn(pt1, 0);
-                    var pt2 = new System.Windows.Shapes.Rectangle { Fill = B("#FF0000") }; Grid.SetColumn(pt2, 1);
-                    var ptDot = new System.Windows.Shapes.Ellipse { Fill = B("#FFCC00"), Width = 4.6, Height = 4.6, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(5.8, 0, 0, 0) };
-                    Grid.SetColumnSpan(ptDot, 2);
-                    g.Children.Add(pt1); g.Children.Add(pt2); g.Children.Add(ptDot);
+                }
+                case LanguageChoice.Portuguese: // Portugal Flag (2:3 Green/Red + Armillary Sphere & Shield)
+                {
+                    AddRect(canvas, 0, 0, W * 0.40, H, B("#006600"));
+                    AddRect(canvas, W * 0.40, 0, W * 0.60, H, B("#FF0000"));
+                    double cx = W * 0.40;
+                    AddEllipse(canvas, cx - 3.1, H / 2.0 - 3.1, 6.2, 6.2, B("#FFCC00"));
+                    AddRect(canvas, cx - 1.6, H / 2.0 - 1.9, 3.2, 3.6, B("#DC2626"));
+                    AddRect(canvas, cx - 1.0, H / 2.0 - 1.2, 2.0, 2.2, Brushes.White);
+                    AddEllipse(canvas, cx - 0.5, H / 2.0 - 0.5, 1.0, 1.0, B("#1D4ED8"));
                     break;
-                case LanguageChoice.Chinese: // Red + gold star
-                    g.Background = B("#DE2910");
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 4.5, Height = 4.5, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(2.5, 2.2, 0, 0) });
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 1.6, Height = 1.6, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(8.2, 1.5, 0, 0) });
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 1.6, Height = 1.6, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(9.3, 3.8, 0, 0) });
-                    g.Children.Add(new System.Windows.Shapes.Ellipse { Fill = B("#FFDE00"), Width = 1.6, Height = 1.6, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(8.2, 6.0, 0, 0) });
+                }
+                case LanguageChoice.Chinese: // China Flag (Red + 5 official yellow stars)
+                {
+                    var gold = B("#FFDE00");
+                    AddRect(canvas, 0, 0, W, H, B("#DE2910"));
+                    AddStar(canvas, 4.5, 4.5, 2.5, 1.0, gold);
+                    AddStar(canvas, 8.6, 1.9, 0.95, 0.4, gold);
+                    AddStar(canvas, 10.1, 3.6, 0.95, 0.4, gold);
+                    AddStar(canvas, 10.1, 5.9, 0.95, 0.4, gold);
+                    AddStar(canvas, 8.6, 7.5, 0.95, 0.4, gold);
                     break;
-                case LanguageChoice.French: // Blue - White - Red vertical
-                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                    g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                    var fr1 = new System.Windows.Shapes.Rectangle { Fill = B("#002395") }; Grid.SetColumn(fr1, 0);
-                    var fr2 = new System.Windows.Shapes.Rectangle { Fill = Brushes.White }; Grid.SetColumn(fr2, 1);
-                    var fr3 = new System.Windows.Shapes.Rectangle { Fill = B("#ED2939") }; Grid.SetColumn(fr3, 2);
-                    g.Children.Add(fr1); g.Children.Add(fr2); g.Children.Add(fr3);
+                }
+                case LanguageChoice.French: // France Flag (Blue - White - Red vertical)
+                {
+                    double tw = W / 3.0;
+                    AddRect(canvas, 0, 0, tw + 0.2, H, B("#002395"));
+                    AddRect(canvas, tw, 0, tw + 0.2, H, Brushes.White);
+                    AddRect(canvas, tw * 2, 0, tw + 0.2, H, B("#ED2939"));
                     break;
-                case LanguageChoice.German: // Black - Red - Gold horizontal
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    var de1 = new System.Windows.Shapes.Rectangle { Fill = B("#111111") }; Grid.SetRow(de1, 0);
-                    var de2 = new System.Windows.Shapes.Rectangle { Fill = B("#DD0000") }; Grid.SetRow(de2, 1);
-                    var de3 = new System.Windows.Shapes.Rectangle { Fill = B("#FFCE00") }; Grid.SetRow(de3, 2);
-                    g.Children.Add(de1); g.Children.Add(de2); g.Children.Add(de3);
+                }
+                case LanguageChoice.German: // Germany Flag (Black - Red - Gold horizontal)
+                {
+                    double th = H / 3.0;
+                    AddRect(canvas, 0, 0, W, th + 0.2, B("#111111"));
+                    AddRect(canvas, 0, th, W, th + 0.2, B("#DD0000"));
+                    AddRect(canvas, 0, th * 2, W, th + 0.2, B("#FFCE00"));
                     break;
-                case LanguageChoice.Russian: // White - Blue - Red horizontal
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    var ru1 = new System.Windows.Shapes.Rectangle { Fill = Brushes.White }; Grid.SetRow(ru1, 0);
-                    var ru2 = new System.Windows.Shapes.Rectangle { Fill = B("#0039A6") }; Grid.SetRow(ru2, 1);
-                    var ru3 = new System.Windows.Shapes.Rectangle { Fill = B("#D52B1E") }; Grid.SetRow(ru3, 2);
-                    g.Children.Add(ru1); g.Children.Add(ru2); g.Children.Add(ru3);
+                }
+                case LanguageChoice.Russian: // Russia Flag (White - Blue - Red horizontal)
+                {
+                    double th = H / 3.0;
+                    AddRect(canvas, 0, 0, W, th + 0.2, Brushes.White);
+                    AddRect(canvas, 0, th, W, th + 0.2, B("#0039A6"));
+                    AddRect(canvas, 0, th * 2, W, th + 0.2, B("#D52B1E"));
                     break;
+                }
             }
 
-            border.Child = g;
+            border.Child = canvas;
             return border;
         }
 

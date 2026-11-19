@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.20] — 2026-11-19
+### Fixed
+- **Accurate Vector Country Flags:** Redrew all 8 country flags on an exact `22×15` vector Canvas: United States flag for English, authentic crescent + 5-pointed star for Turkey, Coat of Arms (*Escudo de España*) on Spain's yellow band, armillary sphere & shield for Portugal, 5-star arc for China, and tricolors for France, Germany, and Russia.
+
+---
+
 ## [v0.19] — 2026-11-19
 ### Changed
 - Kept sidebar navigation icon sizes (`32×32`) and menu row heights (`46px`) identical between expanded and collapsed modes so icons never shift vertically when toggling or resizing.
