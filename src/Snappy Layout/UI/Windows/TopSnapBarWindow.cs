@@ -28,6 +28,7 @@ namespace SnappyLayout.UI.Windows
             public LayoutPreviewControl Control;
             public bool IsVirtualFull;
             public bool IsPhysicalFull;
+            public SnapArea OverrideArea; // Yan yana birleşik sanal monitörler (örn. 1+2, 2+3) için
         }
 
         private IntPtr _draggedHwnd;
@@ -218,13 +219,16 @@ namespace SnappyLayout.UI.Windows
                         if (rel.HasValue)
                         {
                             hitAny = true;
-                            _pendingArea = _currentArea;
+                            var effectiveArea = entry.OverrideArea ?? _currentArea;
+                            _pendingArea = effectiveArea;
                             _pendingRelRect = rel.Value;
-                            _pendingIsVirtualFull = entry.IsVirtualFull;
+                            _pendingIsVirtualFull = entry.IsVirtualFull || entry.OverrideArea != null;
                             _pendingIsPhysicalFull = entry.IsPhysicalFull;
 
                             if (entry.IsPhysicalFull)
                                 _zonePreview.ShowRect(_currentArea.Monitor.WorkArea, true, hwnd);
+                            else if (entry.OverrideArea != null)
+                                _zonePreview.ShowRect(entry.OverrideArea.Rect, false, hwnd);
                             else if (entry.IsVirtualFull)
                                 _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false, hwnd);
                             else
@@ -292,7 +296,7 @@ namespace SnappyLayout.UI.Windows
                 _tiles.Add(new BarTileEntry { Control = ctrl });
             }
 
-            // 3) Sanal monitör aktifse en sağda ince ayırıcı + Gerçek Fiziksel Tam Ekran (Silinemez)
+            // 3) Sanal monitör aktifse en sağda ince ayırıcı + (3+ sanal monitörde komşu 2'li birleşik tam ekran) + Gerçek Fiziksel Tam Ekran
             if (area.IsVirtual)
             {
                 var sep = new Border
@@ -304,6 +308,35 @@ namespace SnappyLayout.UI.Windows
                 };
                 sep.SetResourceReference(Border.BackgroundProperty, "Win11BorderBrush");
                 _tilesPanel.Children.Add(sep);
+
+                var allAreas = AreaService.GetAreas(area.Monitor);
+                if (allAreas.Count >= 3)
+                {
+                    // Aktif sanal monitörle komşu birleşik alanları (örn. 1+2 veya 2+3) ekle
+                    int idx = area.SegmentIndex;
+                    var spanIndices = new List<(int s, int e)>();
+                    if (idx > 0) spanIndices.Add((idx - 1, idx));
+                    if (idx < allAreas.Count - 1) spanIndices.Add((idx, idx + 1));
+
+                    foreach (var (sIdx, eIdx) in spanIndices)
+                    {
+                        var combined = AreaService.CombineAreas(allAreas, sIdx, eIdx);
+                        if (combined == null) continue;
+                        double spanW = Math.Clamp(boxH * Math.Clamp(combined.Aspect, 0.7, 2.5), 62, 124);
+                        var spanCtrl = new LayoutPreviewControl
+                        {
+                            Layout = null,
+                            MonitorAspect = combined.Aspect,
+                            IsEditor = false,
+                            IsWin11Style = true,
+                            Width = spanW,
+                            Height = boxH,
+                            Margin = new Thickness(0, 0, 10, 0)
+                        };
+                        _tilesPanel.Children.Add(spanCtrl);
+                        _tiles.Add(new BarTileEntry { Control = spanCtrl, IsVirtualFull = true, OverrideArea = combined });
+                    }
+                }
 
                 double physW = Math.Clamp(boxH * Math.Clamp(area.Monitor.Aspect, 0.6, 2.6), 54, 132);
                 var physFull = new LayoutPreviewControl

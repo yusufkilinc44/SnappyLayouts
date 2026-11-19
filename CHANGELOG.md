@@ -5,6 +5,13 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.16] — 2026-11-19
+### Added
+- **Multi-Virtual-Monitor Spanning (`1+2`, `2+3`, `Shift+Click`):** On monitors split into 3 or more virtual monitors, added one-click adjacent span chips (`◫ 1+2`, `◫ 2+3`, etc.) and `Shift + Click` range spanning in `SnapFlyoutWindow`, plus adjacent span drop tiles in `TopSnapBarWindow`, allowing a window to maximize across multiple side-by-side virtual monitors with live preview.
+- **Direct Virtual Maximize (Zero Physical Flash):** Added `MaximizeClickInterceptor` (`WH_MOUSE_LL`) to intercept Maximize button clicks before Windows physically maximizes the window, transitioning directly to Virtual Monitor Fullscreen without flashing across the full physical screen first.
+
+---
+
 ## [v0.15] — 2026-11-19
 ### Changed
 - **Subtler Preview Overlays:** Increased transparency of the blue (virtual monitor / zone) and green (physical monitor) live preview boxes (`SnapZonePreviewOverlay`) for a lighter, less intrusive visual highlight.

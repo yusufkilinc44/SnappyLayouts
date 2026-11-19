@@ -28,6 +28,7 @@ bld/
 *.old
 *.tmp
 *.bak
+*.lnk
 *~
 Thumbs.db
 Desktop.ini

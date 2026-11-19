@@ -1,11 +1,11 @@
-# Snappy Layout v0.15
+# Snappy Layout v0.16
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
 [![Languages](https://img.shields.io/badge/UI%20Languages-English%20%7C%20Turkish-6366F1)](#localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v0.15-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v0.16-3B82F6)](CHANGELOG.md)
 
 **Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
@@ -32,7 +32,7 @@
 - **Customizable Virtual Monitor Borders:** Display high-contrast divider lines on screen while dragging windows, while editing ratios, on demand (`Ctrl + Alt + B`), or permanently, with configurable color and thickness.
 
 ### 3. Virtual Monitor Full Screen (`100%`) & Permanent Physical Full Screen
-- **Virtual Monitor Full Screen:** When virtual monitors are active, clicking a window's Maximize button maximizes it **strictly inside its current virtual monitor**. This `100%` tile always appears first in the layout grid of both the Maximize Flyout and Top Drag Snap Bar.
+- **Virtual Monitor Full Screen & Multi-Virtual-Monitor Spanning:** Clicking a window's Maximize button intercepts the click directly (`WH_MOUSE_LL`) so the window maximizes **strictly inside its current virtual monitor with zero flash to the physical monitor**. On monitors split into 3+ virtual monitors, one-click **Span Chips** (`◫ 1+2`, `◫ 2+3`), `Shift + Click` range spanning, and Top Drag Snap Bar span tiles let you maximize a window across any adjacent virtual monitors.
 - **Permanent Physical Full Screen (Indeletable):** Always available (`Shift + Maximize`, `Ctrl + Alt + Shift + ↑`, or from the Flyout/Snap Bar) to maximize a window across the entire physical monitor even when virtual monitors are active.
 
 ### 4. Unlimited Grid & Zone Layout Editor (Per-Monitor & Per-Virtual-Monitor)

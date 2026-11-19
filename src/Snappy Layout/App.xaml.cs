@@ -26,6 +26,7 @@ namespace SnappyLayout
         public HotkeyService Hotkeys { get; private set; }
         public WindowEventService WindowEvents { get; private set; }
         public MaximizeHoverWatcher HoverWatcher { get; private set; }
+        public MaximizeClickInterceptor MaxClickInterceptor { get; private set; }
         public SnapFlyoutWindow Flyout { get; private set; }
         public TopSnapBarWindow TopSnapBar { get; private set; }
         public new MainWindow MainWindow { get; private set; }
@@ -80,6 +81,7 @@ namespace SnappyLayout
             };
 
             HoverWatcher = new MaximizeHoverWatcher();
+            MaxClickInterceptor = new MaximizeClickInterceptor();
             _hoverUiTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(20) };
             _hoverUiTimer.Tick += OnHoverCheckTick;
             _hoverUiTimer.Start();
@@ -330,6 +332,7 @@ namespace SnappyLayout
             try
             {
                 _hoverUiTimer?.Stop();
+                MaxClickInterceptor?.Dispose();
                 HoverWatcher?.Dispose();
                 WindowEvents?.Dispose();
                 Hotkeys?.Dispose();

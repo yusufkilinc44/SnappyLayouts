@@ -63,9 +63,11 @@ namespace SnappyLayout.Core
     {
         public MonitorInfo Monitor;
         public int SegmentIndex = -1;    // -1: fiziksel monitörün tamamı
+        public int SegmentEndIndex = -1; // > SegmentIndex ise birden fazla yan yana sanal monitörü kapsar (örn. 1+2)
         public int SegmentCount = 1;
         public RECT Rect;                 // fiziksel piksel (çalışma alanı içinde)
         public bool IsVirtual => SegmentIndex >= 0 && SegmentCount > 1;
+        public bool IsSpan => IsVirtual && SegmentEndIndex > SegmentIndex;
         public double Aspect => Rect.Height == 0 ? 1.777 : (double)Rect.Width / Rect.Height;
 
         /// <summary>Bu fiziksel veya sanal monitöre özel pencere yerleşim düzenlerinin saklama anahtarı.</summary>
@@ -77,6 +79,8 @@ namespace SnappyLayout.Core
         {
             get
             {
+                if (IsSpan)
+                    return $"{Monitor.ShortName}  ▸  {Loc.T("VirtualMonitor")} #{SegmentIndex + 1}–#{SegmentEndIndex + 1}  ({Rect.Width}×{Rect.Height})";
                 if (IsVirtual)
                     return $"{Monitor.ShortName}  ▸  {Loc.T("VirtualMonitor")} #{SegmentIndex + 1}/{SegmentCount}  ({Rect.Width}×{Rect.Height})";
                 return $"{Monitor.ShortName}  ▸  {Loc.T("FullPhysicalMonitor")}  ({Rect.Width}×{Rect.Height})";
@@ -235,6 +239,32 @@ namespace SnappyLayout.Core
         }
 
         public static SnapArea PhysicalArea(MonitorInfo m) => new SnapArea { Monitor = m, SegmentIndex = -1, SegmentCount = 1, Rect = m.WorkArea };
+
+        /// <summary>Yan yana birden fazla sanal monitörü (startIdx..endIdx) tek bir tam ekran alanında birleştirir.</summary>
+        public static SnapArea CombineAreas(IList<SnapArea> areas, int startIdx, int endIdx)
+        {
+            if (areas == null || areas.Count == 0) return null;
+            int s = Math.Clamp(Math.Min(startIdx, endIdx), 0, areas.Count - 1);
+            int e = Math.Clamp(Math.Max(startIdx, endIdx), 0, areas.Count - 1);
+            if (s == e) return areas[s];
+
+            var first = areas[s];
+            var last = areas[e];
+            var combinedRect = new RECT(
+                Math.Min(first.Rect.Left, last.Rect.Left),
+                Math.Min(first.Rect.Top, last.Rect.Top),
+                Math.Max(first.Rect.Right, last.Rect.Right),
+                Math.Max(first.Rect.Bottom, last.Rect.Bottom));
+
+            return new SnapArea
+            {
+                Monitor = first.Monitor,
+                SegmentIndex = s,
+                SegmentEndIndex = e,
+                SegmentCount = first.SegmentCount,
+                Rect = combinedRect
+            };
+        }
 
         public static SnapArea AreaFromPoint(POINT p)
         {

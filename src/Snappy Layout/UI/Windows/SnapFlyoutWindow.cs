@@ -356,7 +356,7 @@ namespace SnappyLayout.UI.Windows
                 _monitorPillsPanel.Visibility = Visibility.Collapsed;
             }
 
-            // 2) Sanal monitör seçici hapları
+            // 2) Sanal monitör seçici hapları + Yan Yana Birleşik Tam Ekran (Span) çipleri
             _areaPillsPanel.Children.Clear();
             if (_monitorAreas.Count > 1)
             {
@@ -364,11 +364,21 @@ namespace SnappyLayout.UI.Windows
                 {
                     bool active = area.SegmentIndex == _currentArea.SegmentIndex;
                     var pill = MakeWin11Pill($"{Loc.T("VirtualShort")} {area.SegmentIndex + 1}", active);
+                    if (_monitorAreas.Count >= 3) pill.ToolTip = Loc.T("FlyoutSpanHint");
                     var captured = area;
                     pill.MouseEnter += (s, e) =>
                     {
-                        _hoverStatusText.Text = captured.Label;
-                        _zonePreview.ShowRect(captured.Rect, false, SelfHwnd);
+                        if (_monitorAreas.Count >= 3 && IsKeyDown(VK_SHIFT) && captured.SegmentIndex != _currentArea.SegmentIndex)
+                        {
+                            var spanPreview = AreaService.CombineAreas(_monitorAreas, _currentArea.SegmentIndex, captured.SegmentIndex);
+                            _hoverStatusText.Text = $"{Loc.T("FlyoutSpanFull")}: {spanPreview.Label}";
+                            _zonePreview.ShowRect(spanPreview.Rect, false, SelfHwnd);
+                        }
+                        else
+                        {
+                            _hoverStatusText.Text = captured.Label;
+                            _zonePreview.ShowRect(captured.Rect, false, SelfHwnd);
+                        }
                     };
                     pill.MouseLeave += (s, e) =>
                     {
@@ -377,11 +387,63 @@ namespace SnappyLayout.UI.Windows
                     };
                     pill.Click += (s, e) =>
                     {
+                        if (_monitorAreas.Count >= 3 && IsKeyDown(VK_SHIFT) && captured.SegmentIndex != _currentArea.SegmentIndex)
+                        {
+                            var spanArea = AreaService.CombineAreas(_monitorAreas, _currentArea.SegmentIndex, captured.SegmentIndex);
+                            if (_targetHwnd != IntPtr.Zero && spanArea != null)
+                            {
+                                WindowPlacer.VirtualMaximize(_targetHwnd, spanArea, allowToggle: false);
+                                HideFlyout();
+                                return;
+                            }
+                        }
                         _currentArea = captured;
                         _zonePreview.HidePreview();
                         RebuildUI();
                     };
                     _areaPillsPanel.Children.Add(pill);
+                }
+
+                // 3+ sanal monitör varsa yan yana 2'li birleşik tam ekran (örn. 1+2, 2+3) tek tık çipleri
+                if (_monitorAreas.Count >= 3)
+                {
+                    var sep = new Border
+                    {
+                        Width = 1,
+                        Height = 16,
+                        Margin = new Thickness(3, 0, 7, 3),
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    sep.SetResourceReference(Border.BackgroundProperty, "Win11BorderBrush");
+                    _areaPillsPanel.Children.Add(sep);
+
+                    for (int i = 0; i < _monitorAreas.Count - 1; i++)
+                    {
+                        var spanArea = AreaService.CombineAreas(_monitorAreas, i, i + 1);
+                        string spanText = $"◫ {i + 1}+{i + 2}";
+                        var spanPill = MakeWin11Pill(spanText, false);
+                        spanPill.ToolTip = $"{Loc.T("FlyoutSpanFull")} ({Loc.T("VirtualShort")} {i + 1} + {i + 2})";
+                        var capturedSpan = spanArea;
+                        spanPill.MouseEnter += (s, e) =>
+                        {
+                            _hoverStatusText.Text = $"{Loc.T("FlyoutSpanFull")}: {capturedSpan.Label}";
+                            _zonePreview.ShowRect(capturedSpan.Rect, false, SelfHwnd);
+                        };
+                        spanPill.MouseLeave += (s, e) =>
+                        {
+                            ResetHoverStatus();
+                            _zonePreview.HidePreview();
+                        };
+                        spanPill.Click += (s, e) =>
+                        {
+                            if (_targetHwnd != IntPtr.Zero && capturedSpan != null)
+                            {
+                                WindowPlacer.VirtualMaximize(_targetHwnd, capturedSpan, allowToggle: false);
+                                HideFlyout();
+                            }
+                        };
+                        _areaPillsPanel.Children.Add(spanPill);
+                    }
                 }
             }
 
