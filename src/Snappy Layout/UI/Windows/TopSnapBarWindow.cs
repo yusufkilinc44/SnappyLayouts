@@ -40,6 +40,7 @@ namespace SnappyLayout.UI.Windows
         private Rect? _pendingRelRect;
         private bool _pendingIsVirtualFull;
         private bool _pendingIsPhysicalFull;
+        private RECT? _lastEdgePreviewRect;
 
         private readonly StackPanel _tilesPanel;
         private readonly DispatcherTimer _pollTimer;
@@ -117,6 +118,7 @@ namespace SnappyLayout.UI.Windows
             _pendingRelRect = null;
             _pendingIsVirtualFull = false;
             _pendingIsPhysicalFull = false;
+            _lastEdgePreviewRect = null;
         }
 
         private void FinishDrag(bool commitPending)
@@ -176,7 +178,59 @@ namespace SnappyLayout.UI.Windows
             {
                 if (pt.Y <= wa.Top + triggerBand)
                 {
+                    ClearPending();
+                    _zonePreview.HidePreview();
                     ShowForArea(area);
+                    // İmleç doğrudan en üst kenardaysa anında aktif sanal monitör tam ekran önizlemesini göster
+                    if (pt.Y <= wa.Top + (int)Math.Round(16 * scale))
+                    {
+                        var barHwnd = new WindowInteropHelper(this).Handle;
+                        var fullPx = WindowPlacer.ZoneToPixels(area, new Rect(0, 0, 1, 1));
+                        _pendingArea = area;
+                        _pendingRelRect = new Rect(0, 0, 1, 1);
+                        _pendingIsVirtualFull = true;
+                        _pendingIsPhysicalFull = false;
+                        _lastEdgePreviewRect = fullPx;
+                        _zonePreview.ShowRect(fullPx, isPhysicalFull: false, barHwnd);
+                    }
+                    return;
+                }
+
+                // Fiziksel monitörün en sol veya en sağ kenarına sürüklenince:
+                // Windows'un kendi yarım-fiziksel önizlemesi yerine o taraftaki uç sanal monitörün
+                // (sanal monitör yoksa fiziksel monitörün) ilgili yarısını (%50) göster ve bırakınca yerleştir.
+                int edgeBand = (int)Math.Round(16 * scale);
+                bool atLeftEdge = pt.X <= wa.Left + edgeBand;
+                bool atRightEdge = pt.X >= wa.Right - edgeBand;
+
+                if (atLeftEdge || atRightEdge)
+                {
+                    var areas = AreaService.GetAreas(area.Monitor);
+                    if (areas != null && areas.Count > 0)
+                    {
+                        var edgeArea = atLeftEdge ? areas[0] : areas[areas.Count - 1];
+                        var rel = atLeftEdge ? new Rect(0, 0, 0.5, 1) : new Rect(0.5, 0, 0.5, 1);
+                        _pendingArea = edgeArea;
+                        _pendingRelRect = rel;
+                        _pendingIsVirtualFull = false;
+                        _pendingIsPhysicalFull = false;
+
+                        var pxRect = WindowPlacer.ZoneToPixels(edgeArea, rel);
+                        if (!_lastEdgePreviewRect.HasValue ||
+                            _lastEdgePreviewRect.Value.Left != pxRect.Left ||
+                            _lastEdgePreviewRect.Value.Top != pxRect.Top ||
+                            _lastEdgePreviewRect.Value.Right != pxRect.Right ||
+                            _lastEdgePreviewRect.Value.Bottom != pxRect.Bottom)
+                        {
+                            _lastEdgePreviewRect = pxRect;
+                            _zonePreview.ShowRect(pxRect, isPhysicalFull: false);
+                        }
+                    }
+                }
+                else if (_pendingArea != null || _lastEdgePreviewRect.HasValue)
+                {
+                    ClearPending();
+                    _zonePreview.HidePreview();
                 }
                 return;
             }
@@ -219,6 +273,7 @@ namespace SnappyLayout.UI.Windows
                         if (rel.HasValue)
                         {
                             hitAny = true;
+                            _lastEdgePreviewRect = null;
                             var effectiveArea = entry.OverrideArea ?? _currentArea;
                             _pendingArea = effectiveArea;
                             _pendingRelRect = rel.Value;
@@ -243,8 +298,32 @@ namespace SnappyLayout.UI.Windows
 
             if (!hitAny)
             {
-                ClearPending();
-                _zonePreview.HidePreview();
+                // İmleç en üst kenardayken (herhangi bir kutu üzerinde değilken) aktif sanal monitörde Tam Ekran önizlemesi göster
+                int topFullscreenBand = (int)Math.Round(16 * scale);
+                if (pt.Y <= wa.Top + topFullscreenBand)
+                {
+                    var targetArea = area;
+                    var fullPx = WindowPlacer.ZoneToPixels(targetArea, new Rect(0, 0, 1, 1));
+                    _pendingArea = targetArea;
+                    _pendingRelRect = new Rect(0, 0, 1, 1);
+                    _pendingIsVirtualFull = true;
+                    _pendingIsPhysicalFull = false;
+
+                    if (!_lastEdgePreviewRect.HasValue ||
+                        _lastEdgePreviewRect.Value.Left != fullPx.Left ||
+                        _lastEdgePreviewRect.Value.Top != fullPx.Top ||
+                        _lastEdgePreviewRect.Value.Right != fullPx.Right ||
+                        _lastEdgePreviewRect.Value.Bottom != fullPx.Bottom)
+                    {
+                        _lastEdgePreviewRect = fullPx;
+                        _zonePreview.ShowRect(fullPx, isPhysicalFull: false, hwnd);
+                    }
+                }
+                else
+                {
+                    ClearPending();
+                    _zonePreview.HidePreview();
+                }
             }
         }
 

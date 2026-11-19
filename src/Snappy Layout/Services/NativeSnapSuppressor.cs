@@ -14,9 +14,21 @@ namespace SnappyLayout.Services
     public static class NativeSnapSuppressor
     {
         private const string ExplorerAdvancedKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
+        private const uint SPI_GETWINARRANGING = 0x0082;
+        private const uint SPI_SETWINARRANGING = 0x0083;
+        private const uint SPIF_UPDATEINIFILE = 0x0001;
+        private const uint SPIF_SENDCHANGE = 0x0002;
+
         private static int? _origSnapAssistFlyout;
         private static int? _origSnapBar;
+        private static bool? _origWinArranging;
         private static bool _applied;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, out bool pvParam, uint fWinIni);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
 
         private static readonly Guid CLSID_ImmersiveShell = new Guid("C2F03A33-21F5-47FA-B4BB-156362A2F239");
         private static readonly Guid IID_IServiceProvider = new Guid("6D5140C1-7436-11CE-8034-00AA006009FA");
@@ -53,11 +65,16 @@ namespace SnappyLayout.Services
                 {
                     if (key.GetValue("EnableSnapAssistFlyout") is int v1 && v1 != 0) _origSnapAssistFlyout = v1;
                     if (key.GetValue("EnableSnapBar") is int v2 && v2 != 0) _origSnapBar = v2;
+                    if (SystemParametersInfo(SPI_GETWINARRANGING, 0, out bool origArr, 0))
+                        _origWinArranging = origArr;
                     _applied = true;
                 }
 
                 key.SetValue("EnableSnapAssistFlyout", 0, RegistryValueKind.DWord);
                 key.SetValue("EnableSnapBar", 0, RegistryValueKind.DWord);
+
+                // Windows'un kendi kenara sürükleme (Aero Snap) önizleme ve yaslama davranışını devre dışı bırak
+                SystemParametersInfo(SPI_SETWINARRANGING, 0, IntPtr.Zero, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
 
                 RefreshExplorerSettingsCache();
                 BroadcastSettingChange();
@@ -79,6 +96,9 @@ namespace SnappyLayout.Services
 
                 key.SetValue("EnableSnapAssistFlyout", _origSnapAssistFlyout ?? 1, RegistryValueKind.DWord);
                 key.SetValue("EnableSnapBar", _origSnapBar ?? 1, RegistryValueKind.DWord);
+
+                // Windows'un kendi kenara sürükleme (Aero Snap) ayarını eski haline döndür
+                SystemParametersInfo(SPI_SETWINARRANGING, (_origWinArranging ?? true) ? 1u : 0u, IntPtr.Zero, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
 
                 RefreshExplorerSettingsCache();
                 BroadcastSettingChange();

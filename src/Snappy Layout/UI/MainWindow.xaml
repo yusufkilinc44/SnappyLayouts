@@ -29,7 +29,7 @@
                 <!-- Logo + Başlık + Versiyon + Daraltma Düğmesi (Logo X,Y asla değişmez) -->
                 <Grid Grid.Row="0" Margin="0,0,0,14" Height="42">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="52"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
@@ -68,17 +68,17 @@
                 <!-- Sekme Düğmeleri (İkon koordinatları ve satır yükseklikleri her iki modda %100 sabit) -->
                 <StackPanel Grid.Row="1" x:Name="NavButtonsPanel">
                     <Button x:Name="BtnNavLayouts" Click="OnNavClick" Tag="0" Height="46"
-                            HorizontalContentAlignment="Stretch" Padding="8,6,8,6" Margin="0,0,0,6" FontSize="13"/>
+                            HorizontalContentAlignment="Stretch" Padding="9,6,9,6" Margin="0,0,0,6" FontSize="13"/>
                     <Button x:Name="BtnNavVirtual" Click="OnNavClick" Tag="1" Height="46"
-                            HorizontalContentAlignment="Stretch" Padding="8,6,8,6" Margin="0,0,0,6" FontSize="13"/>
+                            HorizontalContentAlignment="Stretch" Padding="9,6,9,6" Margin="0,0,0,6" FontSize="13"/>
                     <Button x:Name="BtnNavWorkspaces" Click="OnNavClick" Tag="2" Height="46"
-                            HorizontalContentAlignment="Stretch" Padding="8,6,8,6" Margin="0,0,0,6" FontSize="13"/>
+                            HorizontalContentAlignment="Stretch" Padding="9,6,9,6" Margin="0,0,0,6" FontSize="13"/>
                     <Button x:Name="BtnNavHotkeys" Click="OnNavClick" Tag="3" Height="46"
-                            HorizontalContentAlignment="Stretch" Padding="8,6,8,6" Margin="0,0,0,6" FontSize="13"/>
+                            HorizontalContentAlignment="Stretch" Padding="9,6,9,6" Margin="0,0,0,6" FontSize="13"/>
                     <Button x:Name="BtnNavSettings" Click="OnNavClick" Tag="4" Height="46"
-                            HorizontalContentAlignment="Stretch" Padding="8,6,8,6" Margin="0,0,0,6" FontSize="13"/>
+                            HorizontalContentAlignment="Stretch" Padding="9,6,9,6" Margin="0,0,0,6" FontSize="13"/>
                     <Button x:Name="BtnNavHelp" Click="OnNavClick" Tag="5" Height="46"
-                            HorizontalContentAlignment="Stretch" Padding="8,6,8,6" Margin="0,0,0,6" FontSize="13"/>
+                            HorizontalContentAlignment="Stretch" Padding="9,6,9,6" Margin="0,0,0,6" FontSize="13"/>
                 </StackPanel>
 
                 <!-- Alt Kontroller: Expand ve Collapse modunda AYNI yapı (sadece metin/combobox açılıp kapanır) -->

@@ -126,8 +126,8 @@ namespace SnappyLayout.UI
         private void ApplySidebarCollapsed(bool collapsed)
         {
             _sidebarCollapsed = collapsed;
-            // Sabit sol/sağ padding (12px) + 50px ikon sütunu = 74px -> tüm ikonların X ve Y koordinatı %100 sabit kalır!
-            SidebarCol.Width = new GridLength(collapsed ? 74 : 265);
+            // Sabit sol/sağ padding (12px) + 1px border + 53px ikon sütunu = 78px -> tüm ikonların X,Y konumu sabit ve kırpılmasız!
+            SidebarCol.Width = new GridLength(collapsed ? 78 : 265);
             SidebarBrandText.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             BtnToggleSidebar.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             QuickLangCombo.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
@@ -145,7 +145,7 @@ namespace SnappyLayout.UI
                 string title = Loc.T(meta.LocKey);
                 btns[i].ToolTip = title;
                 btns[i].Height = 46;
-                btns[i].Padding = new Thickness(8, 6, 8, 6);
+                btns[i].Padding = new Thickness(9, 6, 9, 6);
                 btns[i].HorizontalContentAlignment = HorizontalAlignment.Left;
 
                 var iconBadge = new Border

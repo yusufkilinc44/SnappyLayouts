@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.22";
+        public const string Version = "0.23";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.23", "19.11.2026",
+             "Windows'un yerleşik kenara/tepeye sürükleme (Aero Snap) önizlemesi ve yaslaması SPI_SETWINARRANGING ile devre dışı bırakıldı (kapanışta/duraklatmada otomatik geri yüklenir). En sol/sağ kenara sürükleyince uç sanal monitörün %50 yarısı, en üst kenara sürükleyince imlecin bulunduğu sanal monitörün %100 tam ekranı Snappy Layout önizlemesiyle gösterilip bırakıldığında yerleştirilir. Ayrıca daraltılmış (collapse) sol menüdeki ikonların sağ kenarının kırpılması giderildi.",
+             "Suppressed Windows's native edge/top-drag Aero Snap via SPI_SETWINARRANGING (auto-restored on exit/pause) and replaced it with Snappy Layout's virtual-monitor-aware edge & top snap: left/right screen edges snap to 50% of the edge virtual monitor, and the very top edge previews/snaps to 100% fullscreen of the active virtual monitor. Also fixed right-edge clipping of sidebar icons in collapsed mode."),
             ("0.22", "19.11.2026",
              "İngilizce dil seçimi bayrağı Birleşik Krallık (UK / Union Jack) bayrağı olarak güncellendi.",
              "Updated the English language selector flag icon to the United Kingdom (Union Jack) flag."),

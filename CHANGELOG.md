@@ -5,6 +5,15 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.23] — 2026-11-19
+### Added / Fixed
+- **Virtual-Monitor-Aware Edge & Top-Edge Drag Snap:** Suppressed Windows's built-in edge/top-drag Aero Snap overlay (`SPI_SETWINARRANGING`, restored automatically on exit or pause) and replaced it with Snappy Layout's own translucent zone preview and snap behavior:
+  - Dragging any window to the **far left or far right edge** of a physical monitor previews and snaps to the corresponding **50% half of the leftmost or rightmost virtual monitor** (instead of 50% of the entire physical screen).
+  - Dragging any window to the **very top edge** previews and snaps directly to **100% Virtual Monitor Fullscreen** of whichever virtual monitor the cursor is currently over (while moving slightly down into the Top Snap Bar still lets you choose any layout zone).
+- **Fixed Collapsed Sidebar Icon Clipping:** Widened the collapsed sidebar rail (`78px`) and tuned nav button padding (`9px`) so the `32×32` icon badges render completely with zero right-edge clipping at any DPI.
+
+---
+
 ## [v0.22] — 2026-11-19
 ### Changed
 - **UK Flag for English:** Updated the English language selector flag icon to the United Kingdom (Union Jack) flag.
