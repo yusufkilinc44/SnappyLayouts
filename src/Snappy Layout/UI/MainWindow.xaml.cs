@@ -126,13 +126,17 @@ namespace SnappyLayout.UI
         private void ApplySidebarCollapsed(bool collapsed)
         {
             _sidebarCollapsed = collapsed;
+            // Sabit sol/sağ padding (12px) + 50px ikon sütunu = 74px -> tüm ikonların X ve Y koordinatı %100 sabit kalır!
             SidebarCol.Width = new GridLength(collapsed ? 74 : 265);
             SidebarBorder.Padding = collapsed ? new Thickness(10, 14, 10, 14) : new Thickness(14, 14, 14, 14);
             SidebarBrandText.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             BtnToggleSidebar.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             SidebarFooterExpanded.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             SidebarFooterCompact.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
+            QuickLangCombo.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+            QuickThemeCombo.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             RefreshNavButtonContents();
+            RefreshFooterButtons();
         }
 
         private void RefreshNavButtonContents()
@@ -144,6 +148,8 @@ namespace SnappyLayout.UI
                 string title = Loc.T(meta.LocKey);
                 btns[i].ToolTip = title;
                 btns[i].Height = 46;
+                btns[i].Padding = new Thickness(8, 6, 8, 6);
+                btns[i].HorizontalContentAlignment = HorizontalAlignment.Left;
 
                 var iconBadge = new Border
                 {
@@ -151,6 +157,7 @@ namespace SnappyLayout.UI
                     Height = 32,
                     CornerRadius = new CornerRadius(8),
                     HorizontalAlignment = HorizontalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center
                 };
                 iconBadge.SetResourceReference(Border.BackgroundProperty, meta.BgBrushKey);
@@ -169,12 +176,118 @@ namespace SnappyLayout.UI
                 iconBadge.Child = iconText;
 
                 if (_sidebarCollapsed)
+                var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                sp.Children.Add(iconBadge);
+                var lbl = new TextBlock
                 {
                     btns[i].Padding = new Thickness(4, 6, 4, 6);
                     btns[i].HorizontalContentAlignment = HorizontalAlignment.Center;
                     btns[i].Content = iconBadge;
                 }
                 else
+                    Text = title,
+                    FontSize = 13,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(10, 0, 0, 0),
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible
+                };
+                lbl.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+                sp.Children.Add(lbl);
+                btns[i].Content = sp;
+            }
+        }
+
+        private void RefreshFooterButtons()
+        {
+            bool paused = App.Instance?.Paused ?? false;
+
+            // 1) Dil bayrağı ikonu (System seçiliyse tespit edilen aktif dilin bayrağını göster)
+            var activeLang = Storage.Data.Settings.Language;
+            var flagLang = activeLang == LanguageChoice.System ? ResolveLanguageChoiceFromCode(Loc.CurrentCode) : activeLang;
+            BtnFooterLangIcon.Content = BuildFlagIcon(flagLang);
+            BtnFooterLangIcon.ToolTip = Loc.T("SetLanguage");
+
+            // 2) Tema ikonu (System / Light / Dark)
+            var activeTheme = Storage.Data.Settings.Theme;
+            BtnFooterThemeIcon.Content = activeTheme switch
+            {
+                ThemeChoice.Light => "☀",
+                ThemeChoice.Dark => "🌙",
+                _ => ThemeManager.IsDark ? "🌙" : "☀"
+            };
+            BtnFooterThemeIcon.ToolTip = Loc.T("SetTheme");
+            BtnFooterThemeIcon.SetResourceReference(Control.ForegroundProperty, activeTheme == ThemeChoice.Light ? "NavHotkeysBrush" : "NavWorkspacesBrush");
+
+            // 3) Sınır Çizgileri butonu (ikon her iki modda aynı X,Y konumunda)
+            var bPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            bPanel.Children.Add(new TextBlock
+            {
+                Text = "◫",
+                Width = 26,
+                FontSize = 15,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            bPanel.Children.Add(new TextBlock
+            {
+                Text = Loc.T("VmShowBordersNow"),
+                Margin = new Thickness(6, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible
+            });
+            BtnQuickShowBorders.Content = bPanel;
+            BtnQuickShowBorders.ToolTip = Loc.T("VmShowBordersNow");
+            BtnQuickShowBorders.SetResourceReference(Control.BackgroundProperty, "NavVirtualBgBrush");
+            BtnQuickShowBorders.SetResourceReference(Control.BorderBrushProperty, "NavVirtualBrush");
+            BtnQuickShowBorders.SetResourceReference(Control.ForegroundProperty, "NavVirtualBrush");
+
+            // 4) Duraklat / Devam Et butonu (ikon her iki modda aynı X,Y konumunda)
+            var pPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            pPanel.Children.Add(new TextBlock
+            {
+                Text = paused ? "▶" : "⏸",
+                Width = 26,
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            pPanel.Children.Add(new TextBlock
+            {
+                Text = paused ? Loc.T("Resume") : Loc.T("Pause"),
+                Margin = new Thickness(6, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible
+            });
+            BtnPauseResume.Content = pPanel;
+            BtnPauseResume.ToolTip = paused ? Loc.T("Resume") : Loc.T("Pause");
+            BtnPauseResume.SetResourceReference(Control.BackgroundProperty, paused ? "NavSettingsBgBrush" : "NavHotkeysBgBrush");
+            BtnPauseResume.SetResourceReference(Control.BorderBrushProperty, paused ? "NavSettingsBrush" : "NavHotkeysBrush");
+            BtnPauseResume.SetResourceReference(Control.ForegroundProperty, paused ? "NavSettingsBrush" : "NavHotkeysBrush");
+        }
+
+        private static LanguageChoice ResolveLanguageChoiceFromCode(string code) => code switch
+        {
+            "tr" => LanguageChoice.Turkish,
+            "es" => LanguageChoice.Spanish,
+            "pt" => LanguageChoice.Portuguese,
+            "zh" => LanguageChoice.Chinese,
+            "fr" => LanguageChoice.French,
+            "de" => LanguageChoice.German,
+            "ru" => LanguageChoice.Russian,
+            _ => LanguageChoice.English
+        };
+
+        private void OnFooterLangIconClick(object sender, RoutedEventArgs e)
+        {
+            var menu = new ContextMenu();
+            foreach (var (choice, nativeName) in LanguageEntries)
+            {
+                var captured = choice;
+                string label = choice == LanguageChoice.System ? Loc.T("LangSystem") : nativeName;
+                var mi = new MenuItem
                 {
                     btns[i].Padding = new Thickness(8, 6, 10, 6);
                     btns[i].HorizontalContentAlignment = HorizontalAlignment.Stretch;
@@ -192,7 +305,49 @@ namespace SnappyLayout.UI
                     sp.Children.Add(lbl);
                     btns[i].Content = sp;
                 }
+                    Header = label,
+                    Icon = BuildFlagIcon(choice),
+                    IsChecked = Storage.Data.Settings.Language == choice
+                };
+                mi.Click += (s, ev) =>
+                {
+                    Storage.Data.Settings.Language = captured;
+                    Storage.Save();
+                    Loc.Apply(captured);
+                };
+                menu.Items.Add(mi);
             }
+            menu.PlacementTarget = BtnFooterLangIcon;
+            menu.IsOpen = true;
+        }
+
+        private void OnFooterThemeIconClick(object sender, RoutedEventArgs e)
+        {
+            var menu = new ContextMenu();
+            var themes = new[]
+            {
+                (ThemeChoice.System, "🖥  " + Loc.T("ThemeSystem")),
+                (ThemeChoice.Light, "☀  " + Loc.T("ThemeLight")),
+                (ThemeChoice.Dark, "🌙  " + Loc.T("ThemeDark"))
+            };
+            foreach (var (choice, label) in themes)
+            {
+                var captured = choice;
+                var mi = new MenuItem
+                {
+                    Header = label,
+                    IsChecked = Storage.Data.Settings.Theme == choice
+                };
+                mi.Click += (s, ev) =>
+                {
+                    Storage.Data.Settings.Theme = captured;
+                    Storage.Save();
+                    ThemeManager.Apply(captured);
+                };
+                menu.Items.Add(mi);
+            }
+            menu.PlacementTarget = BtnFooterThemeIcon;
+            menu.IsOpen = true;
         }
 
         private void RefreshSidebarChrome()
@@ -216,6 +371,7 @@ namespace SnappyLayout.UI
             BtnQuickShowBorders.SetResourceReference(Control.BackgroundProperty, "NavVirtualBgBrush");
             BtnQuickShowBorders.SetResourceReference(Control.BorderBrushProperty, "NavVirtualBrush");
             BtnQuickShowBorders.SetResourceReference(Control.ForegroundProperty, "NavVirtualBrush");
+            RefreshFooterButtons();
 
             BtnPauseResume.Content = paused ? ("▶  " + Loc.T("Resume")) : ("⏸  " + Loc.T("Pause"));
             BtnPauseResume.SetResourceReference(Control.BackgroundProperty, paused ? "NavSettingsBgBrush" : "NavHotkeysBgBrush");

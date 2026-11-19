@@ -5,6 +5,13 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.21] — 2026-11-19
+### Changed / Added
+- **Zero-Shift Sidebar Expand/Collapse:** Unified sidebar padding, fixed icon columns, and footer layout so expanding or collapsing the left sidebar only reveals or hides text labels and dropdowns while keeping every icon's `(X, Y)` coordinates pixel-locked.
+- **Full Feature Parity in Collapsed Mode:** Added clickable active **language flag** and **theme icon** buttons (each opening a quick selection menu) alongside the border highlight and pause/resume controls in collapsed mode so every expanded sidebar feature is available when collapsed.
+
+---
+
 ## [v0.20] — 2026-11-19
 ### Fixed
 - **Accurate Vector Country Flags:** Redrew all 8 country flags on an exact `22×15` vector Canvas: United States flag for English, authentic crescent + 5-pointed star for Turkey, Coat of Arms (*Escudo de España*) on Spain's yellow band, armillary sphere & shield for Portugal, 5-star arc for China, and tricolors for France, Germany, and Russia.
