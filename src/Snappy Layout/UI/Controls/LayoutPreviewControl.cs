@@ -32,6 +32,10 @@ namespace SnappyLayout.UI.Controls
             DependencyProperty.Register(nameof(IsPermanentFull), typeof(bool), typeof(LayoutPreviewControl),
                 new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
 
+        public static readonly DependencyProperty IsWin11StyleProperty =
+            DependencyProperty.Register(nameof(IsWin11Style), typeof(bool), typeof(LayoutPreviewControl),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+
         public SnapLayout Layout
         {
             get => (SnapLayout)GetValue(LayoutProperty);
@@ -54,6 +58,30 @@ namespace SnappyLayout.UI.Controls
         {
             get => (bool)GetValue(IsPermanentFullProperty);
             set => SetValue(IsPermanentFullProperty, value);
+        }
+
+        public bool IsWin11Style
+        {
+            get => (bool)GetValue(IsWin11StyleProperty);
+            set => SetValue(IsWin11StyleProperty, value);
+        }
+
+        /// <summary>
+        /// Pencere sürüklenirken (mouse capture başka penceredeyken) dışarıdan fare konumunu bildirip
+        /// ilgili bölgeyi vurgular ve hedef dikdörtgeni döndürür.
+        /// </summary>
+        public Rect? SetExternalHoverPoint(Point? localPt)
+        {
+            int hz = localPt.HasValue ? HitZoneIndex(localPt.Value) : -1;
+            if (hz != _hoverZoneIndex)
+            {
+                _hoverZoneIndex = hz;
+                InvalidateVisual();
+            }
+            if (hz < 0) return null;
+            if (IsPermanentFull || Layout == null) return new Rect(0, 0, 1, 1);
+            if (hz < Layout.Zones.Count) return Layout.GetZoneRect(Layout.Zones[hz]);
+            return null;
         }
 
         public event Action<Rect, ZoneCell> ZoneClicked;
@@ -98,8 +126,9 @@ namespace SnappyLayout.UI.Controls
 
         private Rect GetScreenBox()
         {
-            double w = ActualWidth - 8;
-            double h = ActualHeight - 8;
+            double margin = IsWin11Style ? 2.0 : 8.0;
+            double w = ActualWidth - margin;
+            double h = ActualHeight - margin;
             if (w <= 4 || h <= 4) return new Rect(0, 0, Math.Max(1, ActualWidth), Math.Max(1, ActualHeight));
 
             double aspect = Math.Clamp(MonitorAspect <= 0 ? 16.0 / 9.0 : MonitorAspect, 0.35, 4.5);
@@ -125,30 +154,36 @@ namespace SnappyLayout.UI.Controls
 
             var frameBg = (TryFindResource("InputBgBrush") as Brush) ?? Brushes.Black;
             var frameStroke = (TryFindResource("CardBorderBrush") as Brush) ?? Brushes.Gray;
-            var zoneFill = (TryFindResource("ZoneFillBrush") as Brush) ?? Brushes.DarkSlateGray;
-            var zoneHover = (TryFindResource("ZoneHoverBrush") as Brush) ?? Brushes.DodgerBlue;
-            var zoneStroke = (TryFindResource("ZoneStrokeBrush") as Brush) ?? Brushes.LightSlateGray;
-            var permFill = (TryFindResource("PermanentSubtleBrush") as Brush) ?? Brushes.DarkGreen;
-            var permStroke = (TryFindResource("PermanentBrush") as Brush) ?? Brushes.MediumSeaGreen;
+            var zoneFill = (TryFindResource(IsWin11Style ? "Win11ZoneFillBrush" : "ZoneFillBrush") as Brush) ?? Brushes.DarkSlateGray;
+            var zoneHover = (TryFindResource(IsWin11Style ? "Win11ZoneHoverBrush" : "ZoneHoverBrush") as Brush) ?? Brushes.DodgerBlue;
+            var zoneStroke = (TryFindResource(IsWin11Style ? "Win11ZoneStrokeBrush" : "ZoneStrokeBrush") as Brush) ?? Brushes.LightSlateGray;
+            var zoneHoverStroke = (TryFindResource(IsWin11Style ? "Win11ZoneHoverStrokeBrush" : "ZoneHoverBrush") as Brush) ?? Brushes.White;
+            var permFill = (TryFindResource(IsWin11Style ? "Win11PermFillBrush" : "PermanentSubtleBrush") as Brush) ?? Brushes.DarkGreen;
+            var permStroke = (TryFindResource(IsWin11Style ? "Win11PermStrokeBrush" : "PermanentBrush") as Brush) ?? Brushes.MediumSeaGreen;
+            var permHover = (TryFindResource(IsWin11Style ? "Win11PermHoverBrush" : "PermanentBrush") as Brush) ?? Brushes.MediumSeaGreen;
             var textBrush = (TryFindResource("TextPrimaryBrush") as Brush) ?? Brushes.White;
             var mutedBrush = (TryFindResource("TextSecondaryBrush") as Brush) ?? Brushes.Silver;
 
-            // Dış monitör çerçevesi (gerçek en/boy oranında)
-            dc.DrawRoundedRectangle(frameBg, new Pen(frameStroke, 1.5), screen, 6, 6);
+            // Dış monitör çerçevesi (Windows 11 stilinde dış çerçeve çizilmez, doğrudan kutular görünür)
+            if (!IsWin11Style)
+            {
+                dc.DrawRoundedRectangle(frameBg, new Pen(frameStroke, 1.5), screen, 6, 6);
+            }
 
-            double pad = IsEditor ? 8.0 : 4.0;
-            double gap = IsEditor ? 5.0 : 3.0;
+            double pad = IsWin11Style ? 1.0 : (IsEditor ? 8.0 : 4.0);
+            double gap = IsWin11Style ? 3.5 : (IsEditor ? 5.0 : 3.0);
+            double radius = IsWin11Style ? 4.0 : (IsEditor ? 5.0 : 3.0);
             var inner = new Rect(screen.Left + pad, screen.Top + pad,
                 Math.Max(2, screen.Width - pad * 2), Math.Max(2, screen.Height - pad * 2));
 
             if (IsPermanentFull || Layout == null)
             {
                 bool hov = _hoverZoneIndex == 0;
-                var fill = IsPermanentFull ? (hov ? permStroke : permFill) : (hov ? zoneHover : zoneFill);
-                var stroke = IsPermanentFull ? permStroke : zoneStroke;
-                dc.DrawRoundedRectangle(fill, new Pen(stroke, 1.5), inner, 4, 4);
+                var fill = IsPermanentFull ? (hov ? permHover : permFill) : (hov ? zoneHover : zoneFill);
+                var stroke = IsPermanentFull ? (hov ? Brushes.White : permStroke) : (hov ? zoneHoverStroke : zoneStroke);
+                dc.DrawRoundedRectangle(fill, new Pen(stroke, IsWin11Style ? 1.15 : 1.5), inner, radius, radius);
 
-                if (inner.Width > 50 && inner.Height > 24)
+                if (!IsWin11Style && inner.Width > 50 && inner.Height > 24)
                 {
                     var ft = new FormattedText("100%", CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                         new Typeface("Segoe UI Semibold"), IsEditor ? 13 : 10, hov ? Brushes.White : textBrush,
@@ -176,8 +211,8 @@ namespace SnappyLayout.UI.Controls
                     sel = true;
 
                 Brush fill = (hov || sel) ? zoneHover : zoneFill;
-                Pen pen = new Pen((hov || sel) ? Brushes.White : zoneStroke, IsEditor ? 1.5 : 1.1);
-                dc.DrawRoundedRectangle(fill, pen, zr, IsEditor ? 5 : 3, IsEditor ? 5 : 3);
+                Pen pen = new Pen((hov || sel) ? (IsWin11Style ? zoneHoverStroke : Brushes.White) : zoneStroke, IsEditor ? 1.5 : 1.1);
+                dc.DrawRoundedRectangle(fill, pen, zr, radius, radius);
 
                 if (IsEditor && zr.Width > 42 && zr.Height > 22)
                 {
@@ -212,7 +247,7 @@ namespace SnappyLayout.UI.Controls
         private Rect GetInnerRect()
         {
             var screen = GetScreenBox();
-            double pad = IsEditor ? 8.0 : 4.0;
+            double pad = IsWin11Style ? 1.0 : (IsEditor ? 8.0 : 4.0);
             return new Rect(screen.Left + pad, screen.Top + pad,
                 Math.Max(2, screen.Width - pad * 2), Math.Max(2, screen.Height - pad * 2));
         }

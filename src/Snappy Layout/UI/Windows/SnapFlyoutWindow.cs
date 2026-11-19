@@ -18,8 +18,8 @@ using static SnappyLayout.Native.NativeMethods;
 namespace SnappyLayout.UI.Windows
 {
     /// <summary>
-    /// Bir pencerenin maksimize tuşu üzerine gelindiğinde (veya kısayolla) açılan
-    /// özelleştirilebilir yerleşim alternatifleri penceresi (Flyout).
+    /// Bir pencerenin maksimize tuşu üzerine gelindiğinde (veya kısayolla) açılan,
+    /// Windows 11 orijinal Snap Layouts görünümüne sadık özelleştirilebilir yerleşim menüsü (Flyout).
     /// </summary>
     public sealed class SnapFlyoutWindow : Window
     {
@@ -31,13 +31,11 @@ namespace SnappyLayout.UI.Windows
 
         private readonly WrapPanel _monitorPillsPanel;
         private readonly WrapPanel _areaPillsPanel;
-        private readonly TextBlock _headerTitleText;
-        private readonly TextBlock _aspectInfoText;
         private readonly WrapPanel _layoutsWrap;
         private readonly Button _btnPhysicalFull;
+        private readonly TextBlock _hoverStatusText;
         private readonly Button _btnBorders;
         private readonly Button _btnOpenMain;
-        private readonly LayoutPreviewControl _permFullPreview;
         private readonly DispatcherTimer _autoCloseTimer;
         private readonly SnapZonePreviewOverlay _zonePreview = new SnapZonePreviewOverlay();
 
@@ -52,93 +50,68 @@ namespace SnappyLayout.UI.Windows
             ShowActivated = false;
             SizeToContent = SizeToContent.WidthAndHeight;
 
-            // Uygulama teması ne olursa olsun Flyout her zaman Windows temasında çalışır
+            // Uygulama teması ne olursa olsun Flyout her zaman Windows sistem temasını kullanır
             ThemeManager.ApplyWindowsThemeToDictionary(Resources);
             ThemeManager.ThemeChanged += () => ThemeManager.ApplyWindowsThemeToDictionary(Resources);
             ThemeManager.WindowsThemeChanged += () => ThemeManager.ApplyWindowsThemeToDictionary(Resources);
 
             var outerBorder = new Border
             {
-                CornerRadius = new CornerRadius(12),
-                BorderThickness = new Thickness(1.5),
+                CornerRadius = new CornerRadius(10),
+                BorderThickness = new Thickness(1),
                 // Üst kenar boşluğunu 2px tut ki maksimize tuşunun üstünü kapatmasın
                 Margin = new Thickness(12, 2, 12, 12),
-                Padding = new Thickness(14),
-                MaxWidth = 680,
-                Effect = new DropShadowEffect { BlurRadius = 20, ShadowDepth = 6, Opacity = 0.42, Color = Colors.Black }
+                Padding = new Thickness(12, 10, 12, 10),
+                MaxWidth = 560,
+                Effect = new DropShadowEffect { BlurRadius = 24, ShadowDepth = 6, Opacity = 0.45, Color = Colors.Black }
             };
-            outerBorder.SetResourceReference(Border.BackgroundProperty, "FlyoutBgBrush");
-            outerBorder.SetResourceReference(Border.BorderBrushProperty, "FlyoutBorderBrush");
+            outerBorder.SetResourceReference(Border.BackgroundProperty, "Win11SurfaceBrush");
+            outerBorder.SetResourceReference(Border.BorderBrushProperty, "Win11BorderBrush");
 
             var rootStack = new StackPanel { Orientation = Orientation.Vertical };
 
-            // 1) Üst başlık
-            var headerGrid = new Grid { Margin = new Thickness(0, 0, 0, 8) };
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            _headerTitleText = new TextBlock
-            {
-                FontSize = 13,
-                FontWeight = FontWeights.SemiBold,
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxWidth = 420
-            };
-            _headerTitleText.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
-
-            _aspectInfoText = new TextBlock
-            {
-                FontSize = 11.5,
-                Margin = new Thickness(8, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            _aspectInfoText.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
-
-            Grid.SetColumn(_headerTitleText, 0);
-            Grid.SetColumn(_aspectInfoText, 1);
-            headerGrid.Children.Add(_headerTitleText);
-            headerGrid.Children.Add(_aspectInfoText);
-            rootStack.Children.Add(headerGrid);
-
-            // 2a) Fiziksel monitör seçici hapları (tüm fiziksel monitörler seçilebilir)
+            // 1) Fiziksel monitör seçici hapları (birden fazla fiziksel monitör varsa görünür)
             _monitorPillsPanel = new WrapPanel
             {
                 Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 0, 0, 8)
+                Margin = new Thickness(0, 0, 0, 6)
             };
             rootStack.Children.Add(_monitorPillsPanel);
 
-            // 2b) Sanal monitör seçici hapları (sanal monitörler aktifse görünür)
+            // 2) Sanal monitör seçici hapları + Gerçek Fiziksel Tam Ekran (sıkı Windows 11 üst şeridi)
+            var selectorRow = new Grid { Margin = new Thickness(0, 0, 0, 8) };
+            selectorRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            selectorRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
             _areaPillsPanel = new WrapPanel
             {
                 Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 0, 0, 10)
-            };
-            rootStack.Children.Add(_areaPillsPanel);
-
-            // 3) Gerçek Fiziksel Tam Ekran (Silinemez) üst şeridi
-            _permFullPreview = new LayoutPreviewControl
-            {
-                IsPermanentFull = true,
-                Width = 44,
-                Height = 26,
-                Margin = new Thickness(0, 0, 8, 0)
+                VerticalAlignment = VerticalAlignment.Center
             };
 
             _btnPhysicalFull = new Button
             {
-                Margin = new Thickness(0, 0, 0, 10),
-                Padding = new Thickness(10, 6, 10, 6),
+                Padding = new Thickness(8, 3, 8, 3),
+                Margin = new Thickness(6, 0, 0, 0),
+                FontSize = 11,
                 Cursor = Cursors.Hand,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                HorizontalContentAlignment = HorizontalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center
             };
+            _btnPhysicalFull.SetResourceReference(Button.BackgroundProperty, "Win11PermFillBrush");
+            _btnPhysicalFull.SetResourceReference(Button.BorderBrushProperty, "Win11PermStrokeBrush");
             _btnPhysicalFull.MouseEnter += (s, e) =>
             {
                 if (_currentArea?.Monitor != null)
+                {
+                    _hoverStatusText.Text = Loc.T("FlyoutPhysicalFull");
                     _zonePreview.ShowRect(_currentArea.Monitor.WorkArea, true);
+                }
             };
-            _btnPhysicalFull.MouseLeave += (s, e) => _zonePreview.HidePreview();
+            _btnPhysicalFull.MouseLeave += (s, e) =>
+            {
+                ResetHoverStatus();
+                _zonePreview.HidePreview();
+            };
             _btnPhysicalFull.Click += (s, e) =>
             {
                 if (_targetHwnd != IntPtr.Zero && _currentArea != null)
@@ -147,9 +120,14 @@ namespace SnappyLayout.UI.Windows
                     HideFlyout();
                 }
             };
-            rootStack.Children.Add(_btnPhysicalFull);
 
-            // 4) Yerleşim kutuları (monitör en/boy oranına duyarlı)
+            Grid.SetColumn(_areaPillsPanel, 0);
+            Grid.SetColumn(_btnPhysicalFull, 1);
+            selectorRow.Children.Add(_areaPillsPanel);
+            selectorRow.Children.Add(_btnPhysicalFull);
+            rootStack.Children.Add(selectorRow);
+
+            // 3) Windows 11 tarzı temiz yerleşim kutuları (kart çerçevesiz, doğrudan yuvarlatılmış kutular)
             _layoutsWrap = new WrapPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -157,45 +135,52 @@ namespace SnappyLayout.UI.Windows
             };
             rootStack.Children.Add(_layoutsWrap);
 
-            // 5) Alt bilgi ve hızlı butonlar
+            // 4) İnce alt durum şeridi (hover edilen düzen adı + küçük ikon butonlar)
             var footerBorder = new Border
             {
                 BorderThickness = new Thickness(0, 1, 0, 0),
-                Margin = new Thickness(0, 10, 0, 0),
-                Padding = new Thickness(0, 8, 0, 0)
+                Margin = new Thickness(0, 8, 0, 0),
+                Padding = new Thickness(0, 6, 0, 0)
             };
-            footerBorder.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+            footerBorder.SetResourceReference(Border.BorderBrushProperty, "Win11BorderBrush");
 
             var footerGrid = new Grid();
             footerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             footerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            var sigText = new TextBlock
+            _hoverStatusText = new TextBlock
             {
-                Text = $"Snappy Layout {AppInfo.VersionText}  •  {AppInfo.Author} ({AppInfo.AuthorDateTr})",
                 FontSize = 11,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                Margin = new Thickness(2, 0, 8, 0)
             };
-            sigText.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+            _hoverStatusText.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
 
             var footerBtns = new StackPanel { Orientation = Orientation.Horizontal };
             _btnBorders = new Button
             {
-                Content = "◫ " + Loc.T("FlyoutShowBorders"),
-                Padding = new Thickness(8, 3, 8, 3),
-                FontSize = 11,
-                Margin = new Thickness(0, 0, 6, 0),
+                Content = "◫",
+                ToolTip = Loc.T("FlyoutShowBorders"),
+                Padding = new Thickness(7, 2, 7, 2),
+                FontSize = 11.5,
+                Margin = new Thickness(0, 0, 4, 0),
                 Cursor = Cursors.Hand
             };
+            _btnBorders.SetResourceReference(Button.BackgroundProperty, "Win11PillBgBrush");
+            _btnBorders.SetResourceReference(Button.BorderBrushProperty, "Win11PillBorderBrush");
             _btnBorders.Click += (s, e) => App.Instance?.Overlay?.Flash();
 
             _btnOpenMain = new Button
             {
-                Content = "⚙ " + Loc.T("FlyoutOpenApp"),
-                Padding = new Thickness(8, 3, 8, 3),
-                FontSize = 11,
+                Content = "⚙",
+                ToolTip = Loc.T("FlyoutOpenApp"),
+                Padding = new Thickness(7, 2, 7, 2),
+                FontSize = 11.5,
                 Cursor = Cursors.Hand
             };
+            _btnOpenMain.SetResourceReference(Button.BackgroundProperty, "Win11PillBgBrush");
+            _btnOpenMain.SetResourceReference(Button.BorderBrushProperty, "Win11PillBorderBrush");
             _btnOpenMain.Click += (s, e) =>
             {
                 HideFlyout();
@@ -205,9 +190,9 @@ namespace SnappyLayout.UI.Windows
             footerBtns.Children.Add(_btnBorders);
             footerBtns.Children.Add(_btnOpenMain);
 
-            Grid.SetColumn(sigText, 0);
+            Grid.SetColumn(_hoverStatusText, 0);
             Grid.SetColumn(footerBtns, 1);
-            footerGrid.Children.Add(sigText);
+            footerGrid.Children.Add(_hoverStatusText);
             footerGrid.Children.Add(footerBtns);
             footerBorder.Child = footerGrid;
             rootStack.Children.Add(footerBorder);
@@ -252,13 +237,12 @@ namespace SnappyLayout.UI.Windows
             double scale = mon.Scale;
             int flyW = (int)Math.Round(ActualWidth * scale);
             int flyH = (int)Math.Round(ActualHeight * scale);
-            if (flyW < 260) flyW = (int)(480 * scale);
-            if (flyH < 160) flyH = (int)(280 * scale);
+            if (flyW < 220) flyW = (int)(360 * scale);
+            if (flyH < 120) flyH = (int)(220 * scale);
 
             var frame = GetExtendedFrame(_targetHwnd);
-            int x = anchorScreenPt.X - flyW / 2;
-            // Windows orijinal Snap Layouts gibi maksimize tuşunu kapatmayacak şekilde
-            // başlık çubuğunun / maksimize tuşunun hemen altına konumlandır
+            // Windows 11 orijinal Snap Layouts gibi maksimize tuşunun sağ-altına hizala, tuşu kapatma
+            int x = anchorScreenPt.X - flyW + (int)Math.Round(60 * scale);
             int captionBottom = frame.Top + (int)Math.Round(34 * scale);
             int cursorBottom = anchorScreenPt.Y + (int)Math.Round(16 * scale);
             int y = (anchorScreenPt.Y >= frame.Top && anchorScreenPt.Y <= frame.Top + (int)Math.Round(72 * scale))
@@ -283,6 +267,12 @@ namespace SnappyLayout.UI.Windows
             if (IsVisible) Hide();
         }
 
+        private void ResetHoverStatus()
+        {
+            if (_currentArea == null) return;
+            _hoverStatusText.Text = $"{_currentArea.Label}  •  Snappy Layout {AppInfo.VersionText}";
+        }
+
         private void CheckAutoClose(object sender, EventArgs e)
         {
             if (!IsVisible) { _autoCloseTimer.Stop(); return; }
@@ -302,51 +292,49 @@ namespace SnappyLayout.UI.Windows
             HideFlyout();
         }
 
+        private Button MakeWin11Pill(string text, bool active)
+        {
+            var pill = new Button
+            {
+                Content = text,
+                Padding = new Thickness(8, 2.5, 8, 2.5),
+                Margin = new Thickness(0, 0, 4, 3),
+                FontSize = 11,
+                FontWeight = active ? FontWeights.SemiBold : FontWeights.Normal,
+                Cursor = Cursors.Hand
+            };
+            pill.SetResourceReference(Button.BackgroundProperty, active ? "Win11PillActiveBgBrush" : "Win11PillBgBrush");
+            pill.SetResourceReference(Button.BorderBrushProperty, active ? "Win11PillActiveBorderBrush" : "Win11PillBorderBrush");
+            return pill;
+        }
+
         private void RebuildUI()
         {
-            string winTitle = GetWindowTitle(_targetHwnd);
-            if (string.IsNullOrWhiteSpace(winTitle)) winTitle = Loc.T("FlyoutHeader");
-            _headerTitleText.Text = winTitle;
-            _aspectInfoText.Text = $"{_currentArea.Label}  •  {_currentArea.Aspect:0.00}:1";
-            _btnBorders.Content = "◫ " + Loc.T("FlyoutShowBorders");
-            _btnOpenMain.Content = "⚙ " + Loc.T("FlyoutOpenApp");
+            ResetHoverStatus();
+            _btnBorders.ToolTip = Loc.T("FlyoutShowBorders");
+            _btnOpenMain.ToolTip = Loc.T("FlyoutOpenApp");
 
-            // Fiziksel monitör seçici hapları (tüm fiziksel monitörler)
+            // 1) Fiziksel monitör seçici hapları (tüm fiziksel monitörler)
             _monitorPillsPanel.Children.Clear();
             if (_allMonitors.Count > 1)
             {
                 _monitorPillsPanel.Visibility = Visibility.Visible;
-                var mLbl = new TextBlock
-                {
-                    Text = Loc.T("FlyoutPhysicalMonitor"),
-                    FontSize = 11.5,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 8, 4)
-                };
-                mLbl.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
-                _monitorPillsPanel.Children.Add(mLbl);
-
                 foreach (var monItem in _allMonitors)
                 {
                     bool isSelMon = _selectedMonitor != null && monItem.Key == _selectedMonitor.Key;
                     string star = monItem.IsPrimary ? " ★" : "";
-                    var mPill = new Button
-                    {
-                        Content = $"🖥 {monItem.Index}. {monItem.FriendlyName}{star}",
-                        Padding = new Thickness(9, 3, 9, 3),
-                        Margin = new Thickness(0, 0, 5, 4),
-                        FontSize = 11.5,
-                        FontWeight = isSelMon ? FontWeights.Bold : FontWeights.Normal,
-                        Cursor = Cursors.Hand
-                    };
-                    if (isSelMon)
-                    {
-                        mPill.SetResourceReference(Button.BackgroundProperty, "AccentSubtleBrush");
-                        mPill.SetResourceReference(Button.BorderBrushProperty, "AccentBrush");
-                    }
+                    var mPill = MakeWin11Pill($"🖥 {monItem.Index}. {monItem.FriendlyName}{star}", isSelMon);
                     var capturedMon = monItem;
-                    mPill.MouseEnter += (s, e) => _zonePreview.ShowRect(capturedMon.WorkArea, true);
-                    mPill.MouseLeave += (s, e) => _zonePreview.HidePreview();
+                    mPill.MouseEnter += (s, e) =>
+                    {
+                        _hoverStatusText.Text = capturedMon.DisplayName;
+                        _zonePreview.ShowRect(capturedMon.WorkArea, true);
+                    };
+                    mPill.MouseLeave += (s, e) =>
+                    {
+                        ResetHoverStatus();
+                        _zonePreview.HidePreview();
+                    };
                     mPill.Click += (s, e) =>
                     {
                         _selectedMonitor = capturedMon;
@@ -363,41 +351,25 @@ namespace SnappyLayout.UI.Windows
                 _monitorPillsPanel.Visibility = Visibility.Collapsed;
             }
 
-            // Sanal monitör hapları
+            // 2) Sanal monitör seçici hapları
             _areaPillsPanel.Children.Clear();
             if (_monitorAreas.Count > 1)
             {
-                _areaPillsPanel.Visibility = Visibility.Visible;
-                var lbl = new TextBlock
-                {
-                    Text = Loc.T("FlyoutTargetArea"),
-                    FontSize = 11.5,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 8, 4)
-                };
-                lbl.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
-                _areaPillsPanel.Children.Add(lbl);
-
                 foreach (var area in _monitorAreas)
                 {
                     bool active = area.SegmentIndex == _currentArea.SegmentIndex;
-                    var pill = new Button
-                    {
-                        Content = $"{Loc.T("VirtualShort")} {area.SegmentIndex + 1} ({area.Rect.Width}px)",
-                        Padding = new Thickness(9, 3, 9, 3),
-                        Margin = new Thickness(0, 0, 5, 4),
-                        FontSize = 11.5,
-                        FontWeight = active ? FontWeights.Bold : FontWeights.Normal,
-                        Cursor = Cursors.Hand
-                    };
-                    if (active)
-                    {
-                        pill.SetResourceReference(Button.BackgroundProperty, "AccentSubtleBrush");
-                        pill.SetResourceReference(Button.BorderBrushProperty, "AccentBrush");
-                    }
+                    var pill = MakeWin11Pill($"{Loc.T("VirtualShort")} {area.SegmentIndex + 1}", active);
                     var captured = area;
-                    pill.MouseEnter += (s, e) => _zonePreview.ShowRect(captured.Rect, false);
-                    pill.MouseLeave += (s, e) => _zonePreview.HidePreview();
+                    pill.MouseEnter += (s, e) =>
+                    {
+                        _hoverStatusText.Text = captured.Label;
+                        _zonePreview.ShowRect(captured.Rect, false);
+                    };
+                    pill.MouseLeave += (s, e) =>
+                    {
+                        ResetHoverStatus();
+                        _zonePreview.HidePreview();
+                    };
                     pill.Click += (s, e) =>
                     {
                         _currentArea = captured;
@@ -407,64 +379,44 @@ namespace SnappyLayout.UI.Windows
                     _areaPillsPanel.Children.Add(pill);
                 }
             }
-            else
-            {
-                _areaPillsPanel.Visibility = Visibility.Collapsed;
-            }
 
-            // Gerçek Fiziksel Tam Ekran (Silinemez) üst düğmesi
-            _permFullPreview.MonitorAspect = _currentArea.Monitor.Aspect;
-            var physContent = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-            var physPreview = new LayoutPreviewControl
-            {
-                IsPermanentFull = true,
-                MonitorAspect = _currentArea.Monitor.Aspect,
-                Width = 42,
-                Height = 24,
-                Margin = new Thickness(0, 0, 8, 0),
-                IsHitTestVisible = false
-            };
-            var physText = new TextBlock
-            {
-                Text = "⛶  " + Loc.T("FlyoutPhysicalFull"),
-                FontWeight = FontWeights.SemiBold,
-                FontSize = 12,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            physContent.Children.Add(physPreview);
-            physContent.Children.Add(physText);
-            _btnPhysicalFull.Content = physContent;
+            // Gerçek Fiziksel Tam Ekran (Silinemez) düğmesi
+            _btnPhysicalFull.Content = "⛶ " + Loc.T("FlyoutPhysicalFull");
 
-            // Yerleşim düzeni kutuları (seçili fiziksel veya sanal monitöre özel düzenler ve gerçek en/boy oranı!)
+            // 3) Windows 11 tarzı yerleşim kutuları (gerçek en/boy oranı, dış çerçevesiz)
             _layoutsWrap.Children.Clear();
             double aspect = _currentArea.Aspect;
-            double boxH = 74;
-            double boxW = Math.Clamp(boxH * Math.Clamp(aspect, 0.55, 3.2), 68, 220);
+            double boxH = 62;
+            double boxW = Math.Clamp(boxH * Math.Clamp(aspect, 0.55, 2.6), 58, 148);
 
-            // Sanal Monitör Tam Ekran (100%) her zaman alttaki yerleşim düzenlerinin EN BAŞINDA bir yerleşim kartı olarak gösterilir
-            var vmFullCard = new Border
-            {
-                CornerRadius = new CornerRadius(8),
-                BorderThickness = new Thickness(1.5),
-                Margin = new Thickness(5),
-                Padding = new Thickness(6, 6, 6, 4)
-            };
-            vmFullCard.SetResourceReference(Border.BackgroundProperty, "CardBgBrush");
-            vmFullCard.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
+            // Sanal Monitör Tam Ekran (100%) her zaman yerleşimlerin EN BAŞINDA yer alır
+            string vmFullLabel = _currentArea.IsVirtual
+                ? $"{Loc.T("FlyoutVirtualFull")} (#{_currentArea.SegmentIndex + 1})"
+                : Loc.T("FlyoutVirtualFull");
 
-            var vmFullSp = new StackPanel { Orientation = Orientation.Vertical };
             var vmFullPreview = new LayoutPreviewControl
             {
-                Layout = null, // tek parça %100 sanal monitör tam ekran kutusu çizer
+                Layout = null,
                 MonitorAspect = aspect,
                 IsEditor = false,
+                IsWin11Style = true,
                 Width = boxW,
-                Height = boxH
+                Height = boxH,
+                Margin = new Thickness(7, 6, 7, 6),
+                ToolTip = vmFullLabel
             };
             vmFullPreview.ZoneHovered += relRect =>
             {
-                if (relRect == null || _currentArea == null) _zonePreview.HidePreview();
-                else _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false);
+                if (relRect == null || _currentArea == null)
+                {
+                    ResetHoverStatus();
+                    _zonePreview.HidePreview();
+                }
+                else
+                {
+                    _hoverStatusText.Text = vmFullLabel;
+                    _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, new Rect(0, 0, 1, 1)), false);
+                }
             };
             vmFullPreview.ZoneClicked += (relRect, cell) =>
             {
@@ -474,26 +426,7 @@ namespace SnappyLayout.UI.Windows
                     HideFlyout();
                 }
             };
-
-            string vmFullLabel = _currentArea.IsVirtual
-                ? $"{Loc.T("FlyoutVirtualFull")} (#{_currentArea.SegmentIndex + 1})"
-                : Loc.T("FlyoutVirtualFull");
-            var vmFullText = new TextBlock
-            {
-                Text = vmFullLabel,
-                FontSize = 11,
-                FontWeight = FontWeights.SemiBold,
-                MaxWidth = Math.Max(boxW, 115),
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 3, 0, 0)
-            };
-            vmFullText.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
-
-            vmFullSp.Children.Add(vmFullPreview);
-            vmFullSp.Children.Add(vmFullText);
-            vmFullCard.Child = vmFullSp;
-            _layoutsWrap.Children.Add(vmFullCard);
+            _layoutsWrap.Children.Add(vmFullPreview);
 
             var areaLayouts = AreaService.GetLayoutsForArea(_currentArea);
             var layouts = areaLayouts.Where(l => l.IsVisibleFor(aspect)).ToList();
@@ -501,29 +434,30 @@ namespace SnappyLayout.UI.Windows
 
             foreach (var layout in layouts)
             {
-                var card = new Border
-                {
-                    CornerRadius = new CornerRadius(8),
-                    BorderThickness = new Thickness(1),
-                    Margin = new Thickness(5),
-                    Padding = new Thickness(6, 6, 6, 4)
-                };
-                card.SetResourceReference(Border.BackgroundProperty, "CardBgBrush");
-                card.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
-
-                var sp = new StackPanel { Orientation = Orientation.Vertical };
+                var capturedLayout = layout;
                 var preview = new LayoutPreviewControl
                 {
-                    Layout = layout,
+                    Layout = capturedLayout,
                     MonitorAspect = aspect,
                     IsEditor = false,
+                    IsWin11Style = true,
                     Width = boxW,
-                    Height = boxH
+                    Height = boxH,
+                    Margin = new Thickness(7, 6, 7, 6),
+                    ToolTip = capturedLayout.DisplayTitle
                 };
                 preview.ZoneHovered += relRect =>
                 {
-                    if (relRect == null || _currentArea == null) _zonePreview.HidePreview();
-                    else _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, relRect.Value), false);
+                    if (relRect == null || _currentArea == null)
+                    {
+                        ResetHoverStatus();
+                        _zonePreview.HidePreview();
+                    }
+                    else
+                    {
+                        _hoverStatusText.Text = capturedLayout.DisplayTitle;
+                        _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, relRect.Value), false);
+                    }
                 };
                 preview.ZoneClicked += (relRect, cell) =>
                 {
@@ -533,29 +467,14 @@ namespace SnappyLayout.UI.Windows
                         HideFlyout();
                     }
                 };
-
-                var nameText = new TextBlock
-                {
-                    Text = layout.DisplayTitle,
-                    FontSize = 11,
-                    MaxWidth = Math.Max(boxW, 110),
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    Margin = new Thickness(0, 3, 0, 0)
-                };
-                nameText.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
-
-                sp.Children.Add(preview);
-                sp.Children.Add(nameText);
-                card.Child = sp;
-                _layoutsWrap.Children.Add(card);
+                _layoutsWrap.Children.Add(preview);
             }
         }
     }
 
     /// <summary>
-    /// Flyout içindeki bir kutunun üzerine gelindiğinde gerçek ekranda pencerenin yerleşeceği alanı
-    /// yarı saydam bir çerçeveyle gösteren önizleme katmanı.
+    /// Flyout veya TopSnapBar içindeki bir kutunun üzerine gelindiğinde gerçek ekranda pencerenin yerleşeceği alanı
+    /// Windows 11 tarzı yarı saydam bir çerçeveyle gösteren önizleme katmanı.
     /// </summary>
     internal sealed class SnapZonePreviewOverlay : Window
     {
@@ -575,8 +494,8 @@ namespace SnappyLayout.UI.Windows
 
             _box = new Border
             {
-                CornerRadius = new CornerRadius(10),
-                BorderThickness = new Thickness(3),
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(2),
                 Margin = new Thickness(4)
             };
             Content = _box;
@@ -591,9 +510,9 @@ namespace SnappyLayout.UI.Windows
 
         public void ShowRect(RECT r, bool isPhysicalFull)
         {
-            var col = isPhysicalFull ? Color.FromRgb(16, 185, 129) : Color.FromRgb(59, 130, 246);
-            _box.Background = new SolidColorBrush(Color.FromArgb(65, col.R, col.G, col.B));
-            _box.BorderBrush = new SolidColorBrush(Color.FromArgb(230, col.R, col.G, col.B));
+            var col = isPhysicalFull ? Color.FromRgb(16, 185, 129) : Color.FromRgb(0, 120, 212);
+            _box.Background = new SolidColorBrush(Color.FromArgb(60, col.R, col.G, col.B));
+            _box.BorderBrush = new SolidColorBrush(Color.FromArgb(220, col.R, col.G, col.B));
 
             if (!IsVisible) Show();
             var hwnd = new WindowInteropHelper(this).Handle;

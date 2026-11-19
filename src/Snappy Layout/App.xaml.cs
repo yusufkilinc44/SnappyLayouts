@@ -27,6 +27,7 @@ namespace SnappyLayout
         public WindowEventService WindowEvents { get; private set; }
         public MaximizeHoverWatcher HoverWatcher { get; private set; }
         public SnapFlyoutWindow Flyout { get; private set; }
+        public TopSnapBarWindow TopSnapBar { get; private set; }
         public new MainWindow MainWindow { get; private set; }
 
         public bool Paused { get; set; }
@@ -68,9 +69,11 @@ namespace SnappyLayout
 
             Overlay = new VirtualBorderOverlayManager();
             Flyout = new SnapFlyoutWindow();
+            TopSnapBar = new TopSnapBarWindow();
 
             WindowEvents = new WindowEventService();
             WindowEvents.MoveSizeChanged += dragging => Dispatcher.BeginInvoke(new Action(() => Overlay.SetDragging(dragging)));
+            WindowEvents.DragStateChanged += (dragging, hwnd) => Dispatcher.BeginInvoke(new Action(() => TopSnapBar.OnDragStateChanged(dragging, hwnd)));
             WindowEvents.ForegroundChanged += hwnd =>
             {
                 if (WindowPlacer.IsValidTarget(hwnd)) _lastNonSelfForeground = hwnd;
@@ -332,6 +335,7 @@ namespace SnappyLayout
                 Hotkeys?.Dispose();
                 Overlay?.Dispose();
                 Flyout?.Close();
+                TopSnapBar?.Close();
                 if (_trayIcon != null)
                 {
                     _trayIcon.Visible = false;

@@ -5,6 +5,17 @@ Bu projedeki tüm önemli değişiklikler bu dosyada belgelenmektedir.
 
 ---
 
+## [v0.11] — 19.11.2026
+### Eklendi / Değiştirildi (TR)
+- **Üst Kenara Sürükleme Çubuğu (Top Drag Snap Bar):** Herhangi bir pencereyi fareyle ekranın (veya sanal monitörün) en üst kenarına sürüklediğinizde Windows 11'in yerleşik Snap Bar'ı bastırılarak Snappy Layout'un kendi `TopSnapBarWindow` çubuğu açılır; fareyi hedef bölge üzerinde bıraktığınızda pencere anında o bölgeye yerleştirilir.
+- **Windows 11 Orijinal Görünüm:** Hem maksimize tuşu üstündeki `SnapFlyoutWindow` hem de üst kenar sürükleme çubuğu `TopSnapBarWindow`, Windows 11'in orijinal Snap Layouts tasarım diline (temiz `#2C2C2C` / `#F3F3F3` yüzey, dış çerçevesiz yuvarlatılmış bölge kutuları, Windows vurgu mavisi `#0078D4` hover ve yumuşak gölge) uygun şekilde yeniden tasarlandı.
+
+### Added / Changed (EN)
+- **Top-of-Screen Drag Snap Bar (`TopSnapBarWindow`):** Dragging any window to the top edge of any physical or virtual monitor now suppresses Windows 11's native Snap Bar and displays Snappy Layout's custom horizontal Snap Bar with live zone previews and drop-to-snap support.
+- **Native Windows 11 Visual Design:** Redesigned both `SnapFlyoutWindow` and `TopSnapBarWindow` to match Windows 11's native Snap Layouts aesthetic (neutral `#2C2C2C` / `#F3F3F3` surface, frameless rounded zone tiles, Windows Accent Blue `#0078D4` hover highlight).
+
+---
+
 ## [v0.10] — 19.11.2026
 ### Eklendi / Değiştirildi (TR)
 - Maksimize üstü yerleşim menüsüne (Snap Flyout) **tüm fiziksel monitörleri seçebilme** çubuğu eklendi; üzerine gelindiğinde ilgili fiziksel monitör ekranda önizlenir, tıklandığında o fiziksel monitörün sanal monitörleri ve pencere yerleşim düzenleri anında açılır.

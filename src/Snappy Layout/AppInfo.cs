@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.10";
+        public const string Version = "0.11";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.11", "19.11.2026",
+             "Pencereyi fareyle ekranın en üstüne sürükleyince Windows'un kendi Snap Bar'ı bastırılarak Snappy Layout'un üst sürükleme yerleşim çubuğunun (TopSnapBarWindow) açılması sağlandı. Hem maksimize üstü Flyout hem de üst sürükleme Snap Bar ekranları Windows 11 orijinal Snap Layouts görünümüne (koyu/açık nötr yüzey, çerçevesiz yuvarlatılmış bölge kutuları, Windows vurgu mavisi) birebir benzetildi.",
+             "Replaced Windows 11's native top-of-screen drag Snap Bar with Snappy Layout's TopSnapBarWindow when dragging any window to the top edge. Redesigned both the Maximize Snap Flyout and Top Drag Snap Bar to closely match Windows 11's native Snap Layouts visual design (clean neutral surface, frameless rounded zone tiles, Windows accent blue hover)."),
             ("0.10", "19.11.2026",
              "Maksimize üstü yerleşim menüsüne (Snap Flyout) tüm fiziksel monitörleri doğrudan seçebilme ve canlı önizleme desteği eklendi; böylece herhangi bir pencere tek tıkla farklı bir fiziksel monitöre ve o monitörün sanal monitörlerine/düzenlerine gönderilebilir.",
              "Added physical monitor selector pills with live screen preview to the Maximize Snap Flyout, allowing any window to be snapped directly onto any physical monitor and its virtual monitors/layouts."),

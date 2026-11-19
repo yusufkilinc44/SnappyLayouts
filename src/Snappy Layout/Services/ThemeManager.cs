@@ -77,8 +77,21 @@ namespace SnappyLayout.Services
                 SetBrush(r, "ZoneFillBrush", "#24344D");
                 SetBrush(r, "ZoneHoverBrush", "#3B82F6");
                 SetBrush(r, "ZoneStrokeBrush", "#5B7AA6");
-                SetBrush(r, "FlyoutBgBrush", "#1F242D");
-                SetBrush(r, "FlyoutBorderBrush", "#3B4454");
+                SetBrush(r, "FlyoutBgBrush", "#2C2C2C");
+                SetBrush(r, "FlyoutBorderBrush", "#454545");
+                SetBrush(r, "Win11SurfaceBrush", "#2C2C2C");
+                SetBrush(r, "Win11BorderBrush", "#474747");
+                SetBrush(r, "Win11PillBgBrush", "#383838");
+                SetBrush(r, "Win11PillBorderBrush", "#505050");
+                SetBrush(r, "Win11PillActiveBgBrush", "#005FB8");
+                SetBrush(r, "Win11PillActiveBorderBrush", "#60CDFF");
+                SetBrush(r, "Win11ZoneFillBrush", "#464646");
+                SetBrush(r, "Win11ZoneStrokeBrush", "#6D6D6D");
+                SetBrush(r, "Win11ZoneHoverBrush", "#0078D4");
+                SetBrush(r, "Win11ZoneHoverStrokeBrush", "#60CDFF");
+                SetBrush(r, "Win11PermFillBrush", "#22463A");
+                SetBrush(r, "Win11PermStrokeBrush", "#34D399");
+                SetBrush(r, "Win11PermHoverBrush", "#10B981");
 
                 // Fluent dahili fırça anahtarlarını da senkronize et
                 SetBrush(r, "TextFillColorPrimaryBrush", "#F2F6FC");
@@ -112,8 +125,21 @@ namespace SnappyLayout.Services
                 SetBrush(r, "ZoneFillBrush", "#CBD5E1");
                 SetBrush(r, "ZoneHoverBrush", "#2563EB");
                 SetBrush(r, "ZoneStrokeBrush", "#475569");
-                SetBrush(r, "FlyoutBgBrush", "#F8FAFC");
-                SetBrush(r, "FlyoutBorderBrush", "#CBD5E1");
+                SetBrush(r, "FlyoutBgBrush", "#F3F3F3");
+                SetBrush(r, "FlyoutBorderBrush", "#D1D1D1");
+                SetBrush(r, "Win11SurfaceBrush", "#F3F3F3");
+                SetBrush(r, "Win11BorderBrush", "#CCCCCC");
+                SetBrush(r, "Win11PillBgBrush", "#EAEAEA");
+                SetBrush(r, "Win11PillBorderBrush", "#C8C8C8");
+                SetBrush(r, "Win11PillActiveBgBrush", "#D6ECFF");
+                SetBrush(r, "Win11PillActiveBorderBrush", "#0067C0");
+                SetBrush(r, "Win11ZoneFillBrush", "#E3E3E3");
+                SetBrush(r, "Win11ZoneStrokeBrush", "#B4B4B4");
+                SetBrush(r, "Win11ZoneHoverBrush", "#0067C0");
+                SetBrush(r, "Win11ZoneHoverStrokeBrush", "#005A9E");
+                SetBrush(r, "Win11PermFillBrush", "#D1FAE5");
+                SetBrush(r, "Win11PermStrokeBrush", "#059669");
+                SetBrush(r, "Win11PermHoverBrush", "#059669");
 
                 // Fluent dahili fırça anahtarlarını da senkronize et
                 SetBrush(r, "TextFillColorPrimaryBrush", "#0F172A");

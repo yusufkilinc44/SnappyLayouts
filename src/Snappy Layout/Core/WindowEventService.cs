@@ -19,7 +19,9 @@ namespace SnappyLayout.Core
         private readonly HashSet<IntPtr> _zoomed = new HashSet<IntPtr>();
         private readonly Dispatcher _dispatcher;
 
+        public static bool IsDraggingWindow { get; private set; }
         public event Action<bool> MoveSizeChanged;   // true = başladı
+        public event Action<bool, IntPtr> DragStateChanged;
         public event Action<IntPtr> ForegroundChanged;
 
         public WindowEventService()
@@ -38,8 +40,16 @@ namespace SnappyLayout.Core
             {
                 switch (evt)
                 {
-                    case EVENT_SYSTEM_MOVESIZESTART: MoveSizeChanged?.Invoke(true); return;
-                    case EVENT_SYSTEM_MOVESIZEEND: MoveSizeChanged?.Invoke(false); return;
+                    case EVENT_SYSTEM_MOVESIZESTART:
+                        IsDraggingWindow = true;
+                        MoveSizeChanged?.Invoke(true);
+                        DragStateChanged?.Invoke(true, hwnd);
+                        return;
+                    case EVENT_SYSTEM_MOVESIZEEND:
+                        IsDraggingWindow = false;
+                        MoveSizeChanged?.Invoke(false);
+                        DragStateChanged?.Invoke(false, hwnd);
+                        return;
                     case EVENT_SYSTEM_FOREGROUND: ForegroundChanged?.Invoke(hwnd); return;
                     case EVENT_OBJECT_CREATE:
                     case EVENT_OBJECT_SHOW:
@@ -65,7 +75,8 @@ namespace SnappyLayout.Core
             if (!NativeSnapSuppressor.IsNativeSnapWindowClass(cls)) return false;
 
             bool flyoutVisible = App.Instance?.Flyout?.IsVisible ?? false;
-            if (flyoutVisible || MaximizeHoverWatcher.IsRecentlyHoveringMaxButton())
+            bool topBarVisible = App.Instance?.TopSnapBar?.IsVisible ?? false;
+            if (flyoutVisible || topBarVisible || IsDraggingWindow || MaximizeHoverWatcher.IsRecentlyHoveringMaxButton())
             {
                 NativeSnapSuppressor.SuppressWindowInstant(hwnd);
                 return true;
