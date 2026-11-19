@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -24,10 +24,13 @@ namespace SnappyLayout.UI.Windows
     public sealed class SnapFlyoutWindow : Window
     {
         private IntPtr _targetHwnd;
+        private MonitorInfo _selectedMonitor;
+        private List<MonitorInfo> _allMonitors = new List<MonitorInfo>();
         private SnapArea _currentArea;
         private List<SnapArea> _monitorAreas = new List<SnapArea>();
 
-        private readonly StackPanel _areaPillsPanel;
+        private readonly WrapPanel _monitorPillsPanel;
+        private readonly WrapPanel _areaPillsPanel;
         private readonly TextBlock _headerTitleText;
         private readonly TextBlock _aspectInfoText;
         private readonly WrapPanel _layoutsWrap;
@@ -97,8 +100,16 @@ namespace SnappyLayout.UI.Windows
             headerGrid.Children.Add(_aspectInfoText);
             rootStack.Children.Add(headerGrid);
 
-            // 2) Sanal monitör seçici hapları (sanal monitörler aktifse görünür)
-            _areaPillsPanel = new StackPanel
+            // 2a) Fiziksel monitör seçici hapları (tüm fiziksel monitörler seçilebilir)
+            _monitorPillsPanel = new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 0, 0, 8)
+            };
+            rootStack.Children.Add(_monitorPillsPanel);
+
+            // 2b) Sanal monitör seçici hapları (sanal monitörler aktifse görünür)
+            _areaPillsPanel = new WrapPanel
             {
                 Orientation = Orientation.Horizontal,
                 Margin = new Thickness(0, 0, 0, 10)
@@ -223,10 +234,12 @@ namespace SnappyLayout.UI.Windows
             // Flyout her açılışta güncel Windows temasını kullanır
             ThemeManager.ApplyWindowsThemeToDictionary(Resources);
 
+            _allMonitors = MonitorService.GetMonitors();
             var mon = MonitorService.FromPoint(anchorScreenPt);
-            _monitorAreas = AreaService.GetAreas(mon);
+            _selectedMonitor = _allMonitors.FirstOrDefault(m => m.Key == mon.Key) ?? mon;
+            _monitorAreas = AreaService.GetAreas(_selectedMonitor);
             _currentArea = AreaService.AreaFromPoint(anchorScreenPt);
-            if (_currentArea == null || _currentArea.Monitor.Handle != mon.Handle)
+            if (_currentArea == null || _currentArea.Monitor.Key != _selectedMonitor.Key)
                 _currentArea = _monitorAreas.First();
 
             RebuildUI();
@@ -298,6 +311,58 @@ namespace SnappyLayout.UI.Windows
             _btnBorders.Content = "◫ " + Loc.T("FlyoutShowBorders");
             _btnOpenMain.Content = "⚙ " + Loc.T("FlyoutOpenApp");
 
+            // Fiziksel monitör seçici hapları (tüm fiziksel monitörler)
+            _monitorPillsPanel.Children.Clear();
+            if (_allMonitors.Count > 1)
+            {
+                _monitorPillsPanel.Visibility = Visibility.Visible;
+                var mLbl = new TextBlock
+                {
+                    Text = Loc.T("FlyoutPhysicalMonitor"),
+                    FontSize = 11.5,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 8, 4)
+                };
+                mLbl.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+                _monitorPillsPanel.Children.Add(mLbl);
+
+                foreach (var monItem in _allMonitors)
+                {
+                    bool isSelMon = _selectedMonitor != null && monItem.Key == _selectedMonitor.Key;
+                    string star = monItem.IsPrimary ? " ★" : "";
+                    var mPill = new Button
+                    {
+                        Content = $"🖥 {monItem.Index}. {monItem.FriendlyName}{star}",
+                        Padding = new Thickness(9, 3, 9, 3),
+                        Margin = new Thickness(0, 0, 5, 4),
+                        FontSize = 11.5,
+                        FontWeight = isSelMon ? FontWeights.Bold : FontWeights.Normal,
+                        Cursor = Cursors.Hand
+                    };
+                    if (isSelMon)
+                    {
+                        mPill.SetResourceReference(Button.BackgroundProperty, "AccentSubtleBrush");
+                        mPill.SetResourceReference(Button.BorderBrushProperty, "AccentBrush");
+                    }
+                    var capturedMon = monItem;
+                    mPill.MouseEnter += (s, e) => _zonePreview.ShowRect(capturedMon.WorkArea, true);
+                    mPill.MouseLeave += (s, e) => _zonePreview.HidePreview();
+                    mPill.Click += (s, e) =>
+                    {
+                        _selectedMonitor = capturedMon;
+                        _monitorAreas = AreaService.GetAreas(_selectedMonitor);
+                        _currentArea = _monitorAreas.First();
+                        _zonePreview.HidePreview();
+                        RebuildUI();
+                    };
+                    _monitorPillsPanel.Children.Add(mPill);
+                }
+            }
+            else
+            {
+                _monitorPillsPanel.Visibility = Visibility.Collapsed;
+            }
+
             // Sanal monitör hapları
             _areaPillsPanel.Children.Clear();
             if (_monitorAreas.Count > 1)
@@ -308,7 +373,7 @@ namespace SnappyLayout.UI.Windows
                     Text = Loc.T("FlyoutTargetArea"),
                     FontSize = 11.5,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 8, 0)
+                    Margin = new Thickness(0, 0, 8, 4)
                 };
                 lbl.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
                 _areaPillsPanel.Children.Add(lbl);
@@ -320,7 +385,7 @@ namespace SnappyLayout.UI.Windows
                     {
                         Content = $"{Loc.T("VirtualShort")} {area.SegmentIndex + 1} ({area.Rect.Width}px)",
                         Padding = new Thickness(9, 3, 9, 3),
-                        Margin = new Thickness(0, 0, 5, 0),
+                        Margin = new Thickness(0, 0, 5, 4),
                         FontSize = 11.5,
                         FontWeight = active ? FontWeights.Bold : FontWeights.Normal,
                         Cursor = Cursors.Hand
@@ -331,9 +396,12 @@ namespace SnappyLayout.UI.Windows
                         pill.SetResourceReference(Button.BorderBrushProperty, "AccentBrush");
                     }
                     var captured = area;
+                    pill.MouseEnter += (s, e) => _zonePreview.ShowRect(captured.Rect, false);
+                    pill.MouseLeave += (s, e) => _zonePreview.HidePreview();
                     pill.Click += (s, e) =>
                     {
                         _currentArea = captured;
+                        _zonePreview.HidePreview();
                         RebuildUI();
                     };
                     _areaPillsPanel.Children.Add(pill);

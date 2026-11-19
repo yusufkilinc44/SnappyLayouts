@@ -1,4 +1,4 @@
-﻿# Katkıda Bulunma Rehberi (Contributing Guide)
+# Katkıda Bulunma Rehberi (Contributing Guide)
 
 **Snappy Layout** projesine ilgi gösterdiğiniz için teşekkür ederiz!
 

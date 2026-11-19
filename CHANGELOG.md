@@ -5,6 +5,15 @@ Bu projedeki tüm önemli değişiklikler bu dosyada belgelenmektedir.
 
 ---
 
+## [v0.10] — 19.11.2026
+### Eklendi / Değiştirildi (TR)
+- Maksimize üstü yerleşim menüsüne (Snap Flyout) **tüm fiziksel monitörleri seçebilme** çubuğu eklendi; üzerine gelindiğinde ilgili fiziksel monitör ekranda önizlenir, tıklandığında o fiziksel monitörün sanal monitörleri ve pencere yerleşim düzenleri anında açılır.
+
+### Added / Changed (EN)
+- Added **Physical Monitor selector pills** with live preview to the Maximize Snap Flyout so users can switch between all connected physical monitors and snap windows directly to any monitor's virtual monitors or layouts.
+
+---
+
 ## [v0.9] — 18.11.2026
 ### Eklendi / Değiştirildi (TR)
 - Windows 11 orijinal Snap Layouts menüsünün (ana pencere dahil) hiçbir zaman açılmaması sağlandı (`ImmersiveShell` `ISettingsCache` COM yenilemesi, `WndProc` `HTMAXBUTTON` filtrelemesi ve anlık `EVENT_OBJECT_SHOW` yakalama).

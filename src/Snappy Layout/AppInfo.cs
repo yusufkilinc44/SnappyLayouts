@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.9";
+        public const string Version = "0.10";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.10", "19.11.2026",
+             "Maksimize üstü yerleşim menüsüne (Snap Flyout) tüm fiziksel monitörleri doğrudan seçebilme ve canlı önizleme desteği eklendi; böylece herhangi bir pencere tek tıkla farklı bir fiziksel monitöre ve o monitörün sanal monitörlerine/düzenlerine gönderilebilir.",
+             "Added physical monitor selector pills with live screen preview to the Maximize Snap Flyout, allowing any window to be snapped directly onto any physical monitor and its virtual monitors/layouts."),
             ("0.9", "18.11.2026",
              "Windows 11 orijinal Snap Layouts menüsünün (ana pencere dahil) hiçbir zaman açılmaması sağlandı (ImmersiveShell SettingsCache COM yenilemesi, WndProc HTMAXBUTTON filtrelemesi ve anlık EVENT_OBJECT_SHOW yakalama). Maksimize üstü Flyout menüsü her zaman Windows temasında çalışacak ve maksimize tuşunu kapatmayacak şekilde başlık çubuğu altına taşındı. Sanal Monitör Tam Ekran kartı yerleşimlerin en başına alındı. Oran kutularına alt-üst sayı arttırma/azaltma (▲/▼) butonları ile 25%, 33%, 50%, 66%, 75%, 100% hızlı seçim çipleri eklendi. Kayıtlı sanal monitör şablonlarına görsel oran önizleme şemaları eklendi.",
              "Completely prevented Windows 11 native Snap Layouts flyout from appearing on any window including MainWindow (ImmersiveShell SettingsCache COM refresh, WndProc HTMAXBUTTON intercept, and instant EVENT_OBJECT_SHOW hook). Snap Flyout now always uses the Windows system theme and is positioned below the maximize button without covering it. Moved Virtual Monitor Full Screen card to the start of the layout cards. Added ▲/▼ spinner buttons and 25%, 33%, 50%, 66%, 75%, 100% quick ratio chips to percentage inputs. Added visual ratio thumbnail diagrams to Saved Virtual Monitor Presets."),
