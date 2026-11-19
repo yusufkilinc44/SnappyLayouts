@@ -66,8 +66,8 @@ namespace SnappyLayout
         {
             base.OnStartup(e);
 
-            _shutdownEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "SnappyLayout_YusufKilinc_ShutdownEvent");
-            _singleInstanceMutex = new Mutex(true, "SnappyLayout_YusufKilinc_SingleInstance", out bool isNew);
+            _shutdownEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "SnappyLayouts_YusufKilinc_ShutdownEvent");
+            _singleInstanceMutex = new Mutex(true, "SnappyLayouts_YusufKilinc_SingleInstance", out bool isNew);
             if (!isNew)
             {
                 // Önceki çalışan örneğe kapanma sinyali gönder ve yeni sürümü başlat

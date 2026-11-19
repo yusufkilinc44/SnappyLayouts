@@ -17,7 +17,7 @@ namespace SnappyLayout.Core
     /// </summary>
     public static class WindowPlacer
     {
-        public const string PropPhysicalMax = "SnappyLayout.PhysicalMax";
+        public const string PropPhysicalMax = "SnappyLayouts.PhysicalMax";
 
         /// <summary>Sanal tam ekran yapılmış pencerelerin önceki konumu (geri almak için).</summary>
         private static readonly Dictionary<IntPtr, (RECT Previous, RECT Virtual)> _virtualMax = new Dictionary<IntPtr, (RECT, RECT)>();

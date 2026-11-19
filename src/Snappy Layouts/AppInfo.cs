@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "0.25";
+        public const string Version = "0.26";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.26", "19.11.2026",
+             "Kalan tüm eski ad kalıntıları (mutex/olay adları, pencere özelliği adı, eski klasörler, AppData klasörleri, Registry başlangıç kayıtları ve başlatıcı betik) tamamen temizlenip 'Snappy Layouts' olarak tekdüzeleştirildi.",
+             "Cleaned up all remaining legacy name references (single-instance mutex/event names, window property key, legacy folders, AppData directories, Registry Run entries, and launcher script) so everything is unified under 'Snappy Layouts'."),
             ("0.25", "19.11.2026",
              "Uygulama adı tüm kaynak kod, proje dosyaları, arayüz ve belgelerde 'Snappy Layouts' olarak güncellendi (eski %AppData%\\Snappy Layout ayarları otomatik taşınır). Uygulama duraklatıldığında veya tamamen kapatıldığında Windows'un orijinal Snap Layouts ve Aero Snap özellikleri eksiksiz geri yüklenir. Task View / Sanal Masaüstü seçici (Desktops) penceresinin fare hareketiyle kaybolma hatası giderildi ve Çalışma Alanlarının (Workspaces & Apps) düzenler değişmiş olsa bile pencereleri tam kaydedilen konumlara yerleştirmesi sağlandı.",
              "Renamed the application to 'Snappy Layouts' across all code, project/solution files, UI, and documentation (with automatic migration of settings from legacy %AppData%\\Snappy Layout). Fixed pausing and exiting so Windows's native Snap Layouts and Aero Snap are immediately and reliably restored. Fixed Windows 11 Task View / Virtual Desktops switcher disappearing on mouse movement, and ensured Workspaces always restore windows to their exact saved coordinates even if Snap Layouts changed."),

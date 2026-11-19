@@ -5,6 +5,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v0.26] — 2026-11-19
+### Changed
+- **Complete Legacy Cleanup:** Unified internal single-instance mutex/event names, window property keys, and the launcher script under **Snappy Layouts**, and removed all obsolete legacy folders, AppData directories, and Registry Run keys.
+
+---
+
 ## [v0.25] — 2026-11-19
 ### Changed / Fixed
 - **Renamed to Snappy Layouts:** Renamed the application, solution, project, launcher, UI strings, and documentation to **Snappy Layouts** (with automatic one-time migration of existing `%AppData%\Snappy Layout\settings.json` so no saved layouts or workspaces are lost).
