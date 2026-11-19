@@ -264,6 +264,10 @@ namespace SnappyLayout.UI
                 mCard.SetResourceReference(Border.BorderBrushProperty, isSelMon ? "AccentBrush" : "CardBorderBrush");
 
                 int vmCnt = AreaService.GetAreas(m).Count;
+                var mGrid = new Grid();
+                mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
                 var mSp = new StackPanel();
                 var mTitle = new TextBlock { Text = m.DisplayName, FontWeight = FontWeights.Bold, FontSize = 12.5 };
                 mTitle.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
@@ -278,9 +282,29 @@ namespace SnappyLayout.UI
                 mSub.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
                 mSp.Children.Add(mTitle);
                 mSp.Children.Add(mSub);
-                mCard.Child = mSp;
 
                 var capturedM = m;
+                var btnRenM = new Button
+                {
+                    Content = "✎",
+                    ToolTip = Loc.T("RenameMonitor"),
+                    Padding = new Thickness(6, 2, 6, 2),
+                    FontSize = 11.5,
+                    Margin = new Thickness(8, 0, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                btnRenM.Click += (s, e) =>
+                {
+                    e.Handled = true;
+                    ShowRenameMonitorDialog(capturedM);
+                };
+
+                Grid.SetColumn(mSp, 0);
+                Grid.SetColumn(btnRenM, 1);
+                mGrid.Children.Add(mSp);
+                mGrid.Children.Add(btnRenM);
+                mCard.Child = mGrid;
+
                 mCard.MouseLeftButtonDown += (s, e) =>
                 {
                     _selectedPhysicalMonitor = capturedM;
@@ -1126,6 +1150,10 @@ namespace SnappyLayout.UI
                 mBtn.SetResourceReference(Border.BackgroundProperty, isSel ? "AccentSubtleBrush" : "InputBgBrush");
                 mBtn.SetResourceReference(Border.BorderBrushProperty, isSel ? "AccentBrush" : "CardBorderBrush");
 
+                var mGrid = new Grid();
+                mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
                 var mSp = new StackPanel();
                 var t1 = new TextBlock { Text = m.DisplayName, FontWeight = FontWeights.Bold, FontSize = 13 };
                 t1.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
@@ -1139,9 +1167,29 @@ namespace SnappyLayout.UI
                 t2.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
                 mSp.Children.Add(t1);
                 mSp.Children.Add(t2);
-                mBtn.Child = mSp;
 
                 var capturedMon = m;
+                var btnRenMon = new Button
+                {
+                    Content = "✎",
+                    ToolTip = Loc.T("RenameMonitor"),
+                    Padding = new Thickness(6, 2, 6, 2),
+                    FontSize = 11.5,
+                    Margin = new Thickness(10, 0, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                btnRenMon.Click += (s, e) =>
+                {
+                    e.Handled = true;
+                    ShowRenameMonitorDialog(capturedMon);
+                };
+
+                Grid.SetColumn(mSp, 0);
+                Grid.SetColumn(btnRenMon, 1);
+                mGrid.Children.Add(mSp);
+                mGrid.Children.Add(btnRenMon);
+                mBtn.Child = mGrid;
+
                 mBtn.MouseLeftButtonDown += (s, e) =>
                 {
                     _selectedPhysicalMonitor = capturedMon;
@@ -2000,14 +2048,23 @@ namespace SnappyLayout.UI
                 mRow.SetResourceReference(Border.BackgroundProperty, "InputBgBrush");
                 mRow.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
 
+                var mRowGrid = new Grid();
+                mRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                mRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
                 var mSp = new StackPanel();
-                var t1 = new TextBlock { Text = m.DisplayName, FontWeight = FontWeights.Bold, FontSize = 13 };
+                var t1 = new TextBlock
+                {
+                    Text = m.DisplayName + (m.HasCustomName ? $"  ({Loc.T("HardwareName")}: {m.HardwareName})" : ""),
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 13
+                };
                 t1.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
 
                 var vmWeights = AreaService.GetStoredWeights(m);
                 var t2 = new TextBlock
                 {
-                    Text = $"Konum: ({m.Bounds.Left}, {m.Bounds.Top})  •  Çalışma Alanı: {m.WorkArea.Width}×{m.WorkArea.Height} px  •  DPI: {m.Dpi} ({Math.Round(m.Scale * 100)}%)  •  En/Boy: {m.Aspect:0.00}:1  •  Sanal Monitör: {vmWeights.Count}",
+                    Text = $"({m.Bounds.Left}, {m.Bounds.Top})  •  {m.WorkArea.Width}×{m.WorkArea.Height} px  •  DPI: {m.Dpi} ({Math.Round(m.Scale * 100)}%)  •  {Loc.T("AspectRatio")}: {m.Aspect:0.00}:1  •  {Loc.T("VirtualMonitor")}: {vmWeights.Count}",
                     FontSize = 11.5,
                     Margin = new Thickness(0, 2, 0, 0)
                 };
@@ -2015,7 +2072,22 @@ namespace SnappyLayout.UI
 
                 mSp.Children.Add(t1);
                 mSp.Children.Add(t2);
-                mRow.Child = mSp;
+
+                var capturedMonDpi = m;
+                var btnRenDpi = new Button
+                {
+                    Content = "✎  " + Loc.T("RenameMonitor"),
+                    Padding = new Thickness(10, 5, 10, 5),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(12, 0, 0, 0)
+                };
+                btnRenDpi.Click += (sender, e) => ShowRenameMonitorDialog(capturedMonDpi);
+
+                Grid.SetColumn(mSp, 0);
+                Grid.SetColumn(btnRenDpi, 1);
+                mRowGrid.Children.Add(mSp);
+                mRowGrid.Children.Add(btnRenDpi);
+                mRow.Child = mRowGrid;
                 dpiSp.Children.Add(mRow);
             }
 
@@ -2023,6 +2095,117 @@ namespace SnappyLayout.UI
             root.Children.Add(dpiCard);
 
             return root;
+        }
+
+        private void ShowRenameMonitorDialog(MonitorInfo mon)
+        {
+            if (mon == null) return;
+
+            var dlg = new Window
+            {
+                Title = Loc.T("RenameMonitor"),
+                Width = 440,
+                SizeToContent = SizeToContent.Height,
+                ResizeMode = ResizeMode.NoResize,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this
+            };
+            dlg.SetResourceReference(Window.BackgroundProperty, "AppBgBrush");
+            dlg.SourceInitialized += (s, e) => ThemeManager.ApplyWindowChrome(dlg);
+
+            var sp = new StackPanel { Margin = new Thickness(18) };
+
+            var hwInfo = new TextBlock
+            {
+                Text = $"🖥  {mon.Index}. {mon.HardwareName}  ({mon.Bounds.Width}×{mon.Bounds.Height} @ {Math.Round(mon.Scale * 100)}%)",
+                FontWeight = FontWeights.Bold,
+                FontSize = 13,
+                Margin = new Thickness(0, 0, 0, 6)
+            };
+            hwInfo.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+            sp.Children.Add(hwInfo);
+
+            var prompt = new TextBlock
+            {
+                Text = Loc.T("RenameMonitorPrompt"),
+                FontSize = 12,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            prompt.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+            sp.Children.Add(prompt);
+
+            var nameBox = new TextBox
+            {
+                Text = mon.HasCustomName ? mon.EffectiveName : "",
+                FontSize = 13.5,
+                Padding = new Thickness(9, 6, 9, 6),
+                Margin = new Thickness(0, 0, 0, 14)
+            };
+            sp.Children.Add(nameBox);
+
+            var btnGrid = new Grid();
+            btnGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            btnGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            btnGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var btnReset = new Button
+            {
+                Content = Loc.T("RenameMonitorReset"),
+                Padding = new Thickness(10, 6, 10, 6),
+                IsEnabled = mon.HasCustomName
+            };
+            btnReset.Click += (s, e) =>
+            {
+                MonitorService.SetCustomName(mon, null);
+                dlg.DialogResult = true;
+                dlg.Close();
+            };
+
+            var rightBtns = new StackPanel { Orientation = Orientation.Horizontal };
+            var btnCancel = new Button
+            {
+                Content = Loc.T("Cancel"),
+                Padding = new Thickness(14, 6, 14, 6),
+                Margin = new Thickness(0, 0, 8, 0),
+                IsCancel = true
+            };
+            var btnSave = new Button
+            {
+                Content = Loc.T("Save"),
+                Padding = new Thickness(16, 6, 16, 6),
+                FontWeight = FontWeights.SemiBold,
+                IsDefault = true
+            };
+            btnSave.SetResourceReference(Button.BackgroundProperty, "AccentSubtleBrush");
+            btnSave.SetResourceReference(Button.BorderBrushProperty, "AccentBrush");
+            btnSave.Click += (s, e) =>
+            {
+                MonitorService.SetCustomName(mon, nameBox.Text);
+                dlg.DialogResult = true;
+                dlg.Close();
+            };
+
+            rightBtns.Children.Add(btnCancel);
+            rightBtns.Children.Add(btnSave);
+
+            Grid.SetColumn(btnReset, 0);
+            Grid.SetColumn(rightBtns, 2);
+            btnGrid.Children.Add(btnReset);
+            btnGrid.Children.Add(rightBtns);
+            sp.Children.Add(btnGrid);
+
+            dlg.Content = sp;
+            dlg.Loaded += (s, e) =>
+            {
+                nameBox.Focus();
+                nameBox.SelectAll();
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                RebuildAllPages();
+            }
         }
 
         // =========================================================================

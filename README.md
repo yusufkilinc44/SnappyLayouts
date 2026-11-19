@@ -1,11 +1,11 @@
-# Snappy Layout v0.12
+# Snappy Layout v0.13
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
 [![Languages](https://img.shields.io/badge/UI%20Languages-English%20%7C%20Turkish-6366F1)](#localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v0.12-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v0.13-3B82F6)](CHANGELOG.md)
 
 **Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
@@ -20,7 +20,7 @@
 - **Top-of-Screen Drag Snap Bar (`TopSnapBarWindow`):** Drag any window to the top edge of any physical or virtual monitor to reveal a sleek horizontal Windows 11-style Snap Bar. Hover any zone for a live translucent preview and release the mouse button to snap immediately.
 - **Zero-Flash Native Windows 11 Suppression:** Automatically suppresses Windows 11's built-in Snap Flyout and Snap Bar (`XamlExplorerHostIslandWindow`) using a 4-layer approach (`ImmersiveShell` `ISettingsCache` COM refresh, registry flags, `MainWindow` `WndProc` `HTMAXBUTTON` filtering, and synchronous `EVENT_OBJECT_SHOW` hooks) so the native and custom overlays never collide or flicker.
 - **Always Matches Windows Theme:** Regardless of whether you choose Light or Dark theme for the management UI, both the Maximize Flyout and Top Drag Snap Bar always follow your active **Windows system theme**.
-- **Cross-Monitor Switching:** Switch between all connected physical monitors and their virtual monitors directly from the Maximize Flyout with live screen previews.
+- **Cross-Monitor Switching & Custom Monitor Names:** Switch between all connected physical monitors and their virtual monitors directly from the Maximize Flyout with live screen previews, and assign custom friendly names to any physical monitor.
 
 ### 2. Side-by-Side Virtual Monitors (Equal or Asymmetric Widths)
 - Split any physical monitor (especially `21:9` / `32:9` ultrawide or large 4K/5K displays) into unlimited side-by-side **virtual monitors**.

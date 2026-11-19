@@ -23,11 +23,34 @@ namespace SnappyLayout.Core
         public double Scale => Dpi / 96.0;
         public double Aspect => WorkArea.Height == 0 ? 1.777 : (double)WorkArea.Width / WorkArea.Height;
 
+        public string HardwareName => FriendlyName ?? DeviceName?.TrimStart('\\', '.') ?? $"Monitor {Index}";
+
+        public string EffectiveName
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Key) &&
+                    Storage.Data?.MonitorCustomNames != null &&
+                    Storage.Data.MonitorCustomNames.TryGetValue(Key, out var custom) &&
+                    !string.IsNullOrWhiteSpace(custom))
+                {
+                    return custom.Trim();
+                }
+                return HardwareName;
+            }
+        }
+
+        public bool HasCustomName =>
+            !string.IsNullOrEmpty(Key) &&
+            Storage.Data?.MonitorCustomNames != null &&
+            Storage.Data.MonitorCustomNames.TryGetValue(Key, out var custom) &&
+            !string.IsNullOrWhiteSpace(custom);
+
         public string DisplayName =>
-            $"{Index}. {FriendlyName ?? DeviceName?.TrimStart('\\', '.')} — {Bounds.Width}×{Bounds.Height} @ {Math.Round(Scale * 100)}%"
+            $"{Index}. {EffectiveName} — {Bounds.Width}×{Bounds.Height} @ {Math.Round(Scale * 100)}%"
             + (IsPrimary ? " ★" : "");
 
-        public string ShortName => $"{Index}. {FriendlyName ?? DeviceName?.TrimStart('\\', '.')}";
+        public string ShortName => $"{Index}. {EffectiveName}";
     }
 
     /// <summary>
@@ -121,6 +144,20 @@ namespace SnappyLayout.Core
         {
             GetMonitors(true);
             MonitorsChanged?.Invoke();
+        }
+
+        public static void SetCustomName(MonitorInfo mon, string customName)
+        {
+            if (mon == null || string.IsNullOrEmpty(mon.Key)) return;
+            if (Storage.Data.MonitorCustomNames == null)
+                Storage.Data.MonitorCustomNames = new Dictionary<string, string>();
+
+            if (string.IsNullOrWhiteSpace(customName))
+                Storage.Data.MonitorCustomNames.Remove(mon.Key);
+            else
+                Storage.Data.MonitorCustomNames[mon.Key] = customName.Trim();
+
+            Storage.Save();
         }
 
         public static MonitorInfo FromHandle(IntPtr hMon)

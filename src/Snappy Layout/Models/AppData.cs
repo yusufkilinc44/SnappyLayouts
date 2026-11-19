@@ -190,6 +190,9 @@ namespace SnappyLayout.Models
         /// <summary>Monitör anahtarı → sanal monitör genişlik oranları</summary>
         public Dictionary<string, List<double>> VirtualMonitors { get; set; } = new Dictionary<string, List<double>>();
 
+        /// <summary>Fiziksel monitör anahtarı → kullanıcı tanımlı özel monitör adı</summary>
+        public Dictionary<string, string> MonitorCustomNames { get; set; } = new Dictionary<string, string>();
+
         public List<VirtualPreset> VirtualPresets { get; set; } = new List<VirtualPreset>
         {
             new VirtualPreset { Name = "2 Sanal Monitör (50% | 50%)", Weights = new List<double> { 1, 1 } },
@@ -226,6 +229,7 @@ namespace SnappyLayout.Models
             }
 
             if (VirtualMonitors == null) VirtualMonitors = new Dictionary<string, List<double>>();
+            if (MonitorCustomNames == null) MonitorCustomNames = new Dictionary<string, string>();
             if (VirtualPresets == null) VirtualPresets = new List<VirtualPreset>();
             foreach (var vp in VirtualPresets)
             {

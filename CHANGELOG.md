@@ -5,6 +5,12 @@ All notable changes to **Snappy Layout** are documented in this file.
 
 ---
 
+## [v0.13] — 2026-11-19
+### Added
+- **Custom Physical Monitor Names:** Users can now assign custom friendly names to any physical monitor (from the Snap Layouts, Virtual Monitors, or Settings & DPI tabs) or reset back to the hardware name. Custom names persist in `settings.json` and appear everywhere across the UI, including the Maximize Snap Flyout.
+
+---
+
 ## [v0.12] — 2026-11-19
 ### Fixed
 - Fixed live preview overlay (`SnapZonePreviewOverlay`) overflowing onto adjacent monitors or shrinking when switching between physical monitors with different DPI scales (e.g. `125%` ↔ `175%`) due to `WM_DPICHANGED` rescaling, by implementing two-pass DPI-synchronized positioning.

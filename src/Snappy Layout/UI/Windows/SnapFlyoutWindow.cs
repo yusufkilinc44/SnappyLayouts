@@ -323,7 +323,7 @@ namespace SnappyLayout.UI.Windows
                 {
                     bool isSelMon = _selectedMonitor != null && monItem.Key == _selectedMonitor.Key;
                     string star = monItem.IsPrimary ? " ★" : "";
-                    var mPill = MakeWin11Pill($"🖥 {monItem.Index}. {monItem.FriendlyName}{star}", isSelMon);
+                    var mPill = MakeWin11Pill($"🖥 {monItem.Index}. {monItem.EffectiveName}{star}", isSelMon);
                     var capturedMon = monItem;
                     mPill.MouseEnter += (s, e) =>
                     {
