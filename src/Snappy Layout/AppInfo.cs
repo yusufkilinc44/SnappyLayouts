@@ -11,7 +11,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layout";
-        public const string Version = "0.11";
+        public const string Version = "0.12";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -22,6 +22,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("0.12", "19.11.2026",
+             "Farklı DPI ölçeklerine sahip fiziksel monitörler (örn. %125 ve %175) arasında önizleme çerçevesi (SnapZonePreviewOverlay) geçişi yapılırken WM_DPICHANGED yeniden ölçeklemesi nedeniyle yeşil/mavi önizleme kutusunun diğer monitöre taşması veya küçülmesi hatası iki aşamalı DPI yerleşimi ile giderildi.",
+             "Fixed SnapZonePreviewOverlay overflowing or shrinking when switching live previews between physical monitors with different DPI scales (e.g. 125% and 175%) by using two-pass DPI-synchronized positioning."),
             ("0.11", "19.11.2026",
              "Pencereyi fareyle ekranın en üstüne sürükleyince Windows'un kendi Snap Bar'ı bastırılarak Snappy Layout'un üst sürükleme yerleşim çubuğunun (TopSnapBarWindow) açılması sağlandı. Hem maksimize üstü Flyout hem de üst sürükleme Snap Bar ekranları Windows 11 orijinal Snap Layouts görünümüne (koyu/açık nötr yüzey, çerçevesiz yuvarlatılmış bölge kutuları, Windows vurgu mavisi) birebir benzetildi.",
              "Replaced Windows 11's native top-of-screen drag Snap Bar with Snappy Layout's TopSnapBarWindow when dragging any window to the top edge. Redesigned both the Maximize Snap Flyout and Top Drag Snap Bar to closely match Windows 11's native Snap Layouts visual design (clean neutral surface, frameless rounded zone tiles, Windows accent blue hover)."),

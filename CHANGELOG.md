@@ -5,6 +5,15 @@ Bu projedeki tüm önemli değişiklikler bu dosyada belgelenmektedir.
 
 ---
 
+## [v0.12] — 19.11.2026
+### Düzeltildi (TR)
+- Farklı DPI ölçeklerine sahip fiziksel monitörler (örn. `%125` ve `%175`) arasında canlı önizleme çerçevesi (`SnapZonePreviewOverlay`) geçişi yapılırken `WM_DPICHANGED` yeniden ölçeklemesi nedeniyle yeşil/mavi önizleme kutusunun diğer monitöre taşması veya küçülmesi hatası giderildi.
+
+### Fixed (EN)
+- Fixed live preview overlay (`SnapZonePreviewOverlay`) overflowing onto adjacent monitors or shrinking when switching between physical monitors with different DPI scales (e.g. `125%` ↔ `175%`) due to `WM_DPICHANGED` rescaling.
+
+---
+
 ## [v0.11] — 19.11.2026
 ### Eklendi / Değiştirildi (TR)
 - **Üst Kenara Sürükleme Çubuğu (Top Drag Snap Bar):** Herhangi bir pencereyi fareyle ekranın (veya sanal monitörün) en üst kenarına sürüklediğinizde Windows 11'in yerleşik Snap Bar'ı bastırılarak Snappy Layout'un kendi `TopSnapBarWindow` çubuğu açılır; fareyi hedef bölge üzerinde bıraktığınızda pencere anında o bölgeye yerleştirilir.

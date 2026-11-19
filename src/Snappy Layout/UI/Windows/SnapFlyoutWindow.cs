@@ -517,7 +517,19 @@ namespace SnappyLayout.UI.Windows
             if (!IsVisible) Show();
             var hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd != IntPtr.Zero)
+            {
+                // 1. Geçiş: hedef monitöre taşı (farklı DPI'lı monitöre geçerken WM_DPICHANGED tetiklenir)
                 SetWindowPos(hwnd, HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+                // Yeni monitörün DPI ölçeğine göre WPF mantıksal (DIP) boyutunu senkronize et
+                var targetMon = MonitorService.FromRect(r);
+                double scale = targetMon != null && targetMon.Scale > 0.1 ? targetMon.Scale : 1.0;
+                Width = Math.Max(10, r.Width / scale);
+                Height = Math.Max(10, r.Height / scale);
+
+                // 2. Geçiş: WM_DPICHANGED yeniden ölçeklemesinden sonra tam fiziksel piksel sınırlarına oturt
+                SetWindowPos(hwnd, HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
         }
 
         public void HidePreview()

@@ -1,10 +1,10 @@
-# Snappy Layout v0.11
+# Snappy Layout v0.12
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v0.11-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v0.12-3B82F6)](CHANGELOG.md)
 
 **Yazar / Tasarım & Programlama (Author / Design & Programming):** **YUSUF KILINÇ — Kasım 2026 (November 2026)**
 
