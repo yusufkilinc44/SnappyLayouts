@@ -200,6 +200,12 @@ All shortcuts can be customized or cleared in the **Keyboard Shortcuts** tab, an
 
 ---
 
+## Code Signing Policy
+
+Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+
+---
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).  
