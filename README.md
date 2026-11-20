@@ -163,8 +163,16 @@ Snappy Layouts/
 4. Can be cleanly upgraded in-place (no uninstall required) or uninstalled anytime via **Windows Settings → Installed Apps** (automatically restores native Windows Snap settings).
 
 ### Option 2 — Portable ZIP (No Installation)
-1. Download **`SnappyLayouts-v1.0-Portable-win-x64.zip`** from [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases).
+1. Download **`SnappyLayouts-v1.1-Portable-win-x64.zip`** from [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases).
 2. Extract to any permanent folder and run **`Snappy Layouts.exe`**.
+
+> [!NOTE]
+> **Windows SmartScreen & Antivirus Notice (Unsigned Open-Source Binary)**  
+> **Snappy Layouts** is a free, independent open-source project and is not yet signed with a paid Authenticode code-signing certificate. Because it is unsigned and uses standard Windows window-management APIs (`SetWinEventHook`, `WH_MOUSE_LL`, `DWM`), **Windows Defender SmartScreen** (*"Windows protected your PC — Unknown publisher"*) or heuristic antivirus scanners (such as Bitdefender) may show a false-positive warning on first launch:
+> - **SmartScreen ("Warn" mode):** Click **More info → Run anyway**.
+> - **SmartScreen ("Block" mode — only *"Don't run"* shown):** Right-click the downloaded `SnappyLayouts-v1.1-Setup.exe` → **Properties** → check **Unblock** → **Apply / OK**, then run the installer again.
+> - **Third-Party Antivirus:** If your antivirus flags the installed app, add `C:\Program Files\Snappy Layouts` to its exclusions.
+> - **Full Transparency:** Every release binary is compiled publicly from this repository via [GitHub Actions](https://github.com/yusufkilinc44/SnappyLayouts/actions) with zero telemetry or network access (see [SECURITY.md](SECURITY.md)), or you can build directly from source below.
 
 ### Option 3 — Build from Source & Package Installer Locally
 **Prerequisites:** Windows 10 (1809+) or Windows 11, [.NET 10.0 SDK](https://dotnet.microsoft.com/), and optionally [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`) to build `Setup.exe`.
@@ -177,7 +185,7 @@ cd SnappyLayouts
 dotnet build "Snappy Layouts.sln" -c Release
 
 # Or build self-contained Portable ZIP + Windows Setup.exe into dist/
-.\installer\build-release.ps1 -Version "1.0"
+.\installer\build-release.ps1 -Version "1.1"
 ```
 
 ---
