@@ -106,11 +106,14 @@ namespace SnappyLayout.Core
     public static class MonitorService
     {
         private static List<MonitorInfo> _cache;
+        private static long _cacheTick;
         public static event Action MonitorsChanged;
 
         public static List<MonitorInfo> GetMonitors(bool refresh = false)
         {
-            if (_cache != null && !refresh) return _cache;
+            // Önbelleği en fazla 1.5 saniye tut: monitör çıkarılıp takıldığında veya uykudan çıkınca asla bayat monitör kalmasın
+            if (_cache != null && !refresh && (Environment.TickCount64 - _cacheTick) < 1500)
+                return _cache;
             var names = DisplayConfig.Query();
             var list = new List<MonitorInfo>();
             EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr h, IntPtr hdc, ref RECT r, IntPtr d) =>
@@ -146,6 +149,7 @@ namespace SnappyLayout.Core
                 if (!seen.Add(list[i].Key)) { list[i].Key += "#" + list[i].DeviceName; seen.Add(list[i].Key); }
             }
             _cache = list;
+            _cacheTick = Environment.TickCount64;
             return list;
         }
 

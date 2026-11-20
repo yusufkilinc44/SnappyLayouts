@@ -4,6 +4,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.2] — 2026-11-20
+### Fixed
+- **Disconnected Monitor Ghost Borders Fixed:** Fixed a bug where unplugging an external monitor (e.g., an ultrawide monitor with 3 virtual monitors) could leave its stale border overlay window hidden in memory and re-appear on the remaining laptop screen when dragging windows. `VirtualBorderOverlayManager` now destroys hidden overlays cleanly, refreshes against live connected monitors on drag start, handles `PowerModeChanged` (sleep/wake) with a two-pass display-topology refresh, and `MonitorService` auto-expires its monitor cache after 1.5 seconds.
+
+---
+
 ## [v1.1] — 2026-11-19
 ### Changed / Improved
 - **Standard Program Files Installation:** Updated the Inno Setup installer to install into `C:\Program Files\Snappy Layouts` instead of `%LocalAppData%\Programs`.

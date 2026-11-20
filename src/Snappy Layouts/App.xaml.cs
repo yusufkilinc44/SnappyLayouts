@@ -33,6 +33,34 @@ namespace SnappyLayout
 
         public bool Paused { get; set; }
 
+        private DispatcherTimer _displayRefreshTimer;
+
+        private void ScheduleDisplayRefresh()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                // Anında yenile (eski/çıkarılmış monitörlerin overlay pencerelerini hemen kapat)
+                MonitorService.Refresh();
+                Overlay?.Refresh();
+                MainWindow?.RebuildAllPages();
+
+                // Windows ekran topolojisini 450ms sonra oturttuğunda ikinci kez garanti yenileme yap
+                if (_displayRefreshTimer == null)
+                {
+                    _displayRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(450) };
+                    _displayRefreshTimer.Tick += (s, e) =>
+                    {
+                        _displayRefreshTimer.Stop();
+                        MonitorService.Refresh();
+                        Overlay?.Refresh();
+                        MainWindow?.RebuildAllPages();
+                    };
+                }
+                _displayRefreshTimer.Stop();
+                _displayRefreshTimer.Start();
+            }));
+        }
+
         public void SetPaused(bool paused)
         {
             Paused = paused;
@@ -111,12 +139,11 @@ namespace SnappyLayout
             Hotkeys.Pressed += OnHotkeyPressed;
             Hotkeys.ReRegister();
 
-            SystemEvents.DisplaySettingsChanged += (s, ev) => Dispatcher.BeginInvoke(new Action(() =>
+            SystemEvents.DisplaySettingsChanged += (s, ev) => ScheduleDisplayRefresh();
+            SystemEvents.PowerModeChanged += (s, ev) =>
             {
-                MonitorService.Refresh();
-                Overlay.Refresh();
-                MainWindow?.RebuildAllPages();
-            }));
+                if (ev.Mode == PowerModes.Resume) ScheduleDisplayRefresh();
+            };
 
             SetupTrayIcon();
             Overlay.Refresh();

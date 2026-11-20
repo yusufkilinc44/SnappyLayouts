@@ -40,7 +40,8 @@ namespace SnappyLayout.UI.Windows
         {
             var s = Storage.Data?.Settings;
             _isDraggingWindow = dragging && (s?.ShowBordersWhileDragging ?? true);
-            UpdateVisibility();
+            // Sürükleme başlarken bağlı monitör listesini tazele (çıkarılmış monitörün eski çizgileri asla görünmesin)
+            UpdateVisibility(recreate: _isDraggingWindow);
         }
 
         public void ToggleManual()
@@ -71,6 +72,8 @@ namespace SnappyLayout.UI.Windows
 
         public void UpdateVisibility(bool recreate = false)
         {
+            if (recreate) CloseAll();
+
             var s = Storage.Data?.Settings;
             if (s == null || !s.VirtualMonitorsEnabled || (App.Instance?.Paused ?? false))
             {
@@ -81,14 +84,14 @@ namespace SnappyLayout.UI.Windows
             bool shouldShow = s.AlwaysShowBorders || _isDraggingWindow || _isFlashing || _manualToggle;
             if (!shouldShow)
             {
-                foreach (var w in _windows) w.Hide();
+                CloseAll();
                 return;
             }
 
             if (recreate || _windows.Count == 0)
             {
                 CloseAll();
-                foreach (var m in MonitorService.GetMonitors())
+                foreach (var m in MonitorService.GetMonitors(refresh: true))
                 {
                     var weights = AreaService.GetWeights(m);
                     if (weights == null || weights.Count <= 1) continue;
