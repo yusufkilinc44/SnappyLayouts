@@ -24,6 +24,8 @@ namespace SnappyLayout.UI.Windows
     public sealed class SnapFlyoutWindow : Window
     {
         private IntPtr _targetHwnd;
+        private MonitorInfo _anchorMonitor;
+        private POINT _lastAnchorPt;
         private MonitorInfo _selectedMonitor;
         private List<MonitorInfo> _allMonitors = new List<MonitorInfo>();
         private SnapArea _currentArea;
@@ -228,6 +230,8 @@ namespace SnappyLayout.UI.Windows
             _allMonitors = MonitorService.GetMonitors();
             _openWindows = WindowCatalog.GetAppWindows(includeMinimized: false);
             var mon = MonitorService.FromPoint(anchorScreenPt);
+            _anchorMonitor = mon;
+            _lastAnchorPt = anchorScreenPt;
             _selectedMonitor = _allMonitors.FirstOrDefault(m => m.Key == mon.Key) ?? mon;
             _monitorAreas = AreaService.GetAreas(_selectedMonitor);
             _currentArea = AreaService.AreaFromPoint(anchorScreenPt);
@@ -237,34 +241,59 @@ namespace SnappyLayout.UI.Windows
             RebuildUI();
 
             if (!IsVisible) Show();
+            PositionWithinMonitor(mon, anchorScreenPt);
+            _autoCloseTimer.Start();
+        }
+
+        /// <summary>
+        /// Farklı DPI'lı monitörler (%125 ↔ %175) arasında geçişte WM_DPICHANGED kaynaklı sağa/aşağı taşmayı
+        /// önlemek için pencereyi iki aşamada (önce hedef monitöre taşı → gerçek GetWindowRect ile piksel kırp) konumlandırır.
+        /// </summary>
+        private void PositionWithinMonitor(MonitorInfo mon, POINT anchorScreenPt)
+        {
+            if (mon == null) return;
             UpdateLayout();
 
-            // Ekran sınırları içinde konumlandır (fiziksel piksel → WPF DIP)
             var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return;
+
             double scale = mon.Scale;
-            int flyW = (int)Math.Round(ActualWidth * scale);
-            int flyH = (int)Math.Round(ActualHeight * scale);
-            if (flyW < 220) flyW = (int)(360 * scale);
-            if (flyH < 120) flyH = (int)(220 * scale);
-
-            var frame = GetExtendedFrame(_targetHwnd);
-            // Windows 11 orijinal Snap Layouts gibi maksimize tuşunun sağ-altına hizala, tuşu kapatma
-            int x = anchorScreenPt.X - flyW + (int)Math.Round(60 * scale);
-            int captionBottom = frame.Top + (int)Math.Round(34 * scale);
-            int cursorBottom = anchorScreenPt.Y + (int)Math.Round(16 * scale);
-            int y = (anchorScreenPt.Y >= frame.Top && anchorScreenPt.Y <= frame.Top + (int)Math.Round(72 * scale))
-                ? Math.Max(captionBottom, cursorBottom)
-                : cursorBottom;
-
             var wa = mon.WorkArea;
-            if (x + flyW > wa.Right - 8) x = wa.Right - flyW - 8;
-            if (x < wa.Left + 8) x = wa.Left + 8;
-            if (y + flyH > wa.Bottom - 8) y = wa.Bottom - flyH - 8;
-            if (y < wa.Top + 4) y = wa.Top + 4;
+            var frame = GetExtendedFrame(_targetHwnd);
 
+            int CalcX(int w)
+            {
+                int cx = anchorScreenPt.X - w + (int)Math.Round(60 * scale);
+                if (cx + w > wa.Right - 8) cx = wa.Right - w - 8;
+                if (cx < wa.Left + 8) cx = wa.Left + 8;
+                return cx;
+            }
+
+            int CalcY(int h)
+            {
+                int captionBottom = frame.Top + (int)Math.Round(34 * scale);
+                int cursorBottom = anchorScreenPt.Y + (int)Math.Round(16 * scale);
+                int cy = (anchorScreenPt.Y >= frame.Top && anchorScreenPt.Y <= frame.Top + (int)Math.Round(72 * scale))
+                    ? Math.Max(captionBottom, cursorBottom)
+                    : cursorBottom;
+                if (cy + h > wa.Bottom - 8) cy = wa.Bottom - h - 8;
+                if (cy < wa.Top + 4) cy = wa.Top + 4;
+                return cy;
+            }
+
+            // 1. Geçiş: pencereyi hedef monitöre taşı ki WM_DPICHANGED tetiklenip gerçek DPI ölçeği otursun
+            int estW = Math.Max((int)Math.Round(ActualWidth * scale), (int)(360 * scale));
+            int estH = Math.Max((int)Math.Round(ActualHeight * scale), (int)(220 * scale));
             NativeSnapSuppressor.DismissActiveNativeFlyout();
-            SetWindowPos(hwnd, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-            _autoCloseTimer.Start();
+            SetWindowPos(hwnd, HWND_TOPMOST, CalcX(estW), CalcY(estH), 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+            // 2. Geçiş: WM_DPICHANGED sonrası gerçek fiziksel pencere boyutunu GetWindowRect ile ölç ve ekrana tam sığdır
+            UpdateLayout();
+            if (GetWindowRect(hwnd, out var realRect) && realRect.Width > 0 && realRect.Height > 0)
+            {
+                SetWindowPos(hwnd, HWND_TOPMOST, CalcX(realRect.Width), CalcY(realRect.Height), 0, 0,
+                    SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
         }
 
         public void HideFlyout()
@@ -353,6 +382,8 @@ namespace SnappyLayout.UI.Windows
                         _currentArea = _monitorAreas.First();
                         _zonePreview.HidePreview();
                         RebuildUI();
+                        if (IsVisible && _anchorMonitor != null)
+                            PositionWithinMonitor(_anchorMonitor, _lastAnchorPt);
                     };
                     _monitorPillsPanel.Children.Add(mPill);
                 }
@@ -467,10 +498,13 @@ namespace SnappyLayout.UI.Windows
             if (layouts.Count == 0) layouts = areaLayouts.ToList();
 
             // Sabit genişlik hesapla ki hover sırasında alt metin değişince pencere boyutu/konumu asla oynamasın (sıfır flicker)
+            // ve hedef monitörün çalışma alanını asla aşmasın
             int totalTiles = 1 + layouts.Count;
             int colsPerRow = Math.Min(totalTiles, boxW > 115 ? 3 : 4);
             double desiredW = colsPerRow * (boxW + 14) + 32;
-            _outerBorder.Width = Math.Clamp(desiredW, 380, 560);
+            var hostMon = _anchorMonitor ?? _selectedMonitor;
+            double maxLogicalW = hostMon != null ? Math.Max(340, (hostMon.WorkArea.Width / Math.Max(1.0, hostMon.Scale)) - 48) : 560;
+            _outerBorder.Width = Math.Clamp(desiredW, 360, Math.Min(560, maxLogicalW));
 
             // Sanal Monitör Tam Ekran (100%) her zaman yerleşimlerin EN BAŞINDA yer alır
             string vmFullLabel = _currentArea.IsVirtual

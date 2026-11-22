@@ -445,20 +445,29 @@ namespace SnappyLayout.UI.Windows
 
             var hwnd = new WindowInteropHelper(this).Handle;
             double scale = area.Monitor.Scale;
-            int barW = (int)Math.Round(ActualWidth * scale);
-            int barH = (int)Math.Round(ActualHeight * scale);
-            if (barW < 180) barW = (int)(400 * scale);
-
             var targetRect = area.Rect;
-            int x = targetRect.Left + (targetRect.Width - barW) / 2;
-            int y = area.Monitor.WorkArea.Top + (int)Math.Round(2 * scale);
-
             var wa = area.Monitor.WorkArea;
-            if (x + barW > wa.Right - 6) x = wa.Right - barW - 6;
-            if (x < wa.Left + 6) x = wa.Left + 6;
+            int y = wa.Top + (int)Math.Round(2 * scale);
 
+            int CalcBarX(int w)
+            {
+                int cx = targetRect.Left + (targetRect.Width - w) / 2;
+                if (cx + w > wa.Right - 6) cx = wa.Right - w - 6;
+                if (cx < wa.Left + 6) cx = wa.Left + 6;
+                return cx;
+            }
+
+            // 1. Geçiş: hedef monitöre taşı (WM_DPICHANGED tetiklensin)
+            int estW = Math.Max((int)Math.Round(ActualWidth * scale), (int)(400 * scale));
             NativeSnapSuppressor.DismissActiveNativeFlyout();
-            SetWindowPos(hwnd, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            SetWindowPos(hwnd, HWND_TOPMOST, CalcBarX(estW), y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+            // 2. Geçiş: gerçek fiziksel genişliği GetWindowRect ile ölçüp ekrana tam sığdır
+            UpdateLayout();
+            if (GetWindowRect(hwnd, out var realRect) && realRect.Width > 0)
+            {
+                SetWindowPos(hwnd, HWND_TOPMOST, CalcBarX(realRect.Width), y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
         }
     }
 }

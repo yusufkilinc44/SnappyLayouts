@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.6";
+        public const string Version = "1.7";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.7", "22.11.2026",
+             "Farklı DPI ölçeklerine sahip monitörler (%125 ↔ %175) arasında açıldığında Snap Flyout ve Top Snap Bar pencerelerinin sağ kenardan ekrandan taşması / kırpılması sorunu iki aşamalı DPI yerleşimi ve gerçek GetWindowRect piksel kırpma ile giderildi.",
+             "Fixed Snap Flyout and Top Snap Bar overflowing off the right edge of the screen on mixed-DPI multi-monitor setups (e.g., 125% ↔ 175%) by using two-pass WM_DPICHANGED-synchronized positioning with exact GetWindowRect pixel clamping."),
             ("1.6", "22.11.2026",
              "Snap Layout kutularındaki uygulama ikonları artık yalnızca gerçekten tam o bölgenin boyut ve konumunda bulunan (üstü başka pencereyle kapanmamış) uygulamalar için gösterilir (4 kenar toleransı + IoU >= 0.85). Tekrarlayan öneri satırı kaldırılarak her düzenin tek kez ve yalnızca gerçek canlı pencere ikonlarıyla görünmesi sağlandı.",
              "Refined live app icons inside Snap Layout zones to appear strictly when a visible, unoccluded window actually occupies that exact zone size and position (4-edge tolerance + IoU >= 0.85), and removed the duplicate suggestion row so each layout appears once with accurate live occupancy icons."),
