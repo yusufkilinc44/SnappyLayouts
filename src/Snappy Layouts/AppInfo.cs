@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.2";
+        public const string Version = "1.3";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.3", "22.11.2026",
+             "Büyük PDF açan Adobe Acrobat gibi CPU/UI yükü altındaki veya yavaş yanıt veren uygulamalarda maksimize tuşu üstü Snap Flyout menüsünün açılmaması / gecikmesi sorunu giderildi. MaximizeHoverWatcher artık başlık çubuğu dışında gereksiz cross-process WM_NCHITTEST göndermez, hedef uygulama meşgul veya özel başlık çubuklu (HTCLIENT) olsa bile 0 ms geometrik tespit ile anında açılır ve UI iş parçacığı asla hedef uygulamayı beklemez.",
+             "Fixed Maximize Hover Snap Flyout failing to open or lagging on busy/heavy apps (e.g., Adobe Acrobat loading large PDFs). MaximizeHoverWatcher now pre-filters to the caption button band with zero IPC elsewhere, falls back instantly to geometric maximize-button bounds when the target app is busy/hung or returns HTCLIENT for custom titlebars, and keeps SnapFlyoutWindow/WindowEventService free of blocking UI-thread hit-tests."),
             ("1.2", "20.11.2026",
              "Harici bir monitör bağlantısı kesildiğinde (veya uykudan dönüldüğünde) çıkarılan monitöre ait eski sanal monitör sınır çizgilerinin ve önbellekteki monitör bilgisinin kalan ekranda görünmesi hatası giderildi. Sınır katmanları gizlenirken bellekten temizlenir ve bağlı monitör listesi anlık/otomatik olarak tazelenir.",
              "Fixed a bug where unplugging an external monitor (or resuming from sleep) could leave stale virtual monitor border overlays from the disconnected monitor visible on the remaining display. Border overlays now close cleanly when hidden, monitor topology refreshes with a follow-up settle pass on display/power changes, and the monitor cache auto-refreshes every 1.5s."),

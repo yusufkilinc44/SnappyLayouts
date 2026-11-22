@@ -291,8 +291,12 @@ namespace SnappyLayout.UI.Windows
             var safeRect = new RECT(flyRect.Left - 36, flyRect.Top - 72, flyRect.Right + 36, flyRect.Bottom + 36);
             if (safeRect.Contains(pt)) return;
 
-            var hitMax = MaximizeHoverWatcher.HitMaxButton(pt);
-            if (hitMax == _targetHwnd && _targetHwnd != IntPtr.Zero) return;
+            // UI iş parçacığında hedef pencereye bloklayıcı SendMessageTimeout göndermeden kontrol et
+            if (_targetHwnd != IntPtr.Zero)
+            {
+                if (MaximizeHoverWatcher.IsPointInWindowMaxButton(_targetHwnd, pt)) return;
+                if (App.Instance?.HoverWatcher != null && App.Instance.HoverWatcher.Current.Window == _targetHwnd) return;
+            }
 
             HideFlyout();
         }

@@ -4,6 +4,15 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.3] — 2026-11-22
+### Fixed
+- **Instant Hover Flyout on Busy / Heavy Apps (e.g., Adobe Acrobat Large PDFs):** Eliminated Snap Flyout delays and failures when hovering over the Maximize button of heavily loaded or slow-responding applications.
+  - `MaximizeHoverWatcher` now pre-filters to the top caption-button band with zero cross-process IPC anywhere else on screen.
+  - Added immediate `IsHungAppWindow` detection, shortened `WM_NCHITTEST` timeout (`18ms`), and added automatic geometric fallback (`IsPointInWindowMaxButton` with maximized-frame clamping and RTL support) whenever the target UI thread is busy or custom titlebar chrome returns `HTCLIENT` (while still rejecting `HTCLOSE` / `HTMINBUTTON`).
+  - Removed blocking cross-process `HitMaxButton` calls from the WPF UI thread in `SnapFlyoutWindow.CheckAutoClose` and `WindowEventService.TrySuppressNativeSnapWindow`, and added `SWP_ASYNCWINDOWPOS` fallback in `WindowPlacer` for hung windows.
+
+---
+
 ## [v1.2] — 2026-11-20
 ### Fixed
 - **Disconnected Monitor Ghost Borders Fixed:** Fixed a bug where unplugging an external monitor (e.g., an ultrawide monitor with 3 virtual monitors) could leave its stale border overlay window hidden in memory and re-appear on the remaining laptop screen when dragging windows. `VirtualBorderOverlayManager` now destroys hidden overlays cleanly, refreshes against live connected monitors on drag start, handles `PowerModeChanged` (sleep/wake) with a two-pass display-topology refresh, and `MonitorService` auto-expires its monitor cache after 1.5 seconds.

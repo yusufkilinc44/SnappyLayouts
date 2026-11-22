@@ -109,9 +109,12 @@ namespace SnappyLayout.Native
         public const int WH_MOUSE_LL = 14;
         public const int WM_HOTKEY = 0x0312;
         public const int WM_SETTINGCHANGE = 0x001A;
+        public const int HTCLIENT = 1;
         public const int HTCAPTION = 2;
+        public const int HTMINBUTTON = 8;
         public const int HTMAXBUTTON = 9;
         public const int HTBORDER = 18;
+        public const int HTCLOSE = 20;
         public const uint GA_ROOT = 2;
         public const uint GA_ROOTOWNER = 3;
         public const uint GW_OWNER = 4;
@@ -133,6 +136,7 @@ namespace SnappyLayout.Native
         public const long WS_EX_TRANSPARENT = 0x00000020L;
         public const long WS_EX_LAYERED = 0x00080000L;
         public const long WS_EX_TOPMOST = 0x00000008L;
+        public const long WS_EX_LAYOUTRTL = 0x00400000L;
 
         public const uint SWP_NOSIZE = 0x0001;
         public const uint SWP_NOMOVE = 0x0002;
@@ -220,6 +224,7 @@ namespace SnappyLayout.Native
         [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
         [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hWnd);
         [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+        [DllImport("user32.dll")] public static extern bool IsHungAppWindow(IntPtr hWnd);
         [DllImport("user32.dll")] public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
         [DllImport("user32.dll")] public static extern bool SetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")] public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);

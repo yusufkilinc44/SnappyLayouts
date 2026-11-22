@@ -80,7 +80,7 @@ namespace SnappyLayout.Core
                 NativeSnapSuppressor.SuppressWindowInstant(hwnd);
                 return true;
             }
-            if (GetCursorPos(out var pt) && MaximizeHoverWatcher.HitMaxButton(pt) != IntPtr.Zero)
+            if (App.Instance?.HoverWatcher != null && App.Instance.HoverWatcher.Current.Window != IntPtr.Zero)
             {
                 NativeSnapSuppressor.SuppressWindowInstant(hwnd);
                 return true;

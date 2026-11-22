@@ -106,10 +106,12 @@ namespace SnappyLayout.Core
             // Mantıksız değerleri yok say (bazı uygulamalar DWM çerçevesi bildirmez)
             if (ml < 0 || ml > 40) ml = 0; if (mt < 0 || mt > 40) mt = 0;
             if (mr < 0 || mr > 40) mr = 0; if (mb < 0 || mb > 40) mb = 0;
+            uint flags = SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER;
+            if (IsHungAppWindow(hwnd)) flags |= SWP_ASYNCWINDOWPOS;
             SetWindowPos(hwnd, IntPtr.Zero,
                 target.Left - ml, target.Top - mt,
                 target.Width + ml + mr, target.Height + mt + mb,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                flags);
         }
 
         private static RECT ToWorkspace(IntPtr hwnd, RECT r)

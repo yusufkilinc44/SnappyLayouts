@@ -195,7 +195,7 @@ namespace SnappyLayout
 
             if (snap.Window == IntPtr.Zero)
             {
-                if (Environment.TickCount64 - _lastSeenHoverTick > 120)
+                if (Environment.TickCount64 - _lastSeenHoverTick > 180)
                     _hoverCandidateHwnd = IntPtr.Zero;
                 return;
             }
