@@ -2332,11 +2332,14 @@ namespace SnappyLayout.UI
                 var p = new VirtualPreset
                 {
                     Name = string.IsNullOrWhiteSpace(presetNameBox.Text) ? "Özel Şablon" : presetNameBox.Text.Trim(),
-                    Weights = AreaService.GetStoredWeights(_selectedPhysicalMonitor)
+                    Weights = AreaService.GetStoredWeights(_selectedPhysicalMonitor),
+                    Hotkey = Storage.Data.FindNextAvailableHotkey(forWorkspace: false)
                 };
                 Storage.Data.VirtualPresets.Add(p);
                 Storage.Save();
+                App.Instance?.Hotkeys?.ReRegister();
                 HostVirtual.Content = BuildVirtualMonitorsPage();
+                HostHotkeys.Content = BuildHotkeysPage();
             };
 
             Grid.SetColumn(presetNameBox, 0);
@@ -2462,9 +2465,13 @@ namespace SnappyLayout.UI
                 var dlg = new WorkspaceCaptureDialog(_selectedPhysicalMonitor) { Owner = this };
                 if (dlg.ShowDialog() == true && dlg.ResultWorkspace != null)
                 {
+                    if (dlg.ResultWorkspace.Hotkey == null || dlg.ResultWorkspace.Hotkey.IsEmpty)
+                        dlg.ResultWorkspace.Hotkey = Storage.Data.FindNextAvailableHotkey(forWorkspace: true);
                     Storage.Data.Workspaces.Add(dlg.ResultWorkspace);
                     Storage.Save();
+                    App.Instance?.Hotkeys?.ReRegister();
                     HostWorkspaces.Content = BuildWorkspacesPage();
+                    HostHotkeys.Content = BuildHotkeysPage();
                 }
             };
             topBar.Children.Add(btnCapture);
@@ -2646,9 +2653,14 @@ namespace SnappyLayout.UI
             btnDef.Click += (s, e) =>
             {
                 Storage.Data.Hotkeys = HotkeyActions.Defaults();
+                foreach (var vp in Storage.Data.VirtualPresets) vp.Hotkey = null;
+                foreach (var ws in Storage.Data.Workspaces) ws.Hotkey = null;
+                Storage.Data.AssignMissingHotkeys();
                 Storage.Save();
                 App.Instance?.Hotkeys?.ReRegister();
                 HostHotkeys.Content = BuildHotkeysPage();
+                HostVirtual.Content = BuildVirtualMonitorsPage();
+                HostWorkspaces.Content = BuildWorkspacesPage();
             };
             topRow.Children.Add(btnDef);
             root.Children.Add(topRow);

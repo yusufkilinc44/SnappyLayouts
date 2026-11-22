@@ -166,7 +166,7 @@ namespace SnappyLayout.Models
                 [NextSegment] = new Hotkey(CA, 0x27),              // Ctrl+Alt+Right
                 [PrevSegment] = new Hotkey(CA, 0x25),              // Ctrl+Alt+Left
                 [RestoreWindow] = new Hotkey(CA, 0x28),            // Ctrl+Alt+Down
-                [ToggleVirtual] = new Hotkey(),
+                [ToggleVirtual] = new Hotkey(CA, 0x56),            // Ctrl+Alt+V
                 [OpenSettings] = new Hotkey(CA, 0x4B),             // Ctrl+Alt+K
             };
         }
@@ -175,7 +175,7 @@ namespace SnappyLayout.Models
     /// <summary>Kalıcı olarak saklanan tüm veriler (settings.json).</summary>
     public class AppData
     {
-        public int SchemaVersion { get; set; } = 2;
+        public int SchemaVersion { get; set; } = 3;
         public AppSettings Settings { get; set; } = new AppSettings();
 
         /// <summary>Geriye dönük uyumluluk / varsayılan şablon listesi</summary>
@@ -195,14 +195,110 @@ namespace SnappyLayout.Models
 
         public List<VirtualPreset> VirtualPresets { get; set; } = new List<VirtualPreset>
         {
-            new VirtualPreset { Name = "2 Sanal Monitör (50% | 50%)", Weights = new List<double> { 1, 1 } },
-            new VirtualPreset { Name = "3 Sanal Monitör (33% | 33% | 33%)", Weights = new List<double> { 1, 1, 1 } },
-            new VirtualPreset { Name = "3 Sanal Monitör — Orta Geniş (25% | 50% | 25%)", Weights = new List<double> { 1, 2, 1 } },
-            new VirtualPreset { Name = "2 Sanal Monitör — Asimetrik (40% | 60%)", Weights = new List<double> { 2, 3 } },
+            new VirtualPreset
+            {
+                Name = "2 Sanal Monitör (50% | 50%)",
+                Weights = new List<double> { 1, 1 },
+                Hotkey = new Hotkey(Native.NativeMethods.MOD_CONTROL | Native.NativeMethods.MOD_ALT | Native.NativeMethods.MOD_SHIFT, 0x31) // Ctrl+Alt+Shift+1
+            },
+            new VirtualPreset
+            {
+                Name = "3 Sanal Monitör (33% | 33% | 33%)",
+                Weights = new List<double> { 1, 1, 1 },
+                Hotkey = new Hotkey(Native.NativeMethods.MOD_CONTROL | Native.NativeMethods.MOD_ALT | Native.NativeMethods.MOD_SHIFT, 0x32) // Ctrl+Alt+Shift+2
+            },
+            new VirtualPreset
+            {
+                Name = "3 Sanal Monitör — Orta Geniş (25% | 50% | 25%)",
+                Weights = new List<double> { 1, 2, 1 },
+                Hotkey = new Hotkey(Native.NativeMethods.MOD_CONTROL | Native.NativeMethods.MOD_ALT | Native.NativeMethods.MOD_SHIFT, 0x33) // Ctrl+Alt+Shift+3
+            },
+            new VirtualPreset
+            {
+                Name = "2 Sanal Monitör — Asimetrik (40% | 60%)",
+                Weights = new List<double> { 2, 3 },
+                Hotkey = new Hotkey(Native.NativeMethods.MOD_CONTROL | Native.NativeMethods.MOD_ALT | Native.NativeMethods.MOD_SHIFT, 0x34) // Ctrl+Alt+Shift+4
+            },
         };
 
         public List<Workspace> Workspaces { get; set; } = new List<Workspace>();
         public Dictionary<string, Hotkey> Hotkeys { get; set; }
+
+        public bool IsHotkeyInUse(Hotkey candidate)
+        {
+            if (candidate == null || candidate.IsEmpty) return false;
+            if (Hotkeys != null && Hotkeys.Values.Any(h => h != null && !h.IsEmpty && h.SameAs(candidate))) return true;
+            if (VirtualPresets != null && VirtualPresets.Any(p => p.Hotkey != null && !p.Hotkey.IsEmpty && p.Hotkey.SameAs(candidate))) return true;
+            if (Workspaces != null && Workspaces.Any(w => w.Hotkey != null && !w.Hotkey.IsEmpty && w.Hotkey.SameAs(candidate))) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Çakışmayan ve Türkçe Q AltGr karakterleriyle çakışmayan ilk boş kısayol kombinasyonunu bulur.
+        /// Sanal monitör şablonları: Ctrl+Alt+Shift+1..9, 0 → ardından Ctrl+Alt+F1..F12.
+        /// Çalışma alanları: Ctrl+Alt+F1..F12 → ardından Ctrl+Alt+Shift+F1..F12.
+        /// </summary>
+        public Hotkey FindNextAvailableHotkey(bool forWorkspace)
+        {
+            const uint CA = Native.NativeMethods.MOD_CONTROL | Native.NativeMethods.MOD_ALT;
+            const uint CAS = CA | Native.NativeMethods.MOD_SHIFT;
+
+            var candidates = new List<Hotkey>();
+            if (!forWorkspace)
+            {
+                for (uint k = 0x31; k <= 0x39; k++) candidates.Add(new Hotkey(CAS, k)); // Ctrl+Alt+Shift+1..9
+                candidates.Add(new Hotkey(CAS, 0x30));                                 // Ctrl+Alt+Shift+0
+                for (uint k = 0x70; k <= 0x7B; k++) candidates.Add(new Hotkey(CA, k)); // Ctrl+Alt+F1..F12
+                for (uint k = 0x70; k <= 0x7B; k++) candidates.Add(new Hotkey(CAS, k));// Ctrl+Alt+Shift+F1..F12
+            }
+            else
+            {
+                for (uint k = 0x70; k <= 0x7B; k++) candidates.Add(new Hotkey(CA, k)); // Ctrl+Alt+F1..F12
+                for (uint k = 0x70; k <= 0x7B; k++) candidates.Add(new Hotkey(CAS, k));// Ctrl+Alt+Shift+F1..F12
+                for (uint k = 0x31; k <= 0x39; k++) candidates.Add(new Hotkey(CAS, k));// Ctrl+Alt+Shift+1..9
+            }
+
+            foreach (var c in candidates)
+            {
+                if (!IsHotkeyInUse(c)) return c;
+            }
+            return new Hotkey();
+        }
+
+        /// <summary>Kısayolu boş olan tüm eylemlere, sanal monitör şablonlarına ve çalışma alanlarına boş kısayol atar.</summary>
+        public void AssignMissingHotkeys()
+        {
+            if (Hotkeys == null) Hotkeys = HotkeyActions.Defaults();
+            var defs = HotkeyActions.Defaults();
+            foreach (var kv in defs)
+            {
+                if (!Hotkeys.TryGetValue(kv.Key, out var cur) || cur == null || cur.IsEmpty)
+                {
+                    if (!IsHotkeyInUse(kv.Value))
+                        Hotkeys[kv.Key] = kv.Value.Clone();
+                    else
+                        Hotkeys[kv.Key] = FindNextAvailableHotkey(forWorkspace: false);
+                }
+            }
+
+            if (VirtualPresets != null)
+            {
+                foreach (var vp in VirtualPresets)
+                {
+                    if (vp.Hotkey == null || vp.Hotkey.IsEmpty)
+                        vp.Hotkey = FindNextAvailableHotkey(forWorkspace: false);
+                }
+            }
+
+            if (Workspaces != null)
+            {
+                foreach (var ws in Workspaces)
+                {
+                    if (ws.Hotkey == null || ws.Hotkey.IsEmpty)
+                        ws.Hotkey = FindNextAvailableHotkey(forWorkspace: true);
+                }
+            }
+        }
 
         public void EnsureDefaults()
         {
@@ -243,6 +339,13 @@ namespace SnappyLayout.Models
             if (Hotkeys == null) Hotkeys = HotkeyActions.Defaults();
             foreach (var kv in HotkeyActions.Defaults())
                 if (!Hotkeys.ContainsKey(kv.Key)) Hotkeys[kv.Key] = kv.Value;
+
+            // v1.10 yükseltmesi: henüz kısayol atanmamış eylem, sanal monitör şablonu ve çalışma alanlarına boş kısayollar ata
+            if (SchemaVersion < 3)
+            {
+                AssignMissingHotkeys();
+                SchemaVersion = 3;
+            }
         }
     }
 }

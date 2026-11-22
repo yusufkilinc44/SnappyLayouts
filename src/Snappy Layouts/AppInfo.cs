@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.9";
+        public const string Version = "1.10";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.10", "22.11.2026",
+             "Kısayol atanmamış tüm işlemlere Türkçe Q (AltGr) ve Windows kısayollarıyla çakışmayan boş varsayılan tuş kombinasyonları atandı: 'Sanal monitörleri etkinleştir/devre dışı bırak' → Ctrl+Alt+V, Kayıtlı Sanal Monitör Şablonları → Ctrl+Alt+Shift+1..4 (yeni eklenenler otomatik boş kısayol alır), Çalışma Alanları → Ctrl+Alt+F1..F12. Mevcut ayarlar açılışta otomatik güncellenir.",
+             "Assigned conflict-free default keyboard shortcuts (also safe for Turkish Q AltGr characters) to all previously unassigned actions: Toggle Virtual Monitors → Ctrl+Alt+V, saved Virtual Monitor Presets → Ctrl+Alt+Shift+1..4 (with automatic free-shortcut assignment for newly created presets), and Workspaces → Ctrl+Alt+F1..F12. Existing user configurations are automatically upgraded on startup."),
             ("1.9", "22.11.2026",
              "Yerleşim Düzenleri ve tüm ekranlarda önemli arayüz geliştirmeleri: (1) Sabit ilk düzen olan 'Sanal Monitör Tam Ekran' artık tıklanabilir/seçilebilir (sağda ayarları ve %100 önizlemesi görünür), yalnızca seçili olduğunda vurgulu çerçeve alır (çift seçili kutu görünümü giderildi), 'SABİT / SİLİNEMEZ' rozeti + kilit ikonu taşır ve sırası değiştirilemez. (2) Diğer tüm yerleşim düzenleri ▲/▼ butonlarıyla yeniden sıralanabilir. (3) Liste üstüne çoklu seçimli Ekran Tipi Filtre Çubuğu (Standart / Ultra-Geniş / Dikey) eklendi. (4) 'Full Physical Screen' tüm dillerde 'Full Physical Monitor' / 'Tam Fiziksel Monitör' olarak güncellendi. (5) Fiziksel Monitörler (koyu mavi/indigo donanım kartı) ile Sanal Monitörler (camgöbeği/turkuaz yuvarlak hap) renk, yazı tipi ve biçim olarak tüm ekranlarda belirgin şekilde ayrıştırıldı.",
              "Major UI & UX improvements across Snap Layouts and all screens: (1) The permanent first 'Virtual Monitor Fullscreen' card is now clickable/selectable (displaying its behavior settings, shortcut, and 100% preview on the right), only highlights its border when actually selected (eliminating the double-selected border effect), displays a 'PERMANENT / INDELETABLE' badge + lock icon, and remains pinned at #1. (2) Added ▲/▼ reorder buttons for all custom/standard layouts. (3) Added a multi-select Screen Type Filter Bar (Standard / Ultra-Wide / Portrait) above the layout list. (4) Renamed 'Full Physical Screen' to 'Full Physical Monitor' across all 8 languages while keeping Fullscreen labels unchanged. (5) Visually differentiated Physical Monitor buttons (bold indigo/blue hardware cards) from Virtual Monitor buttons (vibrant cyan/teal rounded pills) across Snap Layouts, Virtual Monitors, Settings & DPI, and the Snap Flyout."),

@@ -4,6 +4,16 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.10] — 2026-11-22
+### Added
+- **Conflict-Free Default Shortcuts for All Unassigned Actions:**
+  - Assigned `Ctrl + Alt + V` to **Toggle Virtual Monitors on / off**.
+  - Assigned `Ctrl + Alt + Shift + 1`..`4` to the built-in **Virtual Monitor Presets** (and automatically assigns the next free shortcut in `Ctrl + Alt + Shift + 1..9, 0` for newly created presets).
+  - Automatically assigns free `Ctrl + Alt + F1`..`F12` shortcuts to saved **Workspaces** (safe for Turkish Q `AltGr` characters as well as US/international layouts).
+  - Existing user `settings.json` configurations automatically upgrade on startup (`SchemaVersion = 3`) to fill any unassigned shortcuts, and **Restore Default Shortcuts** refreshes all actions, presets, and workspaces together.
+
+---
+
 ## [v1.9] — 2026-11-22
 ### Added
 - **Reorderable Snap Layouts (`▲` / `▼`):** Added Move Up and Move Down controls on every non-permanent layout card in the Snap Layouts tab so you can customize the exact display order across the Snap Flyout and Top Snap Bar. The permanent **Virtual Monitor Fullscreen** item stays pinned at position #1.

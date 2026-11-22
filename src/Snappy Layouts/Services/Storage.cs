@@ -54,7 +54,9 @@ namespace SnappyLayout.Services
                 Logger.Log("Settings load failed: " + ex.Message);
             }
             if (Data == null) Data = new AppData();
+            int prevSchema = Data.SchemaVersion;
             Data.EnsureDefaults();
+            if (prevSchema != Data.SchemaVersion) SaveNow();
         }
 
         /// <summary>Değişiklikleri kısa bir gecikmeyle (toplu) kaydeder.</summary>

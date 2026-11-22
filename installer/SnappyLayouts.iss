@@ -2,7 +2,7 @@
 ; Snappy Layouts — Inno Setup 6 Installer Script (C:\Program Files\Snappy Layouts)
 ; ============================================================================
 #ifndef AppVersion
-  #define AppVersion "1.9"
+  #define AppVersion "1.10"
 #endif
 
 #define AppName "Snappy Layouts"
