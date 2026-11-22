@@ -4,6 +4,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.8] — 2026-11-22
+### Changed
+- **Snap Flyout Header Layout Polish:** Moved the green **Full Physical Screen** button to the far left of the Virtual Monitors selector row with a vertical divider when virtual monitors are present (no divider when none exist), updated multi-virtual-monitor span chip labels to use full names (`Virtual 1 + Virtual 2`, `Virtual 2 + Virtual 3`, localized), and added a full-width horizontal divider line below the selector row.
+
+---
+
 ## [v1.7] — 2026-11-22
 ### Fixed
 - **Mixed-DPI Screen Edge Overflow Fixed (`SnapFlyoutWindow` & `TopSnapBarWindow`):** Fixed Snap Flyout and Top Snap Bar getting clipped off the right edge of the screen when opening across monitors with different DPI scales (e.g., `125%` ↔ `175%`) by applying two-pass `WM_DPICHANGED`-synchronized positioning using actual `GetWindowRect` physical dimensions and capping flyout width to the host monitor's work area.

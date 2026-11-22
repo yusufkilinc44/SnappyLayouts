@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.7";
+        public const string Version = "1.8";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.8", "22.11.2026",
+             "Snap Layouts Flyout üst çubuğu düzenlendi: yeşil 'Full Physical Screen' butonu sanal monitör satırının en soluna alındı, sanal monitör varsa araya dikey ayraç eklendi (yoksa ayraç gizlenir), birleşik tam ekran butonları 'Virtual 1 + Virtual 2' biçiminde adlandırıldı ve bu satırın altına tam genişlikte yatay ayraç çizgisi eklendi.",
+             "Refined the Snap Layouts Flyout header bar: moved the green 'Full Physical Screen' button to the far left of the virtual monitors row with a vertical divider when virtual monitors exist, labeled span chips using full virtual monitor names (e.g., 'Virtual 1 + Virtual 2'), and added a full-width horizontal divider below the selector row."),
             ("1.7", "22.11.2026",
              "Farklı DPI ölçeklerine sahip monitörler (%125 ↔ %175) arasında açıldığında Snap Flyout ve Top Snap Bar pencerelerinin sağ kenardan ekrandan taşması / kırpılması sorunu iki aşamalı DPI yerleşimi ve gerçek GetWindowRect piksel kırpma ile giderildi.",
              "Fixed Snap Flyout and Top Snap Bar overflowing off the right edge of the screen on mixed-DPI multi-monitor setups (e.g., 125% ↔ 175%) by using two-pass WM_DPICHANGED-synchronized positioning with exact GetWindowRect pixel clamping."),

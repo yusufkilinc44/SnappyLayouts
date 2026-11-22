@@ -84,21 +84,18 @@ namespace SnappyLayout.UI.Windows
             };
             rootStack.Children.Add(_monitorPillsPanel);
 
-            // 2) Sanal monitör seçici hapları + Gerçek Fiziksel Tam Ekran (sıkı Windows 11 üst şeridi)
-            var selectorRow = new Grid { Margin = new Thickness(0, 0, 0, 8) };
-            selectorRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            selectorRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
+            // 2) Gerçek Fiziksel Tam Ekran (en solda) | Sanal monitör seçici hapları | Birleşik tam ekran çipleri
             _areaPillsPanel = new WrapPanel
             {
                 Orientation = Orientation.Horizontal,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 2)
             };
 
             _btnPhysicalFull = new Button
             {
-                Padding = new Thickness(8, 3, 8, 3),
-                Margin = new Thickness(6, 0, 0, 0),
+                Padding = new Thickness(8, 2.5, 8, 2.5),
+                Margin = new Thickness(0, 0, 4, 3),
                 FontSize = 11,
                 Cursor = Cursors.Hand,
                 VerticalAlignment = VerticalAlignment.Center
@@ -127,11 +124,16 @@ namespace SnappyLayout.UI.Windows
                 }
             };
 
-            Grid.SetColumn(_areaPillsPanel, 0);
-            Grid.SetColumn(_btnPhysicalFull, 1);
-            selectorRow.Children.Add(_areaPillsPanel);
-            selectorRow.Children.Add(_btnPhysicalFull);
-            rootStack.Children.Add(selectorRow);
+            rootStack.Children.Add(_areaPillsPanel);
+
+            // Seçici satır ile yerleşim önizlemeleri arasında tam genişlikte yatay ayraç
+            var headerDivider = new Border
+            {
+                Height = 1,
+                Margin = new Thickness(0, 4, 0, 8)
+            };
+            headerDivider.SetResourceReference(Border.BackgroundProperty, "Win11BorderBrush");
+            rootStack.Children.Add(headerDivider);
 
             // 3) Windows 11 tarzı temiz yerleşim kutuları (kart çerçevesiz, doğrudan yuvarlatılmış kutular)
             _layoutsWrap = new WrapPanel
@@ -393,14 +395,28 @@ namespace SnappyLayout.UI.Windows
                 _monitorPillsPanel.Visibility = Visibility.Collapsed;
             }
 
-            // 2) Sanal monitör seçici hapları + Yan Yana Birleşik Tam Ekran (Span) çipleri
+            // 2) Gerçek Fiziksel Tam Ekran (en solda) | Sanal monitör seçici hapları | Birleşik tam ekran çipleri
             _areaPillsPanel.Children.Clear();
+            _btnPhysicalFull.Content = "⛶ " + Loc.T("FlyoutPhysicalFull");
+            _areaPillsPanel.Children.Add(_btnPhysicalFull);
+
             if (_monitorAreas.Count > 1)
             {
+                var physSep = new Border
+                {
+                    Width = 1,
+                    Height = 16,
+                    Margin = new Thickness(3, 0, 7, 3),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                physSep.SetResourceReference(Border.BackgroundProperty, "Win11BorderBrush");
+                _areaPillsPanel.Children.Add(physSep);
+
+                string vShort = Loc.T("VirtualShort");
                 foreach (var area in _monitorAreas)
                 {
                     bool active = area.SegmentIndex == _currentArea.SegmentIndex;
-                    var pill = MakeWin11Pill($"{Loc.T("VirtualShort")} {area.SegmentIndex + 1}", active);
+                    var pill = MakeWin11Pill($"{vShort} {area.SegmentIndex + 1}", active);
                     if (_monitorAreas.Count >= 3) pill.ToolTip = Loc.T("FlyoutSpanHint");
                     var captured = area;
                     pill.MouseEnter += (s, e) =>
@@ -441,7 +457,7 @@ namespace SnappyLayout.UI.Windows
                     _areaPillsPanel.Children.Add(pill);
                 }
 
-                // 3+ sanal monitör varsa yan yana 2'li birleşik tam ekran (örn. 1+2, 2+3) tek tık çipleri
+                // 3+ sanal monitör varsa yan yana 2'li birleşik tam ekran (örn. Virtual 1 + Virtual 2) tek tık çipleri
                 if (_monitorAreas.Count >= 3)
                 {
                     var sep = new Border
@@ -457,9 +473,9 @@ namespace SnappyLayout.UI.Windows
                     for (int i = 0; i < _monitorAreas.Count - 1; i++)
                     {
                         var spanArea = AreaService.CombineAreas(_monitorAreas, i, i + 1);
-                        string spanText = $"◫ {i + 1}+{i + 2}";
+                        string spanText = $"◫ {vShort} {i + 1} + {vShort} {i + 2}";
                         var spanPill = MakeWin11Pill(spanText, false);
-                        spanPill.ToolTip = $"{Loc.T("FlyoutSpanFull")} ({Loc.T("VirtualShort")} {i + 1} + {i + 2})";
+                        spanPill.ToolTip = $"{Loc.T("FlyoutSpanFull")} ({vShort} {i + 1} + {vShort} {i + 2})";
                         var capturedSpan = spanArea;
                         spanPill.MouseEnter += (s, e) =>
                         {
@@ -483,9 +499,6 @@ namespace SnappyLayout.UI.Windows
                     }
                 }
             }
-
-            // Gerçek Fiziksel Tam Ekran (Silinemez) düğmesi
-            _btnPhysicalFull.Content = "⛶ " + Loc.T("FlyoutPhysicalFull");
 
             // 3) Windows 11 tarzı yerleşim kutuları (her düzen tek kez görünür; yalnızca tam o bölgede bulunan uygulamaların ikonları çizilir)
             _layoutsWrap.Children.Clear();
