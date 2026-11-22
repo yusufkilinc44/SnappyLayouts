@@ -347,6 +347,7 @@ namespace SnappyLayout.UI.Windows
             double boxW = Math.Clamp(boxH * Math.Clamp(aspect, 0.55, 2.5), 52, 130);
 
             // 1) Sanal Monitör Tam Ekran (100%) her zaman en başta
+            var activeWinIcon = WindowIconProvider.GetWindowIcon(_openWindows, _draggedHwnd);
             var vmFull = new LayoutPreviewControl
             {
                 Layout = null,
@@ -354,6 +355,8 @@ namespace SnappyLayout.UI.Windows
                 IsEditor = false,
                 IsWin11Style = true,
                 ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(area, null, _openWindows, _draggedHwnd),
+                ActiveZoneIndex = WindowIconProvider.FindActiveWindowZoneIndex(area, null, _openWindows, _draggedHwnd),
+                ActiveZoneIcon = activeWinIcon,
                 Width = boxW,
                 Height = boxH,
                 Margin = new Thickness(0, 0, 10, 0)
@@ -376,6 +379,8 @@ namespace SnappyLayout.UI.Windows
                     IsEditor = false,
                     IsWin11Style = true,
                     ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(area, layout, _openWindows, _draggedHwnd),
+                    ActiveZoneIndex = WindowIconProvider.FindActiveWindowZoneIndex(area, layout, _openWindows, _draggedHwnd),
+                    ActiveZoneIcon = activeWinIcon,
                     Width = boxW,
                     Height = boxH,
                     Margin = new Thickness(0, 0, 10, 0)

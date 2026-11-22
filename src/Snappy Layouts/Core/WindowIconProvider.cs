@@ -223,6 +223,66 @@ namespace SnappyLayout.Core
             return result.Count > 0 ? result : null;
         }
 
+        /// <summary>
+        /// Hedef pencere (targetHwnd) şu anda seçili alan (area) içindeki bu düzenin belirli bir bölgesine
+        /// tam olarak yerleşmiş durumdaysa o bölgenin indeksini döndürür; değilse -1.
+        /// </summary>
+        public static int FindActiveWindowZoneIndex(SnapArea area, SnapLayout layout, IList<WindowItem> openWindows, IntPtr targetHwnd)
+        {
+            if (area == null || targetHwnd == IntPtr.Zero || !IsWindow(targetHwnd)) return -1;
+
+            RECT frame;
+            var item = openWindows?.FirstOrDefault(w => w.Hwnd == targetHwnd);
+            if (item != null)
+            {
+                if (item.Minimized) return -1;
+                frame = item.Frame;
+            }
+            else
+            {
+                if (IsIconic(targetHwnd)) return -1;
+                frame = GetExtendedFrame(targetHwnd);
+            }
+            if (frame.Width <= 0 || frame.Height <= 0) return -1;
+
+            int edgeTol = (int)Math.Round(24 * Math.Max(1.0, area.Monitor.Scale));
+
+            if (layout == null)
+            {
+                var zr = WindowPlacer.ZoneToPixels(area, new Rect(0, 0, 1, 1));
+                if (Math.Abs(frame.Left - zr.Left) <= edgeTol &&
+                    Math.Abs(frame.Top - zr.Top) <= edgeTol &&
+                    Math.Abs(frame.Right - zr.Right) <= edgeTol &&
+                    Math.Abs(frame.Bottom - zr.Bottom) <= edgeTol &&
+                    ComputeIoU(frame, zr) >= 0.85)
+                {
+                    return 0;
+                }
+                return -1;
+            }
+
+            for (int i = 0; i < layout.Zones.Count; i++)
+            {
+                var zr = WindowPlacer.ZoneToPixels(area, layout.GetZoneRect(layout.Zones[i]));
+                if (Math.Abs(frame.Left - zr.Left) <= edgeTol &&
+                    Math.Abs(frame.Top - zr.Top) <= edgeTol &&
+                    Math.Abs(frame.Right - zr.Right) <= edgeTol &&
+                    Math.Abs(frame.Bottom - zr.Bottom) <= edgeTol &&
+                    ComputeIoU(frame, zr) >= 0.85)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public static ImageSource GetWindowIcon(IList<WindowItem> openWindows, IntPtr targetHwnd)
+        {
+            if (targetHwnd == IntPtr.Zero) return null;
+            var item = openWindows?.FirstOrDefault(w => w.Hwnd == targetHwnd);
+            return GetIcon(targetHwnd, item?.ExePath);
+        }
+
         private static bool IsOccludedByEarlierWindow(RECT target, IList<WindowItem> openWindows, int targetIndex, IntPtr excludeHwnd)
         {
             double targetArea = Math.Max(1.0, (double)target.Width * target.Height);

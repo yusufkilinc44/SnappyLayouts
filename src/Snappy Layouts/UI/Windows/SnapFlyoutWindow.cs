@@ -554,6 +554,8 @@ namespace SnappyLayout.UI.Windows
             _outerBorder.Width = Math.Clamp(desiredW, 360, Math.Min(560, maxLogicalW));
 
             // Sanal Monitör Tam Ekran (100%) her zaman yerleşimlerin EN BAŞINDA yer alır
+            var activeWinIcon = WindowIconProvider.GetWindowIcon(_openWindows, _targetHwnd);
+
             string vmFullLabel = _currentArea.IsVirtual
                 ? $"{Loc.T("FlyoutVirtualFull")} (#{_currentArea.SegmentIndex + 1})"
                 : Loc.T("FlyoutVirtualFull");
@@ -565,6 +567,8 @@ namespace SnappyLayout.UI.Windows
                 IsEditor = false,
                 IsWin11Style = true,
                 ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(_currentArea, null, _openWindows, _targetHwnd),
+                ActiveZoneIndex = WindowIconProvider.FindActiveWindowZoneIndex(_currentArea, null, _openWindows, _targetHwnd),
+                ActiveZoneIcon = activeWinIcon,
                 Width = boxW,
                 Height = boxH,
                 Margin = new Thickness(7, 6, 7, 6),
@@ -603,6 +607,8 @@ namespace SnappyLayout.UI.Windows
                     IsEditor = false,
                     IsWin11Style = true,
                     ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(_currentArea, capturedLayout, _openWindows, _targetHwnd),
+                    ActiveZoneIndex = WindowIconProvider.FindActiveWindowZoneIndex(_currentArea, capturedLayout, _openWindows, _targetHwnd),
+                    ActiveZoneIcon = activeWinIcon,
                     Width = boxW,
                     Height = boxH,
                     Margin = new Thickness(7, 6, 7, 6),

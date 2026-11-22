@@ -120,6 +120,8 @@ namespace SnappyLayout.Services
                 SetBrush(r, "Win11ZoneStrokeBrush", "#6D6D6D");
                 SetBrush(r, "Win11ZoneHoverBrush", "#0078D4");
                 SetBrush(r, "Win11ZoneHoverStrokeBrush", "#60CDFF");
+                SetBrush(r, "Win11ActiveZoneFillBrush", "#1B4A73");
+                SetBrush(r, "Win11ActiveZoneStrokeBrush", "#60CDFF");
                 SetBrush(r, "Win11PermFillBrush", "#22463A");
                 SetBrush(r, "Win11PermStrokeBrush", "#34D399");
                 SetBrush(r, "Win11PermHoverBrush", "#10B981");
@@ -199,6 +201,8 @@ namespace SnappyLayout.Services
                 SetBrush(r, "Win11ZoneStrokeBrush", "#B4B4B4");
                 SetBrush(r, "Win11ZoneHoverBrush", "#0067C0");
                 SetBrush(r, "Win11ZoneHoverStrokeBrush", "#005A9E");
+                SetBrush(r, "Win11ActiveZoneFillBrush", "#BFE0FF");
+                SetBrush(r, "Win11ActiveZoneStrokeBrush", "#0067C0");
                 SetBrush(r, "Win11PermFillBrush", "#D1FAE5");
                 SetBrush(r, "Win11PermStrokeBrush", "#059669");
                 SetBrush(r, "Win11PermHoverBrush", "#059669");

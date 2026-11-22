@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.10";
+        public const string Version = "1.11";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.11", "22.11.2026",
+             "Snap Layouts Flyout ve Top Snap Bar açıldığında, o anki hedef pencere halihazırda bir yerleşim bölgesine oturmuş durumdaysa ilgili düzen içindeki kutusu parlak vurgu çerçevesi, aktif arka plan tonu, kendi uygulama ikonu ve sağ üst durum noktasıyla (●) işaretlenir.",
+             "When Snap Layouts Flyout or Top Snap Bar opens, if the current target window already occupies a snap zone, that exact zone box is highlighted with a bright accent border, active fill tint, the window's own app icon, and a top-right status dot (●) so you immediately see where the window currently sits."),
             ("1.10", "22.11.2026",
              "Kısayol atanmamış tüm işlemlere Türkçe Q (AltGr) ve Windows kısayollarıyla çakışmayan boş varsayılan tuş kombinasyonları atandı: 'Sanal monitörleri etkinleştir/devre dışı bırak' → Ctrl+Alt+V, Kayıtlı Sanal Monitör Şablonları → Ctrl+Alt+Shift+1..4 (yeni eklenenler otomatik boş kısayol alır), Çalışma Alanları → Ctrl+Alt+F1..F12. Mevcut ayarlar açılışta otomatik güncellenir.",
              "Assigned conflict-free default keyboard shortcuts (also safe for Turkish Q AltGr characters) to all previously unassigned actions: Toggle Virtual Monitors → Ctrl+Alt+V, saved Virtual Monitor Presets → Ctrl+Alt+Shift+1..4 (with automatic free-shortcut assignment for newly created presets), and Workspaces → Ctrl+Alt+F1..F12. Existing user configurations are automatically upgraded on startup."),

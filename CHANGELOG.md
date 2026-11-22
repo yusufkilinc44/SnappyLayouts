@@ -4,6 +4,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.11] — 2026-11-22
+### Added
+- **Active Window Current-Zone Indicator (`SnapFlyoutWindow` & `TopSnapBarWindow`):** When opening Snap Layouts for a window that already occupies an exact layout zone (4-edge alignment + `IoU >= 0.85`), that zone box is clearly marked with a bright accent border, active tint fill, the window's own application icon, and a top-right indicator dot (`●`) so you immediately see which zone the active window is currently in.
+
+---
+
 ## [v1.10] — 2026-11-22
 ### Added
 - **Conflict-Free Default Shortcuts for All Unassigned Actions:**

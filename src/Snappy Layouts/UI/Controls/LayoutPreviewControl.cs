@@ -72,6 +72,16 @@ namespace SnappyLayout.UI.Controls
         public Dictionary<int, ImageSource> ZoneIcons { get; set; }
 
         /// <summary>
+        /// Aktif/hedef pencere şu anda bu yerleşimin belirli bir bölgesine oturmuşsa o bölgenin indeksi (-1 = yok).
+        /// </summary>
+        public int ActiveZoneIndex { get; set; } = -1;
+
+        /// <summary>
+        /// Aktif/hedef pencerenin kendi uygulama ikonu (ActiveZoneIndex &gt;= 0 iken işaretli kutuda çizilir).
+        /// </summary>
+        public ImageSource ActiveZoneIcon { get; set; }
+
+        /// <summary>
         /// Tek bölgeli kutularda (ör. Sanal Monitör Tam Ekran) harici olarak seçili/vurgulu durumu açıp kapatır.
         /// </summary>
         public void SetForcedSelected(bool selected)
@@ -178,6 +188,8 @@ namespace SnappyLayout.UI.Controls
             var zoneHover = (TryFindResource(IsWin11Style ? "Win11ZoneHoverBrush" : "ZoneHoverBrush") as Brush) ?? Brushes.DodgerBlue;
             var zoneStroke = (TryFindResource(IsWin11Style ? "Win11ZoneStrokeBrush" : "ZoneStrokeBrush") as Brush) ?? Brushes.LightSlateGray;
             var zoneHoverStroke = (TryFindResource(IsWin11Style ? "Win11ZoneHoverStrokeBrush" : "ZoneHoverBrush") as Brush) ?? Brushes.White;
+            var activeZoneFill = (TryFindResource("Win11ActiveZoneFillBrush") as Brush) ?? zoneHover;
+            var activeZoneStroke = (TryFindResource("Win11ActiveZoneStrokeBrush") as Brush) ?? zoneHoverStroke;
             var permFill = (TryFindResource(IsWin11Style ? "Win11PermFillBrush" : "PermanentSubtleBrush") as Brush) ?? Brushes.DarkGreen;
             var permStroke = (TryFindResource(IsWin11Style ? "Win11PermStrokeBrush" : "PermanentBrush") as Brush) ?? Brushes.MediumSeaGreen;
             var permHover = (TryFindResource(IsWin11Style ? "Win11PermHoverBrush" : "PermanentBrush") as Brush) ?? Brushes.MediumSeaGreen;
@@ -199,18 +211,24 @@ namespace SnappyLayout.UI.Controls
             if (IsPermanentFull || Layout == null)
             {
                 bool hov = _hoverZoneIndex == 0;
+                bool isActive = !IsPermanentFull && !IsEditor && ActiveZoneIndex == 0;
                 ImageSource singleIcon = null;
-                bool hasSingleIcon = !IsPermanentFull && !IsEditor && ZoneIcons != null && ZoneIcons.TryGetValue(0, out singleIcon) && singleIcon != null;
+                if (isActive && ActiveZoneIcon != null)
+                    singleIcon = ActiveZoneIcon;
+                else if (!IsPermanentFull && !IsEditor && ZoneIcons != null)
+                    ZoneIcons.TryGetValue(0, out singleIcon);
+                bool hasSingleIcon = singleIcon != null;
 
                 // Win11 TopSnapBar stilinde Fiziksel Tam Ekran kutusu seçili değilken nötr görünür,
                 // yalnızca üzerine gelindiğinde yeşil olarak vurgulanır (seçiliymiş gibi kafa karışıklığı yaratmaz).
                 var fill = IsPermanentFull
                     ? (hov ? permHover : (IsWin11Style ? zoneFill : permFill))
-                    : (hov ? zoneHover : (hasSingleIcon && IsWin11Style ? iconZoneBg : zoneFill));
+                    : (hov ? zoneHover : (isActive ? activeZoneFill : (hasSingleIcon && IsWin11Style ? iconZoneBg : zoneFill)));
                 var stroke = IsPermanentFull
                     ? (hov ? Brushes.White : (IsWin11Style ? zoneStroke : permStroke))
-                    : (hov ? zoneHoverStroke : zoneStroke);
-                dc.DrawRoundedRectangle(fill, new Pen(stroke, IsWin11Style ? 1.15 : 1.5), inner, radius, radius);
+                    : (hov ? zoneHoverStroke : (isActive ? activeZoneStroke : zoneStroke));
+                double strokeThick = (isActive && !hov) ? 2.0 : (IsWin11Style ? 1.15 : 1.5);
+                dc.DrawRoundedRectangle(fill, new Pen(stroke, strokeThick), inner, radius, radius);
 
                 if (hasSingleIcon && inner.Width >= 16 && inner.Height >= 16)
                 {
@@ -223,6 +241,11 @@ namespace SnappyLayout.UI.Controls
                         new Typeface("Segoe UI Semibold"), IsEditor ? 13 : 10, hov ? Brushes.White : textBrush,
                         VisualTreeHelper.GetDpi(this).PixelsPerDip);
                     dc.DrawText(ft, new Point(inner.Left + (inner.Width - ft.Width) / 2, inner.Top + (inner.Height - ft.Height) / 2));
+                }
+
+                if (isActive && inner.Width >= 16 && inner.Height >= 16)
+                {
+                    dc.DrawEllipse(hov ? Brushes.White : activeZoneStroke, null, new Point(inner.Right - 6, inner.Top + 6), 3.0, 3.0);
                 }
                 return;
             }
@@ -239,16 +262,23 @@ namespace SnappyLayout.UI.Controls
                     Math.Max(2, rel.Height * inner.Height - gap));
 
                 bool hov = _hoverZoneIndex == i;
+                bool isActive = !IsEditor && ActiveZoneIndex == i;
                 bool sel = false;
                 var selRange = SelectedCellRange;
                 if (selRange != null && z.Intersects(selRange.Value.c0, selRange.Value.r0, selRange.Value.c1, selRange.Value.r1))
                     sel = true;
 
                 ImageSource zoneIcon = null;
-                bool hasIcon = !IsEditor && ZoneIcons != null && ZoneIcons.TryGetValue(i, out zoneIcon) && zoneIcon != null;
+                if (isActive && ActiveZoneIcon != null)
+                    zoneIcon = ActiveZoneIcon;
+                else if (!IsEditor && ZoneIcons != null)
+                    ZoneIcons.TryGetValue(i, out zoneIcon);
+                bool hasIcon = zoneIcon != null;
 
-                Brush fill = (hov || sel) ? zoneHover : (hasIcon && IsWin11Style ? iconZoneBg : zoneFill);
-                Pen pen = new Pen((hov || sel) ? (IsWin11Style ? zoneHoverStroke : Brushes.White) : zoneStroke, IsEditor ? 1.5 : 1.1);
+                Brush fill = (hov || sel) ? zoneHover : (isActive ? activeZoneFill : (hasIcon && IsWin11Style ? iconZoneBg : zoneFill));
+                Brush strokeB = (hov || sel) ? (IsWin11Style ? zoneHoverStroke : Brushes.White) : (isActive ? activeZoneStroke : zoneStroke);
+                double strokeT = (isActive && !hov && !sel) ? 2.0 : (IsEditor ? 1.5 : 1.1);
+                Pen pen = new Pen(strokeB, strokeT);
                 dc.DrawRoundedRectangle(fill, pen, zr, radius, radius);
 
                 if (hasIcon && zr.Width >= 14 && zr.Height >= 14)
@@ -264,6 +294,11 @@ namespace SnappyLayout.UI.Controls
                         VisualTreeHelper.GetDpi(this).PixelsPerDip);
                     if (ft.Width <= zr.Width - 6)
                         dc.DrawText(ft, new Point(zr.Left + (zr.Width - ft.Width) / 2, zr.Top + (zr.Height - ft.Height) / 2));
+                }
+
+                if (isActive && zr.Width >= 14 && zr.Height >= 14)
+                {
+                    dc.DrawEllipse((hov || sel) ? Brushes.White : activeZoneStroke, null, new Point(zr.Right - 5, zr.Top + 5), 2.8, 2.8);
                 }
             }
 
