@@ -34,6 +34,7 @@ namespace SnappyLayout.UI.Windows
         private IntPtr _draggedHwnd;
         private bool _trackingDrag;
         private SnapArea _currentArea;
+        private List<WindowItem> _openWindows = new List<WindowItem>();
         private readonly List<BarTileEntry> _tiles = new List<BarTileEntry>();
 
         private SnapArea _pendingArea;
@@ -103,6 +104,7 @@ namespace SnappyLayout.UI.Windows
 
                 _draggedHwnd = hwnd;
                 _trackingDrag = true;
+                _openWindows = WindowCatalog.GetAppWindows(includeMinimized: false);
                 ClearPending();
                 _pollTimer.Start();
             }
@@ -351,6 +353,7 @@ namespace SnappyLayout.UI.Windows
                 MonitorAspect = aspect,
                 IsEditor = false,
                 IsWin11Style = true,
+                ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(area, null, _openWindows, _draggedHwnd),
                 Width = boxW,
                 Height = boxH,
                 Margin = new Thickness(0, 0, 10, 0)
@@ -372,6 +375,7 @@ namespace SnappyLayout.UI.Windows
                     MonitorAspect = aspect,
                     IsEditor = false,
                     IsWin11Style = true,
+                    ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(area, layout, _openWindows, _draggedHwnd),
                     Width = boxW,
                     Height = boxH,
                     Margin = new Thickness(0, 0, 10, 0)

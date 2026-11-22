@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.4";
+        public const string Version = "1.5";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.5", "22.11.2026",
+             "Windows 11 orijinal Snap Layouts görünümünde olduğu gibi Snap Layout kutularının içinde açık uygulamaların ikonları eklendi: üst satırda son kullanılan diğer açık uygulamalarla çoklu pencere öneri şablonları (tıklandığında tüm önerilen pencereleri ilgili bölgelere tek tıkla yerleştirir) ve alt satırlar ile Top Snap Bar kutularında o bölgelerde halihazırda bulunan uygulamaların canlı ikonları gösterilir (WindowIconProvider — önbellekli ve sıfır bloklama).",
+             "Added Windows 11-style live application icons inside Snap Layout zones: a top row of smart multi-window layout suggestions displaying icons of recently used open apps (clicking arranges the active window and suggested companion apps together), plus live occupied-zone app icons in regular Snap Flyout and Top Snap Bar tiles via a fast, cached, zero-hang WindowIconProvider."),
             ("1.4", "22.11.2026",
              "Yeni bir Snappy Layouts örneği başlatıldığında (veya sürüm güncellendiğinde) kapanan eski örneğin Windows'un yerleşik Snap Layouts ayarlarını yanlışlıkla geri açması (single-instance race condition) giderildi ve uyku/ekran değişikliği sonrasında native Snap bastırmanın otomatik doğrulanması (EnsureSuppressed) eklendi.",
              "Fixed a single-instance handoff race condition where an exiting older instance could accidentally re-enable Windows's native Snap Layouts right after the new instance suppressed it, and added automatic EnsureSuppressed verification after display changes or waking from sleep."),

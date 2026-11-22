@@ -4,6 +4,15 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.5] — 2026-11-22
+### Added
+- **Live App Icons & Windows 11-Style Snap Suggestions in Layouts:**
+  - Added `WindowIconProvider` to extract and cache crisp per-window application icons (Win32, Chrome profile badges, Explorer folders, and UWP/WinUI apps) with zero blocking on hung windows.
+  - Added a Windows 11-style top **Snap Suggestions** row in `SnapFlyoutWindow` showing icons of your most recently used open apps inside multi-zone layouts (on recessed dark/light icon tiles); clicking a zone arranges both the active window and the suggested companion apps together on the selected physical or virtual monitor.
+  - Regular layout tiles in both `SnapFlyoutWindow` and `TopSnapBarWindow` also display icons of apps currently occupying matching zones.
+
+---
+
 ## [v1.4] — 2026-11-22
 ### Fixed
 - **Single-Instance Native Snap Suppression Race Fixed:** When a new instance of Snappy Layouts replaces an existing running instance (such as on restart or in-place upgrade), the exiting old instance no longer calls `RestoreWindowsNativeFlyout()` behind the new instance's back and cleanly releases its single-instance mutex.

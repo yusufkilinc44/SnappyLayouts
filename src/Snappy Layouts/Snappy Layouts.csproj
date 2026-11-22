@@ -15,10 +15,10 @@
     <AssemblyName>Snappy Layouts</AssemblyName>
 
     <!-- ===== VERSION: her değişiklikte artırılır (v0.1 → v0.2 → ... → v1.0 canlı) ===== -->
-    <Version>1.4.0</Version>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
-    <InformationalVersion>1.4</InformationalVersion>
+    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+    <InformationalVersion>1.5</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <Product>Snappy Layouts</Product>

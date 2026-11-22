@@ -67,6 +67,11 @@ namespace SnappyLayout.UI.Controls
         }
 
         /// <summary>
+        /// Windows 11 orijinal Snap Layouts görünümünde bölge kutularının içine çizilecek uygulama ikonları (zoneIndex -> ImageSource).
+        /// </summary>
+        public Dictionary<int, ImageSource> ZoneIcons { get; set; }
+
+        /// <summary>
         /// Tek bölgeli kutularda (ör. Sanal Monitör Tam Ekran) harici olarak seçili/vurgulu durumu açıp kapatır.
         /// </summary>
         public void SetForcedSelected(bool selected)
@@ -126,6 +131,7 @@ namespace SnappyLayout.UI.Controls
         {
             ClipToBounds = true;
             Cursor = Cursors.Hand;
+            RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.HighQuality);
             ThemeManager.ThemeChanged += InvalidateVisual;
             ThemeManager.WindowsThemeChanged += InvalidateVisual;
         }
@@ -168,6 +174,7 @@ namespace SnappyLayout.UI.Controls
             var frameBg = (TryFindResource("InputBgBrush") as Brush) ?? Brushes.Black;
             var frameStroke = (TryFindResource("CardBorderBrush") as Brush) ?? Brushes.Gray;
             var zoneFill = (TryFindResource(IsWin11Style ? "Win11ZoneFillBrush" : "ZoneFillBrush") as Brush) ?? Brushes.DarkSlateGray;
+            var iconZoneBg = (TryFindResource("Win11IconZoneBgBrush") as Brush) ?? zoneFill;
             var zoneHover = (TryFindResource(IsWin11Style ? "Win11ZoneHoverBrush" : "ZoneHoverBrush") as Brush) ?? Brushes.DodgerBlue;
             var zoneStroke = (TryFindResource(IsWin11Style ? "Win11ZoneStrokeBrush" : "ZoneStrokeBrush") as Brush) ?? Brushes.LightSlateGray;
             var zoneHoverStroke = (TryFindResource(IsWin11Style ? "Win11ZoneHoverStrokeBrush" : "ZoneHoverBrush") as Brush) ?? Brushes.White;
@@ -192,17 +199,25 @@ namespace SnappyLayout.UI.Controls
             if (IsPermanentFull || Layout == null)
             {
                 bool hov = _hoverZoneIndex == 0;
+                ImageSource singleIcon = null;
+                bool hasSingleIcon = !IsPermanentFull && !IsEditor && ZoneIcons != null && ZoneIcons.TryGetValue(0, out singleIcon) && singleIcon != null;
+
                 // Win11 TopSnapBar stilinde Fiziksel Tam Ekran kutusu seçili değilken nötr görünür,
                 // yalnızca üzerine gelindiğinde yeşil olarak vurgulanır (seçiliymiş gibi kafa karışıklığı yaratmaz).
                 var fill = IsPermanentFull
                     ? (hov ? permHover : (IsWin11Style ? zoneFill : permFill))
-                    : (hov ? zoneHover : zoneFill);
+                    : (hov ? zoneHover : (hasSingleIcon && IsWin11Style ? iconZoneBg : zoneFill));
                 var stroke = IsPermanentFull
                     ? (hov ? Brushes.White : (IsWin11Style ? zoneStroke : permStroke))
                     : (hov ? zoneHoverStroke : zoneStroke);
                 dc.DrawRoundedRectangle(fill, new Pen(stroke, IsWin11Style ? 1.15 : 1.5), inner, radius, radius);
 
-                if (!IsWin11Style && inner.Width > 50 && inner.Height > 24)
+                if (hasSingleIcon && inner.Width >= 16 && inner.Height >= 16)
+                {
+                    double sz = Math.Clamp(Math.Min(inner.Width, inner.Height) * 0.44, 14, 24);
+                    dc.DrawImage(singleIcon, new Rect(inner.Left + (inner.Width - sz) / 2.0, inner.Top + (inner.Height - sz) / 2.0, sz, sz));
+                }
+                else if (!IsWin11Style && inner.Width > 50 && inner.Height > 24)
                 {
                     var ft = new FormattedText("100%", CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                         new Typeface("Segoe UI Semibold"), IsEditor ? 13 : 10, hov ? Brushes.White : textBrush,
@@ -229,11 +244,19 @@ namespace SnappyLayout.UI.Controls
                 if (selRange != null && z.Intersects(selRange.Value.c0, selRange.Value.r0, selRange.Value.c1, selRange.Value.r1))
                     sel = true;
 
-                Brush fill = (hov || sel) ? zoneHover : zoneFill;
+                ImageSource zoneIcon = null;
+                bool hasIcon = !IsEditor && ZoneIcons != null && ZoneIcons.TryGetValue(i, out zoneIcon) && zoneIcon != null;
+
+                Brush fill = (hov || sel) ? zoneHover : (hasIcon && IsWin11Style ? iconZoneBg : zoneFill);
                 Pen pen = new Pen((hov || sel) ? (IsWin11Style ? zoneHoverStroke : Brushes.White) : zoneStroke, IsEditor ? 1.5 : 1.1);
                 dc.DrawRoundedRectangle(fill, pen, zr, radius, radius);
 
-                if (IsEditor && zr.Width > 42 && zr.Height > 22)
+                if (hasIcon && zr.Width >= 14 && zr.Height >= 14)
+                {
+                    double sz = Math.Clamp(Math.Min(zr.Width, zr.Height) * 0.56, 12, 22);
+                    dc.DrawImage(zoneIcon, new Rect(zr.Left + (zr.Width - sz) / 2.0, zr.Top + (zr.Height - sz) / 2.0, sz, sz));
+                }
+                else if (IsEditor && zr.Width > 42 && zr.Height > 22)
                 {
                     string label = $"{Math.Round(rel.Width * 100)}% × {Math.Round(rel.Height * 100)}%";
                     var ft = new FormattedText(label, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,

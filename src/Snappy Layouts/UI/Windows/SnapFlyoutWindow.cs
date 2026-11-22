@@ -28,10 +28,13 @@ namespace SnappyLayout.UI.Windows
         private List<MonitorInfo> _allMonitors = new List<MonitorInfo>();
         private SnapArea _currentArea;
         private List<SnapArea> _monitorAreas = new List<SnapArea>();
+        private List<WindowItem> _openWindows = new List<WindowItem>();
 
         private readonly Border _outerBorder;
         private readonly WrapPanel _monitorPillsPanel;
         private readonly WrapPanel _areaPillsPanel;
+        private readonly WrapPanel _suggestionsWrap;
+        private readonly Border _suggestionsSeparator;
         private readonly WrapPanel _layoutsWrap;
         private readonly Button _btnPhysicalFull;
         private readonly TextBlock _hoverStatusText;
@@ -130,7 +133,24 @@ namespace SnappyLayout.UI.Windows
             selectorRow.Children.Add(_btnPhysicalFull);
             rootStack.Children.Add(selectorRow);
 
-            // 3) Windows 11 tarzı temiz yerleşim kutuları (kart çerçevesiz, doğrudan yuvarlatılmış kutular)
+            // 3) Windows 11 tarzı akıllı uygulama önerileri satırı (diğer açık uygulamaların ikonlarıyla)
+            _suggestionsWrap = new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            rootStack.Children.Add(_suggestionsWrap);
+
+            _suggestionsSeparator = new Border
+            {
+                Height = 1,
+                Margin = new Thickness(6, 4, 6, 4),
+                Visibility = Visibility.Collapsed
+            };
+            _suggestionsSeparator.SetResourceReference(Border.BackgroundProperty, "Win11BorderBrush");
+            rootStack.Children.Add(_suggestionsSeparator);
+
+            // 4) Windows 11 tarzı temiz yerleşim kutuları (kart çerçevesiz, doğrudan yuvarlatılmış kutular)
             _layoutsWrap = new WrapPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -225,6 +245,7 @@ namespace SnappyLayout.UI.Windows
             ThemeManager.ApplyWindowsThemeToDictionary(Resources);
 
             _allMonitors = MonitorService.GetMonitors();
+            _openWindows = WindowCatalog.GetAppWindows(includeMinimized: false);
             var mon = MonitorService.FromPoint(anchorScreenPt);
             _selectedMonitor = _allMonitors.FirstOrDefault(m => m.Key == mon.Key) ?? mon;
             _monitorAreas = AreaService.GetAreas(_selectedMonitor);
@@ -454,7 +475,8 @@ namespace SnappyLayout.UI.Windows
             // Gerçek Fiziksel Tam Ekran (Silinemez) düğmesi
             _btnPhysicalFull.Content = "⛶ " + Loc.T("FlyoutPhysicalFull");
 
-            // 3) Windows 11 tarzı yerleşim kutuları (gerçek en/boy oranı, dış çerçevesiz)
+            // 3) Windows 11 tarzı akıllı öneriler (uygulama ikonlu üst satır) + normal yerleşim kutuları
+            _suggestionsWrap.Children.Clear();
             _layoutsWrap.Children.Clear();
             double aspect = _currentArea.Aspect;
             double boxH = 62;
@@ -464,13 +486,123 @@ namespace SnappyLayout.UI.Windows
             var layouts = areaLayouts.Where(l => l.IsVisibleFor(aspect)).ToList();
             if (layouts.Count == 0) layouts = areaLayouts.ToList();
 
+            // En son kullanılan diğer açık uygulamaları (en fazla 3) ve ikonlarını topla
+            var recentOthers = new List<(WindowItem Win, ImageSource Icon)>();
+            foreach (var w in _openWindows)
+            {
+                if (w.Hwnd == _targetHwnd || w.Minimized) continue;
+                var ico = WindowIconProvider.GetIcon(w.Hwnd, w.ExePath);
+                if (ico != null)
+                {
+                    recentOthers.Add((w, ico));
+                    if (recentOthers.Count >= 3) break;
+                }
+            }
+
+            // Windows 11 tarzı öneri düzenlerini seç (ör. 2 bölgeli, 3 bölgeli, 4 bölgeli)
+            var suggestionLayouts = new List<SnapLayout>();
+            if (recentOthers.Count >= 1)
+            {
+                int maxZones = recentOthers.Count + 1;
+                var usedCounts = new HashSet<int>();
+                foreach (var l in layouts)
+                {
+                    if (l.Zones.Count >= 2 && l.Zones.Count <= maxZones && usedCounts.Add(l.Zones.Count))
+                    {
+                        suggestionLayouts.Add(l);
+                        if (suggestionLayouts.Count >= 3) break;
+                    }
+                }
+                if (suggestionLayouts.Count < 3)
+                {
+                    foreach (var l in layouts)
+                    {
+                        if (l.Zones.Count >= 2 && l.Zones.Count <= maxZones && !suggestionLayouts.Contains(l))
+                        {
+                            suggestionLayouts.Add(l);
+                            if (suggestionLayouts.Count >= 3) break;
+                        }
+                    }
+                }
+            }
+
             // Sabit genişlik hesapla ki hover sırasında alt metin değişince pencere boyutu/konumu asla oynamasın (sıfır flicker)
             int totalTiles = 1 + layouts.Count;
-            int colsPerRow = Math.Min(totalTiles, boxW > 115 ? 3 : 4);
+            int colsPerRow = Math.Max(suggestionLayouts.Count, Math.Min(totalTiles, boxW > 115 ? 3 : 4));
             double desiredW = colsPerRow * (boxW + 14) + 32;
             _outerBorder.Width = Math.Clamp(desiredW, 380, 560);
 
-            // Sanal Monitör Tam Ekran (100%) her zaman yerleşimlerin EN BAŞINDA yer alır
+            if (suggestionLayouts.Count > 0)
+            {
+                _suggestionsWrap.Visibility = Visibility.Visible;
+                _suggestionsSeparator.Visibility = Visibility.Visible;
+
+                foreach (var sugLayout in suggestionLayouts)
+                {
+                    var capturedLayout = sugLayout;
+                    int companionCount = Math.Min(recentOthers.Count, capturedLayout.Zones.Count - 1);
+                    var companions = recentOthers.Take(companionCount).ToList();
+                    var iconMap = new Dictionary<int, ImageSource>();
+                    for (int k = 0; k < companions.Count; k++)
+                        iconMap[k + 1] = companions[k].Icon;
+
+                    string companionNames = string.Join(" + ", companions.Select(c =>
+                        System.IO.Path.GetFileNameWithoutExtension(c.Win.ExePath ?? c.Win.Title ?? "")));
+                    string sugTitle = $"{capturedLayout.DisplayTitle}  •  + {companionNames}";
+
+                    var sugPreview = new LayoutPreviewControl
+                    {
+                        Layout = capturedLayout,
+                        MonitorAspect = aspect,
+                        IsEditor = false,
+                        IsWin11Style = true,
+                        ZoneIcons = iconMap,
+                        Width = boxW,
+                        Height = boxH,
+                        Margin = new Thickness(7, 4, 7, 6),
+                        ToolTip = sugTitle
+                    };
+                    sugPreview.ZoneHovered += relRect =>
+                    {
+                        if (relRect == null || _currentArea == null)
+                        {
+                            ResetHoverStatus();
+                            _zonePreview.HidePreview();
+                        }
+                        else
+                        {
+                            _hoverStatusText.Text = sugTitle;
+                            _zonePreview.ShowRect(WindowPlacer.ZoneToPixels(_currentArea, relRect.Value), false, SelfHwnd);
+                        }
+                    };
+                    sugPreview.ZoneClicked += (relRect, cell) =>
+                    {
+                        if (_targetHwnd != IntPtr.Zero && _currentArea != null)
+                        {
+                            int clickedIdx = capturedLayout.Zones.IndexOf(cell);
+                            // Önce önerilen yan pencereleri diğer bölgelere yerleştir, ardından aktif pencereyi tıklanan bölgeye oturt
+                            int cIdx = 0;
+                            for (int z = 0; z < capturedLayout.Zones.Count && cIdx < companions.Count; z++)
+                            {
+                                if (z == clickedIdx) continue;
+                                var compWin = companions[cIdx++].Win;
+                                if (IsWindow(compWin.Hwnd))
+                                    WindowPlacer.SnapToZone(compWin.Hwnd, _currentArea, capturedLayout.GetZoneRect(capturedLayout.Zones[z]));
+                            }
+                            WindowPlacer.SnapToZone(_targetHwnd, _currentArea, relRect);
+                            HideFlyout();
+                        }
+                    };
+                    _suggestionsWrap.Children.Add(sugPreview);
+                }
+            }
+            else
+            {
+                _suggestionsWrap.Visibility = Visibility.Collapsed;
+                _suggestionsSeparator.Visibility = Visibility.Collapsed;
+            }
+
+            // Sanal Monitör Tam Ekran (100%) her zaman normal yerleşimlerin EN BAŞINDA yer alır
             string vmFullLabel = _currentArea.IsVirtual
                 ? $"{Loc.T("FlyoutVirtualFull")} (#{_currentArea.SegmentIndex + 1})"
                 : Loc.T("FlyoutVirtualFull");
@@ -481,6 +613,7 @@ namespace SnappyLayout.UI.Windows
                 MonitorAspect = aspect,
                 IsEditor = false,
                 IsWin11Style = true,
+                ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(_currentArea, null, _openWindows, _targetHwnd),
                 Width = boxW,
                 Height = boxH,
                 Margin = new Thickness(7, 6, 7, 6),
@@ -518,6 +651,7 @@ namespace SnappyLayout.UI.Windows
                     MonitorAspect = aspect,
                     IsEditor = false,
                     IsWin11Style = true,
+                    ZoneIcons = WindowIconProvider.BuildOccupiedZoneIcons(_currentArea, capturedLayout, _openWindows, _targetHwnd),
                     Width = boxW,
                     Height = boxH,
                     Margin = new Thickness(7, 6, 7, 6),
