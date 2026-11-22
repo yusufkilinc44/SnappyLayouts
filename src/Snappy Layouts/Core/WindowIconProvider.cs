@@ -157,7 +157,8 @@ namespace SnappyLayout.Core
         }
 
         /// <summary>
-        /// Seçili alan (SnapArea) üzerinde halihazırda belirli bölgelere yerleşmiş açık pencerelerin ikonlarını eşler.
+        /// Seçili alan (SnapArea) üzerinde GERÇEKTEN tam o bölgenin boyut ve konumunda bulunan
+        /// (ve üstü başka bir pencereyle kapanmamış) açık pencerelerin ikonlarını eşler.
         /// </summary>
         public static Dictionary<int, ImageSource> BuildOccupiedZoneIcons(SnapArea area, SnapLayout layout, IList<WindowItem> openWindows, IntPtr excludeHwnd)
         {
@@ -174,38 +175,70 @@ namespace SnappyLayout.Core
                     zoneRects.Add(WindowPlacer.ZoneToPixels(area, layout.GetZoneRect(layout.Zones[i])));
             }
 
+            // Kenar toleransı: yalnızca gerçekten o bölgeye yerleşmiş pencereleri kabul et
+            // (ör. %50 pencere %66 veya %33 kutuda ASLA görünmesin)
+            int edgeTol = (int)Math.Round(24 * Math.Max(1.0, area.Monitor.Scale));
+
             var result = new Dictionary<int, ImageSource>();
             var usedHwnds = new HashSet<IntPtr>();
 
             for (int zIdx = 0; zIdx < zoneRects.Count; zIdx++)
             {
                 var zr = zoneRects[zIdx];
-                double bestIou = 0.52;
-                WindowItem bestWin = null;
+                WindowItem matchedWin = null;
 
-                foreach (var w in openWindows)
+                for (int wi = 0; wi < openWindows.Count; wi++)
                 {
+                    var w = openWindows[wi];
                     if (w.Hwnd == excludeHwnd || w.Minimized || usedHwnds.Contains(w.Hwnd)) continue;
-                    double iou = ComputeIoU(w.Frame, zr);
-                    if (iou > bestIou)
-                    {
-                        bestIou = iou;
-                        bestWin = w;
-                    }
+
+                    // 4 kenar da hedef bölgeye tam oturmalı + IoU >= 0.85
+                    if (Math.Abs(w.Frame.Left - zr.Left) > edgeTol ||
+                        Math.Abs(w.Frame.Top - zr.Top) > edgeTol ||
+                        Math.Abs(w.Frame.Right - zr.Right) > edgeTol ||
+                        Math.Abs(w.Frame.Bottom - zr.Bottom) > edgeTol)
+                        continue;
+
+                    if (ComputeIoU(w.Frame, zr) < 0.85) continue;
+
+                    // Z-sırasında kendisinden önde bulunan başka bir pencere bu pencereyi tamamen kapatıyorsa gösterme
+                    if (IsOccludedByEarlierWindow(w.Frame, openWindows, wi, excludeHwnd))
+                        continue;
+
+                    matchedWin = w;
+                    break; // openWindows Z-sırasındadır (önden arkaya) → en üstteki eşleşeni al
                 }
 
-                if (bestWin != null)
+                if (matchedWin != null)
                 {
-                    var ico = GetIcon(bestWin.Hwnd, bestWin.ExePath);
+                    var ico = GetIcon(matchedWin.Hwnd, matchedWin.ExePath);
                     if (ico != null)
                     {
                         result[zIdx] = ico;
-                        usedHwnds.Add(bestWin.Hwnd);
+                        usedHwnds.Add(matchedWin.Hwnd);
                     }
                 }
             }
 
             return result.Count > 0 ? result : null;
+        }
+
+        private static bool IsOccludedByEarlierWindow(RECT target, IList<WindowItem> openWindows, int targetIndex, IntPtr excludeHwnd)
+        {
+            double targetArea = Math.Max(1.0, (double)target.Width * target.Height);
+            for (int i = 0; i < targetIndex; i++)
+            {
+                var front = openWindows[i];
+                if (front.Hwnd == excludeHwnd || front.Minimized) continue;
+                int il = Math.Max(target.Left, front.Frame.Left);
+                int it = Math.Max(target.Top, front.Frame.Top);
+                int ir = Math.Min(target.Right, front.Frame.Right);
+                int ib = Math.Min(target.Bottom, front.Frame.Bottom);
+                if (ir <= il || ib <= it) continue;
+                double covered = (double)(ir - il) * (ib - it);
+                if (covered / targetArea >= 0.85) return true;
+            }
+            return false;
         }
 
         private static double ComputeIoU(RECT a, RECT b)

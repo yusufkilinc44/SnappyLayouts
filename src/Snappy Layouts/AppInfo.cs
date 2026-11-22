@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.5";
+        public const string Version = "1.6";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.6", "22.11.2026",
+             "Snap Layout kutularındaki uygulama ikonları artık yalnızca gerçekten tam o bölgenin boyut ve konumunda bulunan (üstü başka pencereyle kapanmamış) uygulamalar için gösterilir (4 kenar toleransı + IoU >= 0.85). Tekrarlayan öneri satırı kaldırılarak her düzenin tek kez ve yalnızca gerçek canlı pencere ikonlarıyla görünmesi sağlandı.",
+             "Refined live app icons inside Snap Layout zones to appear strictly when a visible, unoccluded window actually occupies that exact zone size and position (4-edge tolerance + IoU >= 0.85), and removed the duplicate suggestion row so each layout appears once with accurate live occupancy icons."),
             ("1.5", "22.11.2026",
              "Windows 11 orijinal Snap Layouts görünümünde olduğu gibi Snap Layout kutularının içinde açık uygulamaların ikonları eklendi: üst satırda son kullanılan diğer açık uygulamalarla çoklu pencere öneri şablonları (tıklandığında tüm önerilen pencereleri ilgili bölgelere tek tıkla yerleştirir) ve alt satırlar ile Top Snap Bar kutularında o bölgelerde halihazırda bulunan uygulamaların canlı ikonları gösterilir (WindowIconProvider — önbellekli ve sıfır bloklama).",
              "Added Windows 11-style live application icons inside Snap Layout zones: a top row of smart multi-window layout suggestions displaying icons of recently used open apps (clicking arranges the active window and suggested companion apps together), plus live occupied-zone app icons in regular Snap Flyout and Top Snap Bar tiles via a fast, cached, zero-hang WindowIconProvider."),

@@ -4,6 +4,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.6] — 2026-11-22
+### Fixed
+- **Strict Exact-Zone App Icons & No Duplicate Layouts:** Removed the duplicated top suggestion row from `SnapFlyoutWindow` so every layout appears once, and tightened `WindowIconProvider.BuildOccupiedZoneIcons` to require exact 4-edge alignment (`<= 24px * scale`), `IoU >= 0.85`, and Z-order occlusion filtering — ensuring an app icon only appears inside a zone that the app genuinely occupies at that exact size and position.
+
+---
+
 ## [v1.5] — 2026-11-22
 ### Added
 - **Live App Icons & Windows 11-Style Snap Suggestions in Layouts:**
