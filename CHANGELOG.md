@@ -4,6 +4,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.12] — 2026-11-22
+### Changed
+- **3-Row Snap Flyout Header Layout & Overflow Protection (`SnapFlyoutWindow`):** Separated selector button types into dedicated rows — Row 1: Physical Monitors; Row 2: Full Physical Monitor + Virtual Monitors; Row 3 (when 3+ virtual monitors exist): Combined Span buttons (`Virtual 1 + Virtual 2`, etc.) — with dynamic width clamping and repositioning so every row always fits cleanly on screen without overflowing.
+
+---
+
 ## [v1.11] — 2026-11-22
 ### Added
 - **Active Window Current-Zone Indicator (`SnapFlyoutWindow` & `TopSnapBarWindow`):** When opening Snap Layouts for a window that already occupies an exact layout zone (4-edge alignment + `IoU >= 0.85`), that zone box is clearly marked with a bright accent border, active tint fill, the window's own application icon, and a top-right indicator dot (`●`) so you immediately see which zone the active window is currently in.

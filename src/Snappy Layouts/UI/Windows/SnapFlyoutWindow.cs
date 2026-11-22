@@ -35,6 +35,7 @@ namespace SnappyLayout.UI.Windows
         private readonly Border _outerBorder;
         private readonly WrapPanel _monitorPillsPanel;
         private readonly WrapPanel _areaPillsPanel;
+        private readonly WrapPanel _spanPillsPanel;
         private readonly WrapPanel _layoutsWrap;
         private readonly Button _btnPhysicalFull;
         private readonly TextBlock _hoverStatusText;
@@ -126,7 +127,17 @@ namespace SnappyLayout.UI.Windows
 
             rootStack.Children.Add(_areaPillsPanel);
 
-            // Seçici satır ile yerleşim önizlemeleri arasında tam genişlikte yatay ayraç
+            // 2.5) Birleştirilmiş sanal monitör satırı (örn. Virtual 1 + Virtual 2) — yalnızca 3+ sanal monitör varsa görünür
+            _spanPillsPanel = new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 2, 0, 2),
+                Visibility = Visibility.Collapsed
+            };
+            rootStack.Children.Add(_spanPillsPanel);
+
+            // Seçici satırlar ile yerleşim önizlemeleri arasında tam genişlikte yatay ayraç
             var headerDivider = new Border
             {
                 Height = 1,
@@ -429,8 +440,11 @@ namespace SnappyLayout.UI.Windows
                 _monitorPillsPanel.Visibility = Visibility.Collapsed;
             }
 
-            // 2) Gerçek Fiziksel Tam Ekran (en solda) | Sanal monitör seçici hapları | Birleşik tam ekran çipleri
+            // 2) Satır 2: Gerçek Fiziksel Monitör (en solda) | Sanal monitör seçici hapları
             _areaPillsPanel.Children.Clear();
+            _spanPillsPanel.Children.Clear();
+            _spanPillsPanel.Visibility = Visibility.Collapsed;
+
             _btnPhysicalFull.Content = "⛶ " + Loc.T("FlyoutPhysicalFull");
             _areaPillsPanel.Children.Add(_btnPhysicalFull);
 
@@ -487,23 +501,16 @@ namespace SnappyLayout.UI.Windows
                         _currentArea = captured;
                         _zonePreview.HidePreview();
                         RebuildUI();
+                        if (IsVisible && _anchorMonitor != null)
+                            PositionWithinMonitor(_anchorMonitor, _lastAnchorPt);
                     };
                     _areaPillsPanel.Children.Add(pill);
                 }
 
-                // 3+ sanal monitör varsa yan yana 2'li birleşik tam ekran (örn. Virtual 1 + Virtual 2) tek tık çipleri
+                // 3) Satır 3: 3+ sanal monitör varsa birleştirilmiş sanal ekran butonları ayrı satırda (örn. Virtual 1 + Virtual 2)
                 if (_monitorAreas.Count >= 3)
                 {
-                    var sep = new Border
-                    {
-                        Width = 1,
-                        Height = 16,
-                        Margin = new Thickness(3, 0, 7, 3),
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-                    sep.SetResourceReference(Border.BackgroundProperty, "Win11BorderBrush");
-                    _areaPillsPanel.Children.Add(sep);
-
+                    _spanPillsPanel.Visibility = Visibility.Visible;
                     for (int i = 0; i < _monitorAreas.Count - 1; i++)
                     {
                         var spanArea = AreaService.CombineAreas(_monitorAreas, i, i + 1);
@@ -529,12 +536,12 @@ namespace SnappyLayout.UI.Windows
                                 HideFlyout();
                             }
                         };
-                        _areaPillsPanel.Children.Add(spanPill);
+                        _spanPillsPanel.Children.Add(spanPill);
                     }
                 }
             }
 
-            // 3) Windows 11 tarzı yerleşim kutuları (her düzen tek kez görünür; yalnızca tam o bölgede bulunan uygulamaların ikonları çizilir)
+            // 4) Windows 11 tarzı yerleşim kutuları (her düzen tek kez görünür; yalnızca tam o bölgede bulunan uygulamaların ikonları çizilir)
             _layoutsWrap.Children.Clear();
             double aspect = _currentArea.Aspect;
             double boxH = 62;
@@ -544,14 +551,19 @@ namespace SnappyLayout.UI.Windows
             var layouts = areaLayouts.Where(l => l.IsVisibleFor(aspect)).ToList();
             if (layouts.Count == 0) layouts = areaLayouts.ToList();
 
-            // Sabit genişlik hesapla ki hover sırasında alt metin değişince pencere boyutu/konumu asla oynamasın (sıfır flicker)
-            // ve hedef monitörün çalışma alanını asla aşmasın
+            // Sabit genişlik hesapla: sanal monitör satırının tek satıra rahat sığmasını sağla ve
+            // hedef monitörün çalışma alanını asla aşma (sıfır taşma / sıfır flicker)
             int totalTiles = 1 + layouts.Count;
             int colsPerRow = Math.Min(totalTiles, boxW > 115 ? 3 : 4);
             double desiredW = colsPerRow * (boxW + 14) + 32;
+            if (_monitorAreas.Count > 1)
+            {
+                double areaRowEstW = 165 + _monitorAreas.Count * 84 + 32;
+                desiredW = Math.Max(desiredW, areaRowEstW);
+            }
             var hostMon = _anchorMonitor ?? _selectedMonitor;
-            double maxLogicalW = hostMon != null ? Math.Max(340, (hostMon.WorkArea.Width / Math.Max(1.0, hostMon.Scale)) - 48) : 560;
-            _outerBorder.Width = Math.Clamp(desiredW, 360, Math.Min(560, maxLogicalW));
+            double maxLogicalW = hostMon != null ? Math.Max(320, (hostMon.WorkArea.Width / Math.Max(1.0, hostMon.Scale)) - 48) : 580;
+            _outerBorder.Width = Math.Clamp(desiredW, Math.Min(360, maxLogicalW), Math.Min(580, maxLogicalW));
 
             // Sanal Monitör Tam Ekran (100%) her zaman yerleşimlerin EN BAŞINDA yer alır
             var activeWinIcon = WindowIconProvider.GetWindowIcon(_openWindows, _targetHwnd);
