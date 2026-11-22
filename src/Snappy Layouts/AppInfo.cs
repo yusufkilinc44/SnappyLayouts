@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.8";
+        public const string Version = "1.9";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.9", "22.11.2026",
+             "Yerleşim Düzenleri ve tüm ekranlarda önemli arayüz geliştirmeleri: (1) Sabit ilk düzen olan 'Sanal Monitör Tam Ekran' artık tıklanabilir/seçilebilir (sağda ayarları ve %100 önizlemesi görünür), yalnızca seçili olduğunda vurgulu çerçeve alır (çift seçili kutu görünümü giderildi), 'SABİT / SİLİNEMEZ' rozeti + kilit ikonu taşır ve sırası değiştirilemez. (2) Diğer tüm yerleşim düzenleri ▲/▼ butonlarıyla yeniden sıralanabilir. (3) Liste üstüne çoklu seçimli Ekran Tipi Filtre Çubuğu (Standart / Ultra-Geniş / Dikey) eklendi. (4) 'Full Physical Screen' tüm dillerde 'Full Physical Monitor' / 'Tam Fiziksel Monitör' olarak güncellendi. (5) Fiziksel Monitörler (koyu mavi/indigo donanım kartı) ile Sanal Monitörler (camgöbeği/turkuaz yuvarlak hap) renk, yazı tipi ve biçim olarak tüm ekranlarda belirgin şekilde ayrıştırıldı.",
+             "Major UI & UX improvements across Snap Layouts and all screens: (1) The permanent first 'Virtual Monitor Fullscreen' card is now clickable/selectable (displaying its behavior settings, shortcut, and 100% preview on the right), only highlights its border when actually selected (eliminating the double-selected border effect), displays a 'PERMANENT / INDELETABLE' badge + lock icon, and remains pinned at #1. (2) Added ▲/▼ reorder buttons for all custom/standard layouts. (3) Added a multi-select Screen Type Filter Bar (Standard / Ultra-Wide / Portrait) above the layout list. (4) Renamed 'Full Physical Screen' to 'Full Physical Monitor' across all 8 languages while keeping Fullscreen labels unchanged. (5) Visually differentiated Physical Monitor buttons (bold indigo/blue hardware cards) from Virtual Monitor buttons (vibrant cyan/teal rounded pills) across Snap Layouts, Virtual Monitors, Settings & DPI, and the Snap Flyout."),
             ("1.8", "22.11.2026",
              "Snap Layouts Flyout üst çubuğu düzenlendi: yeşil 'Full Physical Screen' butonu sanal monitör satırının en soluna alındı, sanal monitör varsa araya dikey ayraç eklendi (yoksa ayraç gizlenir), birleşik tam ekran butonları 'Virtual 1 + Virtual 2' biçiminde adlandırıldı ve bu satırın altına tam genişlikte yatay ayraç çizgisi eklendi.",
              "Refined the Snap Layouts Flyout header bar: moved the green 'Full Physical Screen' button to the far left of the virtual monitors row with a vertical divider when virtual monitors exist, labeled span chips using full virtual monitor names (e.g., 'Virtual 1 + Virtual 2'), and added a full-width horizontal divider below the selector row."),

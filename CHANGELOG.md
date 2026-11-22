@@ -4,6 +4,19 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.9] — 2026-11-22
+### Added
+- **Reorderable Snap Layouts (`▲` / `▼`):** Added Move Up and Move Down controls on every non-permanent layout card in the Snap Layouts tab so you can customize the exact display order across the Snap Flyout and Top Snap Bar. The permanent **Virtual Monitor Fullscreen** item stays pinned at position #1.
+- **Multi-Select Screen Type Filter Bar:** Added a multi-select toggle chip bar above the layout list (`Standard`, `Ultra-Wide`, `Portrait`) with a live match counter (`visible / total`) to quickly filter layouts by target screen orientation.
+- **Selectable Virtual Monitor Fullscreen Panel:** Clicking the permanent **Virtual Monitor Fullscreen** card now selects it exclusively and displays its dedicated settings & details panel on the right (100% true-aspect preview, target resolution/DPI, shortcut, and direct Virtual Maximize / Shift-bypass toggles).
+
+### Changed
+- **Eliminated Double-Selected Border & Added Permanent Badge:** The **Virtual Monitor Fullscreen** card now only shows an active selection border when actually selected, and includes the same `🔒 PERMANENT / INDELETABLE` badge and lock icon as the Full Physical Monitor card.
+- **Renamed "Full Physical Screen" → "Full Physical Monitor":** Updated `PermFullTitle`, `FlyoutPhysicalFull`, and related labels across all 8 languages while keeping Fullscreen labels unchanged.
+- **Distinct Physical Monitor vs. Virtual Monitor Visual Language:** Applied unmistakable color, shape, and typography differentiation across **Snap Layouts**, **Virtual Monitors**, **Settings & DPI**, and **Snap Flyout** — Physical Monitors use bold indigo/blue hardware cards (`🖥`) while Virtual Monitors use vibrant cyan/teal rounded pills (`◫`).
+
+---
+
 ## [v1.8] — 2026-11-22
 ### Changed
 - **Snap Flyout Header Layout Polish:** Moved the green **Full Physical Screen** button to the far left of the Virtual Monitors selector row with a vertical divider when virtual monitors are present (no divider when none exist), updated multi-virtual-monitor span chip labels to use full names (`Virtual 1 + Virtual 2`, `Virtual 2 + Virtual 3`, localized), and added a full-width horizontal divider line below the selector row.

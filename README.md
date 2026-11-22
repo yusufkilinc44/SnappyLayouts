@@ -1,11 +1,11 @@
-# Snappy Layouts v1.8
+# Snappy Layouts v1.9
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6?logo=windows)](https://github.com/yusufkilinc44/SnappyLayouts)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20WPF-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![DPI](https://img.shields.io/badge/DPI-Per--Monitor%20V2-10B981)](ARCHITECTURE.md)
 [![Languages](https://img.shields.io/badge/UI%20Languages-8%20Languages%20(EN%20%7C%20TR%20%7C%20ES%20%7C%20PT%20%7C%20ZH%20%7C%20FR%20%7C%20DE%20%7C%20RU)-6366F1)](#6-per-monitor-v2-dynamic-dpi-localization--theming)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v1.8-3B82F6)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v1.9-3B82F6)](CHANGELOG.md)
 
 **Author / Design & Programming:** **YUSUF KILINÇ — November 2026**
 
@@ -157,20 +157,20 @@ Snappy Layouts/
 ## Installation
 
 ### Option 1 — Windows Installer (Recommended)
-1. Download **`SnappyLayouts-v1.8-Setup.exe`** from the [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases) page.
+1. Download **`SnappyLayouts-v1.9-Setup.exe`** from the [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases) page.
 2. Run the installer — installs cleanly into **`C:\Program Files\Snappy Layouts`** with optional Start Menu / Desktop shortcuts and *Start with Windows*.
 3. No `.NET` runtime installation is required (fully self-contained).
 4. Can be cleanly upgraded in-place (no uninstall required) or uninstalled anytime via **Windows Settings → Installed Apps** (automatically restores native Windows Snap settings).
 
 ### Option 2 — Portable ZIP (No Installation)
-1. Download **`SnappyLayouts-v1.8-Portable-win-x64.zip`** from [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases).
+1. Download **`SnappyLayouts-v1.9-Portable-win-x64.zip`** from [GitHub Releases](https://github.com/yusufkilinc44/SnappyLayouts/releases).
 2. Extract to any permanent folder and run **`Snappy Layouts.exe`**.
 
 > [!NOTE]
 > **Windows SmartScreen & Antivirus Notice (Unsigned Open-Source Binary)**  
 > **Snappy Layouts** is a free, independent open-source project and is not yet signed with a paid Authenticode code-signing certificate. Because it is unsigned and uses standard Windows window-management APIs (`SetWinEventHook`, `WH_MOUSE_LL`, `DWM`), **Windows Defender SmartScreen** (*"Windows protected your PC — Unknown publisher"*) or heuristic antivirus scanners (such as Bitdefender) may show a false-positive warning on first launch:
 > - **SmartScreen ("Warn" mode):** Click **More info → Run anyway**.
-> - **SmartScreen ("Block" mode — only *"Don't run"* shown):** Right-click the downloaded `SnappyLayouts-v1.8-Setup.exe` → **Properties** → check **Unblock** → **Apply / OK**, then run the installer again.
+> - **SmartScreen ("Block" mode — only *"Don't run"* shown):** Right-click the downloaded `SnappyLayouts-v1.9-Setup.exe` → **Properties** → check **Unblock** → **Apply / OK**, then run the installer again.
 > - **Third-Party Antivirus:** If your antivirus flags the installed app, add `C:\Program Files\Snappy Layouts` to its exclusions.
 > - **Full Transparency:** Every release binary is compiled publicly from this repository via [GitHub Actions](https://github.com/yusufkilinc44/SnappyLayouts/actions) with zero telemetry or network access (see [SECURITY.md](SECURITY.md)), or you can build directly from source below.
 
@@ -185,7 +185,7 @@ cd SnappyLayouts
 dotnet build "Snappy Layouts.sln" -c Release
 
 # Or build self-contained Portable ZIP + Windows Setup.exe into dist/
-.\installer\build-release.ps1 -Version "1.8"
+.\installer\build-release.ps1 -Version "1.9"
 ```
 
 ---

@@ -334,19 +334,53 @@ namespace SnappyLayout.UI.Windows
             HideFlyout();
         }
 
-        private Button MakeWin11Pill(string text, bool active)
+        private Button MakeWin11Pill(string text, bool active, bool isVirtual = false)
         {
             var pill = new Button
             {
                 Content = text,
-                Padding = new Thickness(8, 2.5, 8, 2.5),
+                Padding = isVirtual ? new Thickness(9, 2.5, 9, 2.5) : new Thickness(9, 3, 9, 3),
                 Margin = new Thickness(0, 0, 4, 3),
-                FontSize = 11,
-                FontWeight = active ? FontWeights.SemiBold : FontWeights.Normal,
+                FontSize = isVirtual ? 10.5 : 11.5,
+                FontWeight = isVirtual
+                    ? (active ? FontWeights.Bold : FontWeights.Medium)
+                    : (active ? FontWeights.Bold : FontWeights.SemiBold),
                 Cursor = Cursors.Hand
             };
-            pill.SetResourceReference(Button.BackgroundProperty, active ? "Win11PillActiveBgBrush" : "Win11PillBgBrush");
-            pill.SetResourceReference(Button.BorderBrushProperty, active ? "Win11PillActiveBorderBrush" : "Win11PillBorderBrush");
+
+            // Fiziksel monitör (köşeli mavi kart) vs Sanal monitör (yuvarlatılmış camgöbeği hap) görsel ayrımı
+            var template = new ControlTemplate(typeof(Button));
+            var borderFactory = new FrameworkElementFactory(typeof(Border));
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(isVirtual ? 12 : 5));
+            borderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(active ? 1.5 : 1));
+            borderFactory.SetBinding(Border.BackgroundProperty, new System.Windows.Data.Binding("Background") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            borderFactory.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding("BorderBrush") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            borderFactory.SetBinding(Border.PaddingProperty, new System.Windows.Data.Binding("Padding") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            var contentFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            contentFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            borderFactory.AppendChild(contentFactory);
+            template.VisualTree = borderFactory;
+            pill.Template = template;
+
+            if (isVirtual)
+            {
+                pill.SetResourceReference(Button.BackgroundProperty, active ? "Win11VirtPillActiveBgBrush" : "Win11VirtPillBgBrush");
+                pill.SetResourceReference(Button.BorderBrushProperty, active ? "Win11VirtPillActiveBorderBrush" : "Win11VirtPillBorderBrush");
+                if (active)
+                    pill.Foreground = Brushes.White;
+                else
+                    pill.SetResourceReference(Button.ForegroundProperty, "VirtMonFgBrush");
+            }
+            else
+            {
+                pill.SetResourceReference(Button.BackgroundProperty, active ? "Win11PillActiveBgBrush" : "Win11PillBgBrush");
+                pill.SetResourceReference(Button.BorderBrushProperty, active ? "Win11PillActiveBorderBrush" : "Win11PillBorderBrush");
+                if (active)
+                    pill.Foreground = Brushes.White;
+                else
+                    pill.SetResourceReference(Button.ForegroundProperty, "TextPrimaryBrush");
+            }
             return pill;
         }
 
@@ -416,7 +450,7 @@ namespace SnappyLayout.UI.Windows
                 foreach (var area in _monitorAreas)
                 {
                     bool active = area.SegmentIndex == _currentArea.SegmentIndex;
-                    var pill = MakeWin11Pill($"{vShort} {area.SegmentIndex + 1}", active);
+                    var pill = MakeWin11Pill($"◫ {vShort} {area.SegmentIndex + 1}", active, isVirtual: true);
                     if (_monitorAreas.Count >= 3) pill.ToolTip = Loc.T("FlyoutSpanHint");
                     var captured = area;
                     pill.MouseEnter += (s, e) =>
@@ -474,7 +508,7 @@ namespace SnappyLayout.UI.Windows
                     {
                         var spanArea = AreaService.CombineAreas(_monitorAreas, i, i + 1);
                         string spanText = $"◫ {vShort} {i + 1} + {vShort} {i + 2}";
-                        var spanPill = MakeWin11Pill(spanText, false);
+                        var spanPill = MakeWin11Pill(spanText, false, isVirtual: true);
                         spanPill.ToolTip = $"{Loc.T("FlyoutSpanFull")} ({vShort} {i + 1} + {vShort} {i + 2})";
                         var capturedSpan = spanArea;
                         spanPill.MouseEnter += (s, e) =>

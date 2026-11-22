@@ -136,11 +136,19 @@ namespace SnappyLayout.Services
             ["Primary"] = "Birincil",
 
             // Silinemez Gerçek Tam Ekran
-            ["PermFullTitle"] = "Gerçek Fiziksel Tam Ekran (Silinemez)",
+            ["PermFullTitle"] = "Tam Fiziksel Monitör (Silinemez)",
             ["PermFullDesc"] = "Sanal monitörler aktif olsa bile pencereyi gerçek fiziksel monitörün tamamına kaplatır. Bu yerleşim her zaman mevcuttur ve silinemez.",
             ["PermFullBadge"] = "SABİT / SİLİNEMEZ",
             ["VirtualFullTitle"] = "Sanal Monitör Tam Ekran",
             ["VirtualFullDesc"] = "Pencereyi yalnızca bulunduğu sanal monitörün sınırları içinde tam ekran yapar.",
+            ["CannotDeleteVirtualFull"] = "Sanal Monitör Tam Ekran yerleşimi sabit bir sistem öğesidir; silinemez ve sırası değiştirilemez.",
+            ["VirtualFullSettingsTitle"] = "Sanal Monitör Tam Ekran Davranışı",
+            ["VirtualFullShortcutLabel"] = "Klavye Kısayolu:",
+            ["Coverage"] = "Kapsama:",
+            ["MoveUp"] = "Yukarı Taşı",
+            ["MoveDown"] = "Aşağı Taşı",
+            ["FilterByScreenTypes"] = "Ekran Tipine Göre Filtrele:",
+            ["NoMatchingLayouts"] = "Seçili ekran tipi filtresine uyan yerleşim düzeni yok.",
 
             // Yerleşim Düzenleri Sekmesi
             ["LayoutsTitle"] = "Pencere Yerleşim Düzenleri",
@@ -168,7 +176,7 @@ namespace SnappyLayout.Services
             ["VisibilityFilter"] = "Gösterileceği Ekran Tipleri:",
             ["TestFlyoutBtn"] = "Yerleşim Menüsünü Şimdi Göster",
             ["ZonesCount"] = "bölge",
-            ["CannotDeletePermanent"] = "Gerçek fiziksel tam ekran yerleşimi sabit bir sistem öğesidir ve silinemez.",
+            ["CannotDeletePermanent"] = "Tam Fiziksel Monitör yerleşimi sabit bir sistem öğesidir ve silinemez.",
 
             // Sanal Monitörler Sekmesi
             ["VmTitle"] = "Sanal Monitörler (Yan Yana Bölme)",
@@ -271,7 +279,7 @@ namespace SnappyLayout.Services
             // Flyout (Maksimize Üstü Açılır Pencere)
             ["FlyoutHeader"] = "Pencere Yerleşimi Seçin",
             ["FlyoutVirtualFull"] = "Sanal Monitör Tam Ekran",
-            ["FlyoutPhysicalFull"] = "Tam Fiziksel Ekran",
+            ["FlyoutPhysicalFull"] = "Tam Fiziksel Monitör",
             ["FlyoutSpanFull"] = "Birleşik Tam Ekran",
             ["FlyoutSpanHint"] = "İpucu: Shift + Tık ile birden fazla sanal monitörü birleştirebilirsiniz",
             ["FlyoutPhysicalMonitor"] = "Fiziksel Monitör:",
@@ -341,11 +349,19 @@ namespace SnappyLayout.Services
             ["Primary"] = "Primary",
 
             // Indeletable Physical Fullscreen
-            ["PermFullTitle"] = "Full Physical Screen (Indeletable)",
+            ["PermFullTitle"] = "Full Physical Monitor (Indeletable)",
             ["PermFullDesc"] = "Covers the entire real physical monitor even when virtual monitors are active. This layout is always available and cannot be deleted.",
             ["PermFullBadge"] = "PERMANENT / INDELETABLE",
             ["VirtualFullTitle"] = "Virtual Monitor Fullscreen",
             ["VirtualFullDesc"] = "Maximizes the window strictly within the boundaries of its current virtual monitor.",
+            ["CannotDeleteVirtualFull"] = "Virtual Monitor Fullscreen is a permanent system item; it cannot be deleted or reordered.",
+            ["VirtualFullSettingsTitle"] = "Virtual Monitor Fullscreen Behavior",
+            ["VirtualFullShortcutLabel"] = "Keyboard Shortcut:",
+            ["Coverage"] = "Coverage:",
+            ["MoveUp"] = "Move Up",
+            ["MoveDown"] = "Move Down",
+            ["FilterByScreenTypes"] = "Filter by Screen Types:",
+            ["NoMatchingLayouts"] = "No layouts match the selected screen type filter.",
 
             // Layouts Tab
             ["LayoutsTitle"] = "Window Snap Layouts",
@@ -373,7 +389,7 @@ namespace SnappyLayout.Services
             ["VisibilityFilter"] = "Show on Screen Types:",
             ["TestFlyoutBtn"] = "Show Snap Flyout Now",
             ["ZonesCount"] = "zones",
-            ["CannotDeletePermanent"] = "The Full Physical Screen layout is a permanent system item and cannot be deleted.",
+            ["CannotDeletePermanent"] = "The Full Physical Monitor layout is a permanent system item and cannot be deleted.",
 
             // Virtual Monitors Tab
             ["VmTitle"] = "Virtual Monitors (Side-by-Side Split)",
@@ -476,7 +492,7 @@ namespace SnappyLayout.Services
             // Flyout
             ["FlyoutHeader"] = "Choose Window Snap Layout",
             ["FlyoutVirtualFull"] = "Virtual Monitor Fullscreen",
-            ["FlyoutPhysicalFull"] = "Full Physical Screen",
+            ["FlyoutPhysicalFull"] = "Full Physical Monitor",
             ["FlyoutSpanFull"] = "Combined Fullscreen",
             ["FlyoutSpanHint"] = "Tip: Shift + Click another virtual monitor to span across them",
             ["FlyoutPhysicalMonitor"] = "Physical Monitor:",

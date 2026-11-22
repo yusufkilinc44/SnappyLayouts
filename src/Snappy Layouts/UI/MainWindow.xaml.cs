@@ -23,6 +23,10 @@ namespace SnappyLayout.UI
         private int _activeTabIndex = 0;
         private SnapArea _selectedPreviewArea;
         private SnapLayout _selectedLayout;
+        private bool _selectedVirtualFull = false;
+        private bool _filterLandscape = true;
+        private bool _filterUltrawide = true;
+        private bool _filterPortrait = true;
         private MonitorInfo _selectedPhysicalMonitor;
         private bool _suppressQuickEvents;
         private bool _sidebarCollapsed = false;
@@ -684,38 +688,62 @@ namespace SnappyLayout.UI
             step1Header.Children.Add(btnTestFlyout);
             topStack.Children.Add(step1Header);
 
-            var monWrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 10) };
+            var monWrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 12) };
             foreach (var m in monitors)
             {
                 bool isSelMon = m.Key == _selectedPhysicalMonitor.Key;
                 var mCard = new Border
                 {
-                    CornerRadius = new CornerRadius(8),
-                    BorderThickness = new Thickness(isSelMon ? 2 : 1),
-                    Padding = new Thickness(12, 8, 12, 8),
-                    Margin = new Thickness(0, 0, 8, 6),
+                    CornerRadius = new CornerRadius(10),
+                    BorderThickness = new Thickness(isSelMon ? 2.2 : 1.2),
+                    Padding = new Thickness(12, 9, 12, 9),
+                    Margin = new Thickness(0, 0, 10, 6),
                     Cursor = Cursors.Hand
                 };
-                mCard.SetResourceReference(Border.BackgroundProperty, isSelMon ? "AccentSubtleBrush" : "InputBgBrush");
-                mCard.SetResourceReference(Border.BorderBrushProperty, isSelMon ? "AccentBrush" : "CardBorderBrush");
+                mCard.SetResourceReference(Border.BackgroundProperty, isSelMon ? "PhysMonSelectedBgBrush" : "PhysMonBgBrush");
+                mCard.SetResourceReference(Border.BorderBrushProperty, isSelMon ? "PhysMonSelectedBorderBrush" : "PhysMonBorderBrush");
 
                 int vmCnt = AreaService.GetAreas(m).Count;
                 var mGrid = new Grid();
+                mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-                var mSp = new StackPanel();
-                var mTitle = new TextBlock { Text = m.DisplayName, FontWeight = FontWeights.Bold, FontSize = 12.5 };
-                mTitle.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+                var mIconBadge = new Border
+                {
+                    Width = 30,
+                    Height = 30,
+                    CornerRadius = new CornerRadius(7),
+                    Margin = new Thickness(0, 0, 10, 0),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Background = isSelMon ? new SolidColorBrush(Color.FromArgb(45, 255, 255, 255)) : Brushes.Transparent,
+                    BorderThickness = new Thickness(isSelMon ? 0 : 1)
+                };
+                if (!isSelMon)
+                    mIconBadge.SetResourceReference(Border.BorderBrushProperty, "PhysMonBorderBrush");
+                var mIconTb = new TextBlock
+                {
+                    Text = "🖥",
+                    FontSize = 15,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                mIconTb.SetResourceReference(TextBlock.ForegroundProperty, isSelMon ? "PhysMonSelectedFgBrush" : "PhysMonAccentBrush");
+                mIconBadge.Child = mIconTb;
+
+                var mSp = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+                var mTitle = new TextBlock { Text = m.DisplayName, FontWeight = FontWeights.Bold, FontSize = 13 };
+                mTitle.SetResourceReference(TextBlock.ForegroundProperty, isSelMon ? "PhysMonSelectedFgBrush" : "TextPrimaryBrush");
                 var mSub = new TextBlock
                 {
                     Text = vmCnt > 1
                         ? $"◫ {vmCnt} {Loc.T("VirtualMonitor")}"
-                        : $"🖥 {Loc.T("FullPhysicalMonitor")} ({m.AspectLabel})",
+                        : $"{Loc.T("FullPhysicalMonitor")} ({m.AspectLabel})",
                     FontSize = 11,
+                    FontWeight = FontWeights.SemiBold,
                     Margin = new Thickness(0, 2, 0, 0)
                 };
-                mSub.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+                mSub.SetResourceReference(TextBlock.ForegroundProperty, isSelMon ? "PhysMonSelectedSubFgBrush" : "PhysMonAccentBrush");
                 mSp.Children.Add(mTitle);
                 mSp.Children.Add(mSub);
 
@@ -726,7 +754,7 @@ namespace SnappyLayout.UI
                     ToolTip = Loc.T("RenameMonitor"),
                     Padding = new Thickness(6, 2, 6, 2),
                     FontSize = 11.5,
-                    Margin = new Thickness(8, 0, 0, 0),
+                    Margin = new Thickness(10, 0, 0, 0),
                     VerticalAlignment = VerticalAlignment.Center
                 };
                 btnRenM.Click += (s, e) =>
@@ -735,8 +763,10 @@ namespace SnappyLayout.UI
                     ShowRenameMonitorDialog(capturedM);
                 };
 
-                Grid.SetColumn(mSp, 0);
-                Grid.SetColumn(btnRenM, 1);
+                Grid.SetColumn(mIconBadge, 0);
+                Grid.SetColumn(mSp, 1);
+                Grid.SetColumn(btnRenM, 2);
+                mGrid.Children.Add(mIconBadge);
                 mGrid.Children.Add(mSp);
                 mGrid.Children.Add(btnRenM);
                 mCard.Child = mGrid;
@@ -745,6 +775,7 @@ namespace SnappyLayout.UI
                 {
                     _selectedPhysicalMonitor = capturedM;
                     _selectedPreviewArea = AreaService.GetAreas(capturedM).First();
+                    _selectedVirtualFull = false;
                     _selectedLayout = AreaService.GetLayoutsForArea(_selectedPreviewArea).FirstOrDefault();
                     HostLayouts.Content = BuildLayoutsPage();
                 };
@@ -776,34 +807,50 @@ namespace SnappyLayout.UI
                 step2Header.Children.Add(btnCopySiblings);
                 topStack.Children.Add(step2Header);
 
-                var vmWrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 6) };
+                var vmWrap = new WrapPanel { Margin = new Thickness(0, 2, 0, 8) };
                 foreach (var area in monAreas)
                 {
                     bool isSelArea = area.SegmentIndex == _selectedPreviewArea.SegmentIndex;
                     var aCard = new Border
                     {
-                        CornerRadius = new CornerRadius(7),
-                        BorderThickness = new Thickness(isSelArea ? 2 : 1),
-                        Padding = new Thickness(12, 7, 12, 7),
+                        CornerRadius = new CornerRadius(18),
+                        BorderThickness = new Thickness(isSelArea ? 2 : 1.2),
+                        Padding = new Thickness(14, 6, 14, 6),
                         Margin = new Thickness(0, 0, 8, 6),
                         Cursor = Cursors.Hand
                     };
-                    aCard.SetResourceReference(Border.BackgroundProperty, isSelArea ? "AccentSubtleBrush" : "InputBgBrush");
-                    aCard.SetResourceReference(Border.BorderBrushProperty, isSelArea ? "AccentBrush" : "CardBorderBrush");
+                    aCard.SetResourceReference(Border.BackgroundProperty, isSelArea ? "VirtMonSelectedBgBrush" : "VirtMonBgBrush");
+                    aCard.SetResourceReference(Border.BorderBrushProperty, isSelArea ? "VirtMonSelectedBorderBrush" : "VirtMonBorderBrush");
+
+                    var aRow = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                    var aIcon = new TextBlock
+                    {
+                        Text = "◫",
+                        FontSize = 12,
+                        FontWeight = FontWeights.Bold,
+                        Margin = new Thickness(0, 0, 6, 0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    aIcon.SetResourceReference(TextBlock.ForegroundProperty, isSelArea ? "VirtMonSelectedFgBrush" : "VirtMonAccentBrush");
 
                     var aTxt = new TextBlock
                     {
-                        Text = $"◫  {area.ShortSegmentLabel}",
-                        FontWeight = isSelArea ? FontWeights.Bold : FontWeights.SemiBold,
-                        FontSize = 12
+                        Text = area.ShortSegmentLabel,
+                        FontWeight = isSelArea ? FontWeights.Bold : FontWeights.Medium,
+                        FontSize = 11.5,
+                        VerticalAlignment = VerticalAlignment.Center
                     };
-                    aTxt.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
-                    aCard.Child = aTxt;
+                    aTxt.SetResourceReference(TextBlock.ForegroundProperty, isSelArea ? "VirtMonSelectedFgBrush" : "VirtMonFgBrush");
+
+                    aRow.Children.Add(aIcon);
+                    aRow.Children.Add(aTxt);
+                    aCard.Child = aRow;
 
                     var capturedArea = area;
                     aCard.MouseLeftButtonDown += (s, e) =>
                     {
                         _selectedPreviewArea = capturedArea;
+                        _selectedVirtualFull = false;
                         _selectedLayout = AreaService.GetLayoutsForArea(capturedArea).FirstOrDefault();
                         HostLayouts.Content = BuildLayoutsPage();
                     };
@@ -848,8 +895,8 @@ namespace SnappyLayout.UI
                 Padding = new Thickness(10, 6, 10, 6),
                 Margin = new Thickness(0, 4, 0, 0)
             };
-            targetBanner.SetResourceReference(Border.BackgroundProperty, "InputBgBrush");
-            targetBanner.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
+            targetBanner.SetResourceReference(Border.BackgroundProperty, _selectedPreviewArea.IsVirtual ? "VirtMonBgBrush" : "PhysMonBgBrush");
+            targetBanner.SetResourceReference(Border.BorderBrushProperty, _selectedPreviewArea.IsVirtual ? "VirtMonBorderBrush" : "PhysMonBorderBrush");
 
             var bannerTb = new TextBlock
             {
@@ -857,7 +904,7 @@ namespace SnappyLayout.UI
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 12
             };
-            bannerTb.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+            bannerTb.SetResourceReference(TextBlock.ForegroundProperty, _selectedPreviewArea.IsVirtual ? "VirtMonAccentBrush" : "PhysMonAccentBrush");
             targetBanner.Child = bannerTb;
             topStack.Children.Add(targetBanner);
 
@@ -866,7 +913,7 @@ namespace SnappyLayout.UI
 
             // Ana 2 sütunlu alan: Sol = Liste + Silinemez Tam Ekran, Sağ = Etkileşimli Izgara Düzenleyici
             var mainGrid = new Grid { Margin = new Thickness(0, 6, 0, 0) };
-            mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(390) });
+            mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(420) });
             mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
             mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
@@ -946,7 +993,7 @@ namespace SnappyLayout.UI
             leftStack.Children.Add(permCard);
 
             // 2) Liste Araç Çubuğu (+ Yeni Ekle, Varsayılanları Yükle, Tümünü Sil) — Yalnızca seçili alana etki eder!
-            var listBtnWrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 10) };
+            var listBtnWrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
             var btnNew = new Button { Content = Loc.T("NewLayout"), Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 0, 6, 6), FontWeight = FontWeights.SemiBold };
             btnNew.SetResourceReference(Control.BackgroundProperty, "NavLayoutsBgBrush");
             btnNew.SetResourceReference(Control.BorderBrushProperty, "NavLayoutsBrush");
@@ -956,6 +1003,7 @@ namespace SnappyLayout.UI
                 string prefix = Loc.IsTurkish ? "Özel Pencere Düzeni " : "Custom Window Layout ";
                 var nl = SnapLayout.Grid(prefix + (currentAreaLayouts.Count + 1), new double[] { 1, 1, 1 }, new double[] { 1, 1 });
                 currentAreaLayouts.Add(nl);
+                _selectedVirtualFull = false;
                 _selectedLayout = nl;
                 Storage.Save();
                 HostLayouts.Content = BuildLayoutsPage();
@@ -965,6 +1013,7 @@ namespace SnappyLayout.UI
             btnRestoreDef.Click += (s, e) =>
             {
                 AreaService.ResetLayoutsForArea(_selectedPreviewArea);
+                _selectedVirtualFull = false;
                 _selectedLayout = AreaService.GetLayoutsForArea(_selectedPreviewArea).FirstOrDefault();
                 HostLayouts.Content = BuildLayoutsPage();
             };
@@ -974,6 +1023,7 @@ namespace SnappyLayout.UI
             {
                 currentAreaLayouts.Clear();
                 _selectedLayout = null;
+                _selectedVirtualFull = true;
                 Storage.Save();
                 HostLayouts.Content = BuildLayoutsPage();
             };
@@ -983,18 +1033,114 @@ namespace SnappyLayout.UI
             listBtnWrap.Children.Add(btnDeleteAll);
             leftStack.Children.Add(listBtnWrap);
 
+            // 2.5) Çoklu Seçimli Ekran Tipi Filtre Çubuğu (Show on Screen Types)
+            var visibleLayouts = currentAreaLayouts.Where(l =>
+                (_filterLandscape && l.ShowOnLandscape) ||
+                (_filterUltrawide && l.ShowOnUltrawide) ||
+                (_filterPortrait && l.ShowOnPortrait)).ToList();
+
+            var filterCard = new Border
+            {
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(10, 8, 10, 6),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            filterCard.SetResourceReference(Border.BackgroundProperty, "CardBgBrush");
+            filterCard.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+
+            var filterStack = new StackPanel();
+            var filterHeader = new Grid { Margin = new Thickness(0, 0, 0, 6) };
+            filterHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            filterHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var filterLbl = new TextBlock
+            {
+                Text = "🔎 " + Loc.T("FilterByScreenTypes"),
+                FontSize = 11.5,
+                FontWeight = FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            filterLbl.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+
+            var filterCountTb = new TextBlock
+            {
+                Text = $"{visibleLayouts.Count} / {currentAreaLayouts.Count}",
+                FontSize = 11,
+                FontWeight = FontWeights.Bold,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            filterCountTb.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+
+            Grid.SetColumn(filterLbl, 0);
+            Grid.SetColumn(filterCountTb, 1);
+            filterHeader.Children.Add(filterLbl);
+            filterHeader.Children.Add(filterCountTb);
+            filterStack.Children.Add(filterHeader);
+
+            var filterWrap = new WrapPanel();
+            Button MakeFilterChip(string label, bool isOn, Action onToggle)
+            {
+                var chip = new Button
+                {
+                    Content = (isOn ? "✓ " : "○ ") + label,
+                    FontSize = 11,
+                    FontWeight = isOn ? FontWeights.Bold : FontWeights.Normal,
+                    Padding = new Thickness(8, 3, 8, 3),
+                    Margin = new Thickness(0, 0, 5, 4),
+                    Cursor = Cursors.Hand
+                };
+                if (isOn)
+                {
+                    chip.SetResourceReference(Control.BackgroundProperty, "NavLayoutsBgBrush");
+                    chip.SetResourceReference(Control.BorderBrushProperty, "NavLayoutsBrush");
+                    chip.SetResourceReference(Control.ForegroundProperty, "NavLayoutsBrush");
+                }
+                else
+                {
+                    chip.SetResourceReference(Control.BackgroundProperty, "InputBgBrush");
+                    chip.SetResourceReference(Control.BorderBrushProperty, "CardBorderBrush");
+                    chip.SetResourceReference(Control.ForegroundProperty, "TextSecondaryBrush");
+                }
+                chip.Click += (s, e) =>
+                {
+                    onToggle();
+                    HostLayouts.Content = BuildLayoutsPage();
+                };
+                return chip;
+            }
+
+            filterWrap.Children.Add(MakeFilterChip(Loc.T("ShowOnLandscape"), _filterLandscape, () => _filterLandscape = !_filterLandscape));
+            filterWrap.Children.Add(MakeFilterChip(Loc.T("ShowOnUltrawide"), _filterUltrawide, () => _filterUltrawide = !_filterUltrawide));
+            filterWrap.Children.Add(MakeFilterChip(Loc.T("ShowOnPortrait"), _filterPortrait, () => _filterPortrait = !_filterPortrait));
+            filterStack.Children.Add(filterWrap);
+            filterCard.Child = filterStack;
+            leftStack.Children.Add(filterCard);
+
             // 3) Seçili Fiziksel / Sanal Monitörün Pencere Yerleşim Kartları
             double previewAspect = _selectedPreviewArea.Aspect;
             double thumbH = 54;
             double thumbW = Math.Clamp(thumbH * Math.Clamp(previewAspect, 0.55, 3.0), 54, 150);
 
-            // Sanal Monitör Tam Ekran (100%) her zaman yerleşim listesinin EN BAŞINDA sabit kart olarak gösterilir
+            if (!_selectedVirtualFull && (_selectedLayout == null || !visibleLayouts.Contains(_selectedLayout)))
+            {
+                _selectedLayout = visibleLayouts.FirstOrDefault();
+                if (_selectedLayout == null) _selectedVirtualFull = true;
+            }
+
+            // Sanal Monitör Tam Ekran (100%) her zaman yerleşim listesinin EN BAŞINDA sabit (silinemez / taşınamaz) kart olarak gösterilir
             var vmFullCard = MakeCard();
-            vmFullCard.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
-            vmFullCard.BorderThickness = new Thickness(1.5);
+            if (_selectedVirtualFull)
+            {
+                vmFullCard.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
+                vmFullCard.BorderThickness = new Thickness(2);
+            }
+            vmFullCard.Cursor = Cursors.Hand;
+
             var vmFullGrid = new Grid();
             vmFullGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             vmFullGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            vmFullGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             var vmFullThumb = new LayoutPreviewControl
             {
@@ -1008,6 +1154,7 @@ namespace SnappyLayout.UI
             };
 
             var vmFullInfo = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            var vmFullTitleRow = new WrapPanel { Orientation = Orientation.Horizontal };
             string vmFullCardTitle = _selectedPreviewArea.IsVirtual
                 ? $"{Loc.T("VirtualFullTitle")} (#{_selectedPreviewArea.SegmentIndex + 1} — 100%)"
                 : $"{Loc.T("VirtualFullTitle")} (100%)";
@@ -1015,9 +1162,24 @@ namespace SnappyLayout.UI
             {
                 Text = "⛶  " + vmFullCardTitle,
                 FontWeight = FontWeights.Bold,
-                FontSize = 12.5
+                FontSize = 12.5,
+                Margin = new Thickness(0, 0, 6, 2)
             };
-            vmFullTitleTb.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+            vmFullTitleTb.SetResourceReference(TextBlock.ForegroundProperty, _selectedVirtualFull ? "AccentBrush" : "TextPrimaryBrush");
+
+            var vmPermBadge = new Border
+            {
+                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(6, 1, 6, 1),
+                Margin = new Thickness(0, 0, 0, 2)
+            };
+            vmPermBadge.SetResourceReference(Border.BackgroundProperty, "PermanentSubtleBrush");
+            var vmPermBadgeTxt = new TextBlock { Text = "🔒 " + Loc.T("PermFullBadge"), FontSize = 9.5, FontWeight = FontWeights.Bold };
+            vmPermBadgeTxt.SetResourceReference(TextBlock.ForegroundProperty, "PermanentBrush");
+            vmPermBadge.Child = vmPermBadgeTxt;
+
+            vmFullTitleRow.Children.Add(vmFullTitleTb);
+            vmFullTitleRow.Children.Add(vmPermBadge);
 
             var vmFullDescTb = new TextBlock
             {
@@ -1027,22 +1189,58 @@ namespace SnappyLayout.UI
                 Margin = new Thickness(0, 2, 0, 0)
             };
             vmFullDescTb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
-            vmFullInfo.Children.Add(vmFullTitleTb);
+            vmFullInfo.Children.Add(vmFullTitleRow);
             vmFullInfo.Children.Add(vmFullDescTb);
+
+            var btnVmFullLocked = new Button
+            {
+                Content = "🔒",
+                ToolTip = Loc.T("CannotDeleteVirtualFull"),
+                Padding = new Thickness(7, 4, 7, 4),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(6, 0, 0, 0)
+            };
+            btnVmFullLocked.Click += (s, e) =>
+            {
+                e.Handled = true;
+                MessageBox.Show(this, Loc.T("CannotDeleteVirtualFull"), "Snappy Layouts", MessageBoxButton.OK, MessageBoxImage.Information);
+            };
 
             Grid.SetColumn(vmFullThumb, 0);
             Grid.SetColumn(vmFullInfo, 1);
+            Grid.SetColumn(btnVmFullLocked, 2);
             vmFullGrid.Children.Add(vmFullThumb);
             vmFullGrid.Children.Add(vmFullInfo);
+            vmFullGrid.Children.Add(btnVmFullLocked);
             vmFullCard.Child = vmFullGrid;
+            vmFullCard.MouseLeftButtonDown += (s, e) =>
+            {
+                _selectedVirtualFull = true;
+                _selectedLayout = null;
+                HostLayouts.Content = BuildLayoutsPage();
+            };
             leftStack.Children.Add(vmFullCard);
 
-            if (_selectedLayout == null || !currentAreaLayouts.Contains(_selectedLayout))
-                _selectedLayout = currentAreaLayouts.FirstOrDefault();
-
-            foreach (var layout in currentAreaLayouts.ToList())
+            if (visibleLayouts.Count == 0 && currentAreaLayouts.Count > 0)
             {
-                bool isSel = layout == _selectedLayout;
+                var noMatchCard = MakeCard();
+                var noMatchTb = new TextBlock
+                {
+                    Text = Loc.T("NoMatchingLayouts"),
+                    FontSize = 12,
+                    TextWrapping = TextWrapping.Wrap,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(6, 8, 6, 8)
+                };
+                noMatchTb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+                noMatchCard.Child = noMatchTb;
+                leftStack.Children.Add(noMatchCard);
+            }
+
+            for (int vIdx = 0; vIdx < visibleLayouts.Count; vIdx++)
+            {
+                var layout = visibleLayouts[vIdx];
+                bool isSel = !_selectedVirtualFull && layout == _selectedLayout;
                 var lCard = MakeCard();
                 if (isSel)
                 {
@@ -1088,15 +1286,81 @@ namespace SnappyLayout.UI
                 infoSp.Children.Add(metaTb);
 
                 var actSp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-                var btnDup = new Button { Content = "⧉", ToolTip = Loc.T("Duplicate"), Padding = new Thickness(7, 4, 7, 4), Margin = new Thickness(0, 0, 4, 0) };
                 var captured = layout;
+                int capturedVisIdx = vIdx;
+
+                // Yukarı / Aşağı sıralama butonları
+                var orderSp = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 5, 0) };
+                var btnMoveUp = new Button
+                {
+                    Content = "▲",
+                    ToolTip = Loc.T("MoveUp"),
+                    FontSize = 8.5,
+                    Padding = new Thickness(5, 0, 5, 0),
+                    Height = 16,
+                    Margin = new Thickness(0, 0, 0, 2),
+                    IsEnabled = capturedVisIdx > 0
+                };
+                btnMoveUp.Click += (s, e) =>
+                {
+                    e.Handled = true;
+                    if (capturedVisIdx > 0)
+                    {
+                        var prevLayout = visibleLayouts[capturedVisIdx - 1];
+                        int idxA = currentAreaLayouts.IndexOf(captured);
+                        int idxB = currentAreaLayouts.IndexOf(prevLayout);
+                        if (idxA >= 0 && idxB >= 0)
+                        {
+                            currentAreaLayouts[idxA] = prevLayout;
+                            currentAreaLayouts[idxB] = captured;
+                            Storage.Save();
+                            HostLayouts.Content = BuildLayoutsPage();
+                        }
+                    }
+                };
+
+                var btnMoveDown = new Button
+                {
+                    Content = "▼",
+                    ToolTip = Loc.T("MoveDown"),
+                    FontSize = 8.5,
+                    Padding = new Thickness(5, 0, 5, 0),
+                    Height = 16,
+                    IsEnabled = capturedVisIdx < visibleLayouts.Count - 1
+                };
+                btnMoveDown.Click += (s, e) =>
+                {
+                    e.Handled = true;
+                    if (capturedVisIdx < visibleLayouts.Count - 1)
+                    {
+                        var nextLayout = visibleLayouts[capturedVisIdx + 1];
+                        int idxA = currentAreaLayouts.IndexOf(captured);
+                        int idxB = currentAreaLayouts.IndexOf(nextLayout);
+                        if (idxA >= 0 && idxB >= 0)
+                        {
+                            currentAreaLayouts[idxA] = nextLayout;
+                            currentAreaLayouts[idxB] = captured;
+                            Storage.Save();
+                            HostLayouts.Content = BuildLayoutsPage();
+                        }
+                    }
+                };
+
+                orderSp.Children.Add(btnMoveUp);
+                orderSp.Children.Add(btnMoveDown);
+                actSp.Children.Add(orderSp);
+
+                var btnDup = new Button { Content = "⧉", ToolTip = Loc.T("Duplicate"), Padding = new Thickness(7, 4, 7, 4), Margin = new Thickness(0, 0, 4, 0) };
                 btnDup.Click += (s, e) =>
                 {
                     e.Handled = true;
                     var copy = captured.Clone();
                     copy.DefaultKey = null;
                     copy.Name = captured.DisplayTitle + " (Kopya)";
-                    currentAreaLayouts.Add(copy);
+                    int insertAt = currentAreaLayouts.IndexOf(captured);
+                    if (insertAt >= 0) currentAreaLayouts.Insert(insertAt + 1, copy);
+                    else currentAreaLayouts.Add(copy);
+                    _selectedVirtualFull = false;
                     _selectedLayout = copy;
                     Storage.Save();
                     HostLayouts.Content = BuildLayoutsPage();
@@ -1125,6 +1389,7 @@ namespace SnappyLayout.UI
 
                 lCard.MouseLeftButtonDown += (s, e) =>
                 {
+                    _selectedVirtualFull = false;
                     _selectedLayout = captured;
                     HostLayouts.Content = BuildLayoutsPage();
                 };
@@ -1137,7 +1402,11 @@ namespace SnappyLayout.UI
 
             // --- SAĞ SÜTUN: ETKİLEŞİMLİ YERLEŞİM DÜZENLEYİCİ (SINIRSIZ SÜTUN & SATIR) ---
             var editorCard = MakeCard();
-            if (_selectedLayout != null)
+            if (_selectedVirtualFull)
+            {
+                editorCard.Child = BuildVirtualFullDetailsPanel(_selectedPreviewArea, previewAspect);
+            }
+            else if (_selectedLayout != null)
             {
                 editorCard.Child = BuildLayoutEditorPanel(_selectedLayout, previewAspect);
             }
@@ -1158,6 +1427,157 @@ namespace SnappyLayout.UI
 
             root.Children.Add(mainGrid);
             return root;
+        }
+
+        private UIElement BuildVirtualFullDetailsPanel(SnapArea area, double aspect)
+        {
+            var sp = new StackPanel();
+
+            // Başlık + Sabit / Silinemez rozeti
+            var headerWrap = new WrapPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+            string titleStr = area.IsVirtual
+                ? $"⛶  {Loc.T("VirtualFullTitle")} (#{area.SegmentIndex + 1} — 100%)"
+                : $"⛶  {Loc.T("VirtualFullTitle")} (100%)";
+            var titleTb = new TextBlock
+            {
+                Text = titleStr,
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 10, 4)
+            };
+            titleTb.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+
+            var badge = new Border
+            {
+                CornerRadius = new CornerRadius(5),
+                Padding = new Thickness(8, 3, 8, 3),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            badge.SetResourceReference(Border.BackgroundProperty, "PermanentSubtleBrush");
+            var badgeTxt = new TextBlock { Text = "🔒 " + Loc.T("PermFullBadge"), FontSize = 10.5, FontWeight = FontWeights.Bold };
+            badgeTxt.SetResourceReference(TextBlock.ForegroundProperty, "PermanentBrush");
+            badge.Child = badgeTxt;
+
+            headerWrap.Children.Add(titleTb);
+            headerWrap.Children.Add(badge);
+            sp.Children.Add(headerWrap);
+
+            var descTb = new TextBlock
+            {
+                Text = Loc.T("VirtualFullDesc"),
+                FontSize = 12.5,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 0, 0, 12)
+            };
+            descTb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+            sp.Children.Add(descTb);
+
+            // Büyük %100 Önizleme
+            var canvasBorder = new Border
+            {
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(10),
+                Margin = new Thickness(0, 0, 0, 14)
+            };
+            canvasBorder.SetResourceReference(Border.BackgroundProperty, "InputBgBrush");
+            canvasBorder.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+            canvasBorder.Child = new LayoutPreviewControl
+            {
+                Layout = null,
+                MonitorAspect = aspect,
+                IsEditor = false,
+                Height = 260,
+                IsHitTestVisible = false
+            };
+            sp.Children.Add(canvasBorder);
+
+            // Teknik Bilgiler Kartı
+            var infoBorder = new Border
+            {
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(12, 10, 12, 10),
+                Margin = new Thickness(0, 0, 0, 14)
+            };
+            infoBorder.SetResourceReference(Border.BackgroundProperty, "InputBgBrush");
+            infoBorder.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+
+            var infoGrid = new Grid();
+            infoGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
+            infoGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            void AddInfoRow(string k, string v)
+            {
+                int r = infoGrid.RowDefinitions.Count;
+                infoGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                var kTb = new TextBlock { Text = k, FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 8, 6) };
+                kTb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+                var vTb = new TextBlock { Text = v, FontSize = 12, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 0, 0, 6), TextWrapping = TextWrapping.Wrap };
+                vTb.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+                Grid.SetRow(kTb, r); Grid.SetColumn(kTb, 0);
+                Grid.SetRow(vTb, r); Grid.SetColumn(vTb, 1);
+                infoGrid.Children.Add(kTb);
+                infoGrid.Children.Add(vTb);
+            }
+
+            Storage.Data.Hotkeys.TryGetValue(HotkeyActions.VirtualMaximize, out var vMaxHk);
+            AddInfoRow(Loc.T("TargetMonitor"), area.Label);
+            AddInfoRow(Loc.T("Resolution") + ":", $"{area.Rect.Width} × {area.Rect.Height} px");
+            AddInfoRow(Loc.T("AspectRatio") + ":", area.AspectLabel);
+            AddInfoRow(Loc.T("DpiScale") + ":", $"{Math.Round(area.Monitor.Scale * 100)}%");
+            AddInfoRow(Loc.T("Coverage"), "100% (1 × 1)");
+            AddInfoRow(Loc.T("VirtualFullShortcutLabel"), vMaxHk == null || vMaxHk.IsEmpty ? "—" : vMaxHk.ToString());
+
+            infoBorder.Child = infoGrid;
+            sp.Children.Add(infoBorder);
+
+            // İlgili Davranış Ayarları (Doğrudan düzenlenebilir!)
+            sp.Children.Add(MakeSectionLabel("⚙  " + Loc.T("VirtualFullSettingsTitle")));
+            var settings = Storage.Data.Settings;
+
+            var cbVMax = new CheckBox
+            {
+                Content = Loc.T("SetVirtualMax"),
+                IsChecked = settings.VirtualMaximize,
+                Margin = new Thickness(0, 6, 0, 8)
+            };
+            cbVMax.Click += (s, e) => { settings.VirtualMaximize = cbVMax.IsChecked == true; Storage.Save(); };
+
+            var cbShift = new CheckBox
+            {
+                Content = Loc.T("SetShiftBypass"),
+                IsChecked = settings.ShiftBypassesVirtualMaximize,
+                Margin = new Thickness(0, 0, 0, 12)
+            };
+            cbShift.Click += (s, e) => { settings.ShiftBypassesVirtualMaximize = cbShift.IsChecked == true; Storage.Save(); };
+
+            sp.Children.Add(cbVMax);
+            sp.Children.Add(cbShift);
+
+            // Sabit / Silinemez Bilgi Şeridi
+            var lockNote = new Border
+            {
+                CornerRadius = new CornerRadius(6),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(10, 8, 10, 8)
+            };
+            lockNote.SetResourceReference(Border.BackgroundProperty, "PermanentSubtleBrush");
+            lockNote.SetResourceReference(Border.BorderBrushProperty, "PermanentBrush");
+            var lockNoteTb = new TextBlock
+            {
+                Text = "🔒  " + Loc.T("CannotDeleteVirtualFull"),
+                FontSize = 11.5,
+                FontWeight = FontWeights.SemiBold,
+                TextWrapping = TextWrapping.Wrap
+            };
+            lockNoteTb.SetResourceReference(TextBlock.ForegroundProperty, "PermanentBrush");
+            lockNote.Child = lockNoteTb;
+            sp.Children.Add(lockNote);
+
+            return sp;
         }
 
         private UIElement BuildLayoutEditorPanel(SnapLayout layout, double aspect)
@@ -1580,30 +2000,54 @@ namespace SnappyLayout.UI
                 bool isSel = m.Key == _selectedPhysicalMonitor.Key;
                 var mBtn = new Border
                 {
-                    CornerRadius = new CornerRadius(8),
-                    BorderThickness = new Thickness(isSel ? 2 : 1),
-                    Padding = new Thickness(14, 10, 14, 10),
+                    CornerRadius = new CornerRadius(10),
+                    BorderThickness = new Thickness(isSel ? 2.2 : 1.2),
+                    Padding = new Thickness(12, 9, 12, 9),
                     Margin = new Thickness(0, 0, 10, 6),
                     Cursor = Cursors.Hand
                 };
-                mBtn.SetResourceReference(Border.BackgroundProperty, isSel ? "AccentSubtleBrush" : "InputBgBrush");
-                mBtn.SetResourceReference(Border.BorderBrushProperty, isSel ? "AccentBrush" : "CardBorderBrush");
+                mBtn.SetResourceReference(Border.BackgroundProperty, isSel ? "PhysMonSelectedBgBrush" : "PhysMonBgBrush");
+                mBtn.SetResourceReference(Border.BorderBrushProperty, isSel ? "PhysMonSelectedBorderBrush" : "PhysMonBorderBrush");
 
                 var mGrid = new Grid();
+                mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 mGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-                var mSp = new StackPanel();
+                var mIconBadge = new Border
+                {
+                    Width = 30,
+                    Height = 30,
+                    CornerRadius = new CornerRadius(7),
+                    Margin = new Thickness(0, 0, 10, 0),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Background = isSel ? new SolidColorBrush(Color.FromArgb(45, 255, 255, 255)) : Brushes.Transparent,
+                    BorderThickness = new Thickness(isSel ? 0 : 1)
+                };
+                if (!isSel)
+                    mIconBadge.SetResourceReference(Border.BorderBrushProperty, "PhysMonBorderBrush");
+                var mIconTb = new TextBlock
+                {
+                    Text = "🖥",
+                    FontSize = 15,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                mIconTb.SetResourceReference(TextBlock.ForegroundProperty, isSel ? "PhysMonSelectedFgBrush" : "PhysMonAccentBrush");
+                mIconBadge.Child = mIconTb;
+
+                var mSp = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
                 var t1 = new TextBlock { Text = m.DisplayName, FontWeight = FontWeights.Bold, FontSize = 13 };
-                t1.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+                t1.SetResourceReference(TextBlock.ForegroundProperty, isSel ? "PhysMonSelectedFgBrush" : "TextPrimaryBrush");
                 var vmCount = AreaService.GetStoredWeights(m).Count;
                 var t2 = new TextBlock
                 {
-                    Text = $"{Loc.T("AspectRatio")}: {m.AspectLabel}   •   {Loc.T("VirtualMonitor")}: {vmCount}",
-                    FontSize = 11.5,
+                    Text = $"{Loc.T("AspectRatio")}: {m.AspectLabel}   •   ◫ {Loc.T("VirtualMonitor")}: {vmCount}",
+                    FontSize = 11,
+                    FontWeight = FontWeights.SemiBold,
                     Margin = new Thickness(0, 3, 0, 0)
                 };
-                t2.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+                t2.SetResourceReference(TextBlock.ForegroundProperty, isSel ? "PhysMonSelectedSubFgBrush" : "PhysMonAccentBrush");
                 mSp.Children.Add(t1);
                 mSp.Children.Add(t2);
 
@@ -1623,8 +2067,10 @@ namespace SnappyLayout.UI
                     ShowRenameMonitorDialog(capturedMon);
                 };
 
-                Grid.SetColumn(mSp, 0);
-                Grid.SetColumn(btnRenMon, 1);
+                Grid.SetColumn(mIconBadge, 0);
+                Grid.SetColumn(mSp, 1);
+                Grid.SetColumn(btnRenMon, 2);
+                mGrid.Children.Add(mIconBadge);
                 mGrid.Children.Add(mSp);
                 mGrid.Children.Add(btnRenMon);
                 mBtn.Child = mGrid;
@@ -2482,13 +2928,13 @@ namespace SnappyLayout.UI
             {
                 var mRow = new Border
                 {
-                    CornerRadius = new CornerRadius(6),
-                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(9),
+                    BorderThickness = new Thickness(1.2),
                     Padding = new Thickness(12, 9, 12, 9),
                     Margin = new Thickness(0, 0, 0, 6)
                 };
-                mRow.SetResourceReference(Border.BackgroundProperty, "InputBgBrush");
-                mRow.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+                mRow.SetResourceReference(Border.BackgroundProperty, "PhysMonBgBrush");
+                mRow.SetResourceReference(Border.BorderBrushProperty, "PhysMonBorderBrush");
 
                 var mRowGrid = new Grid();
                 mRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
