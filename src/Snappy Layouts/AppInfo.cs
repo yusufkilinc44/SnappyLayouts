@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.3";
+        public const string Version = "1.4";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.4", "22.11.2026",
+             "Yeni bir Snappy Layouts örneği başlatıldığında (veya sürüm güncellendiğinde) kapanan eski örneğin Windows'un yerleşik Snap Layouts ayarlarını yanlışlıkla geri açması (single-instance race condition) giderildi ve uyku/ekran değişikliği sonrasında native Snap bastırmanın otomatik doğrulanması (EnsureSuppressed) eklendi.",
+             "Fixed a single-instance handoff race condition where an exiting older instance could accidentally re-enable Windows's native Snap Layouts right after the new instance suppressed it, and added automatic EnsureSuppressed verification after display changes or waking from sleep."),
             ("1.3", "22.11.2026",
              "Büyük PDF açan Adobe Acrobat gibi CPU/UI yükü altındaki veya yavaş yanıt veren uygulamalarda maksimize tuşu üstü Snap Flyout menüsünün açılmaması / gecikmesi sorunu giderildi. MaximizeHoverWatcher artık başlık çubuğu dışında gereksiz cross-process WM_NCHITTEST göndermez, hedef uygulama meşgul veya özel başlık çubuklu (HTCLIENT) olsa bile 0 ms geometrik tespit ile anında açılır ve UI iş parçacığı asla hedef uygulamayı beklemez.",
              "Fixed Maximize Hover Snap Flyout failing to open or lagging on busy/heavy apps (e.g., Adobe Acrobat loading large PDFs). MaximizeHoverWatcher now pre-filters to the caption button band with zero IPC elsewhere, falls back instantly to geometric maximize-button bounds when the target app is busy/hung or returns HTCLIENT for custom titlebars, and keeps SnapFlyoutWindow/WindowEventService free of blocking UI-thread hit-tests."),

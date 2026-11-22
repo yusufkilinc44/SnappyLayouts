@@ -4,6 +4,13 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.4] — 2026-11-22
+### Fixed
+- **Single-Instance Native Snap Suppression Race Fixed:** When a new instance of Snappy Layouts replaces an existing running instance (such as on restart or in-place upgrade), the exiting old instance no longer calls `RestoreWindowsNativeFlyout()` behind the new instance's back and cleanly releases its single-instance mutex.
+- **Post-Sleep / Display Change Re-Suppression (`EnsureSuppressed`):** Added automatic verification after display topology changes or waking from sleep so Windows 11's native Snap Flyout stays suppressed whenever `FlyoutEnabled` is active.
+
+---
+
 ## [v1.3] — 2026-11-22
 ### Fixed
 - **Instant Hover Flyout on Busy / Heavy Apps (e.g., Adobe Acrobat Large PDFs):** Eliminated Snap Flyout delays and failures when hovering over the Maximize button of heavily loaded or slow-responding applications.

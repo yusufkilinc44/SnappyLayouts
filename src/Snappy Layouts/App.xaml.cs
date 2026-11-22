@@ -43,6 +43,8 @@ namespace SnappyLayout
                 MonitorService.Refresh();
                 Overlay?.Refresh();
                 MainWindow?.RebuildAllPages();
+                if (!Paused && Storage.Data?.Settings?.FlyoutEnabled == true)
+                    NativeSnapSuppressor.EnsureSuppressed();
 
                 // Windows ekran topolojisini 450ms sonra oturttuğunda ikinci kez garanti yenileme yap
                 if (_displayRefreshTimer == null)
@@ -54,6 +56,8 @@ namespace SnappyLayout
                         MonitorService.Refresh();
                         Overlay?.Refresh();
                         MainWindow?.RebuildAllPages();
+                        if (!Paused && Storage.Data?.Settings?.FlyoutEnabled == true)
+                            NativeSnapSuppressor.EnsureSuppressed();
                     };
                 }
                 _displayRefreshTimer.Stop();
@@ -83,6 +87,7 @@ namespace SnappyLayout
 
         private Mutex _singleInstanceMutex;
         private EventWaitHandle _shutdownEvent;
+        private bool _skipRestoreOnExit;
         private Forms.NotifyIcon _trayIcon;
         private DispatcherTimer _hoverUiTimer;
         private IntPtr _hoverCandidateHwnd;
@@ -105,7 +110,8 @@ namespace SnappyLayout
 
             ThreadPool.RegisterWaitForSingleObject(_shutdownEvent, (state, timedOut) =>
             {
-                Dispatcher.BeginInvoke(new Action(ExitApplication));
+                // Yeni bir Snappy Layouts örneği devraldığı için çıkarken Windows native Snap'i geri açma!
+                Dispatcher.BeginInvoke(new Action(() => ExitApplication(restoreNativeSnap: false)));
             }, null, -1, true);
 
             Storage.Load();
@@ -382,12 +388,18 @@ namespace SnappyLayout
 
         protected override void OnExit(ExitEventArgs e)
         {
-            NativeSnapSuppressor.RestoreWindowsNativeFlyout();
+            if (!_skipRestoreOnExit)
+                NativeSnapSuppressor.RestoreWindowsNativeFlyout();
+            try { _singleInstanceMutex?.ReleaseMutex(); } catch { }
+            try { _singleInstanceMutex?.Dispose(); } catch { }
             base.OnExit(e);
         }
 
-        public void ExitApplication()
+        public void ExitApplication() => ExitApplication(restoreNativeSnap: true);
+
+        public void ExitApplication(bool restoreNativeSnap)
         {
+            if (!restoreNativeSnap) _skipRestoreOnExit = true;
             try
             {
                 _hoverUiTimer?.Stop();
@@ -404,7 +416,9 @@ namespace SnappyLayout
                     _trayIcon.Dispose();
                 }
                 Storage.SaveNow();
-                NativeSnapSuppressor.RestoreWindowsNativeFlyout();
+                if (restoreNativeSnap)
+                    NativeSnapSuppressor.RestoreWindowsNativeFlyout();
+                try { _singleInstanceMutex?.ReleaseMutex(); } catch { }
             }
             catch { }
             Shutdown();

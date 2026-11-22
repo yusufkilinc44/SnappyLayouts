@@ -55,6 +55,26 @@ namespace SnappyLayout.Services
             ref Guid riid,
             [MarshalAs(UnmanagedType.Interface)] out IComServiceProvider ppv);
 
+        /// <summary>
+        /// Explorer yeniden başlatıldıysa veya Windows uyku sonrası ayarları sıfırladıysa
+        /// native Snap bastırmayı hızlıca yeniden uygular (zaten 0 ise hiçbir şey yapmaz).
+        /// </summary>
+        public static void EnsureSuppressed()
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(ExplorerAdvancedKey, writable: false);
+                bool flyoutOn = !(key?.GetValue("EnableSnapAssistFlyout") is int v1 && v1 == 0);
+                bool barOn = !(key?.GetValue("EnableSnapBar") is int v2 && v2 == 0);
+                bool arrOn = SystemParametersInfo(SPI_GETWINARRANGING, 0, out bool arr, 0) && arr;
+                if (flyoutOn || barOn || arrOn)
+                {
+                    SuppressWindowsNativeFlyout();
+                }
+            }
+            catch { }
+        }
+
         public static void SuppressWindowsNativeFlyout()
         {
             try
