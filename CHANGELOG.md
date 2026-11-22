@@ -4,6 +4,12 @@ All notable changes to **Snappy Layouts** are documented in this file.
 
 ---
 
+## [v1.13] — 2026-11-22
+### Fixed
+- **Missing Icons for Min-Size-Constrained & Store Apps (`WindowIconProvider`):** Fixed application icons (such as Spotify in a quarter zone extending slightly behind the taskbar due to its minimum height) failing to appear in Snap Layout tiles by clipping candidate window frames to the monitor's visible `WorkArea` before matching edges/IoU and allowing shell icon extraction for `WindowsApps` MSIX paths.
+
+---
+
 ## [v1.12] — 2026-11-22
 ### Changed
 - **3-Row Snap Flyout Header Layout & Overflow Protection (`SnapFlyoutWindow`):** Separated selector button types into dedicated rows — Row 1: Physical Monitors; Row 2: Full Physical Monitor + Virtual Monitors; Row 3 (when 3+ virtual monitors exist): Combined Span buttons (`Virtual 1 + Virtual 2`, etc.) — with dynamic width clamping and repositioning so every row always fits cleanly on screen without overflowing.

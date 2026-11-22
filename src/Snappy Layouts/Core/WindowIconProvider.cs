@@ -116,7 +116,7 @@ namespace SnappyLayout.Core
             ImageSource icon = null;
             try
             {
-                if (File.Exists(exePath))
+                if (!string.IsNullOrWhiteSpace(exePath))
                 {
                     var shfi = new SHFILEINFO();
                     IntPtr res = SHGetFileInfo(exePath, 0, ref shfi, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | SHGFI_LARGEICON);
@@ -178,6 +178,7 @@ namespace SnappyLayout.Core
             // Kenar toleransı: yalnızca gerçekten o bölgeye yerleşmiş pencereleri kabul et
             // (ör. %50 pencere %66 veya %33 kutuda ASLA görünmesin)
             int edgeTol = (int)Math.Round(24 * Math.Max(1.0, area.Monitor.Scale));
+            var workArea = area.Monitor.WorkArea;
 
             var result = new Dictionary<int, ImageSource>();
             var usedHwnds = new HashSet<IntPtr>();
@@ -192,14 +193,7 @@ namespace SnappyLayout.Core
                     var w = openWindows[wi];
                     if (w.Hwnd == excludeHwnd || w.Minimized || usedHwnds.Contains(w.Hwnd)) continue;
 
-                    // 4 kenar da hedef bölgeye tam oturmalı + IoU >= 0.85
-                    if (Math.Abs(w.Frame.Left - zr.Left) > edgeTol ||
-                        Math.Abs(w.Frame.Top - zr.Top) > edgeTol ||
-                        Math.Abs(w.Frame.Right - zr.Right) > edgeTol ||
-                        Math.Abs(w.Frame.Bottom - zr.Bottom) > edgeTol)
-                        continue;
-
-                    if (ComputeIoU(w.Frame, zr) < 0.85) continue;
+                    if (!MatchesZone(w.Frame, zr, workArea, edgeTol)) continue;
 
                     // Z-sırasında kendisinden önde bulunan başka bir pencere bu pencereyi tamamen kapatıyorsa gösterme
                     if (IsOccludedByEarlierWindow(w.Frame, openWindows, wi, excludeHwnd))
@@ -221,6 +215,39 @@ namespace SnappyLayout.Core
             }
 
             return result.Count > 0 ? result : null;
+        }
+
+        /// <summary>
+        /// Bir pencere çerçevesinin hedef bölgeye tam oturup oturmadığını kontrol eder.
+        /// Spotify gibi minimum yükseklik/genişlik dayatan uygulamalarda görev çubuğu altına taşan
+        /// dış kenar payını çalışma alanına (workArea) kırparak görünür bölge eşleşmesini doğru tespit eder.
+        /// </summary>
+        private static bool MatchesZone(RECT rawFrame, RECT zoneRect, RECT workArea, int edgeTol)
+        {
+            if (rawFrame.Width <= 0 || rawFrame.Height <= 0) return false;
+
+            // Pencerenin bu monitörün çalışma alanında kalan görünür kısmını hesapla
+            int cl = Math.Max(rawFrame.Left, workArea.Left);
+            int ct = Math.Max(rawFrame.Top, workArea.Top);
+            int cr = Math.Min(rawFrame.Right, workArea.Right);
+            int cb = Math.Min(rawFrame.Bottom, workArea.Bottom);
+            if (cr <= cl || cb <= ct) return false;
+
+            double rawArea = (double)rawFrame.Width * rawFrame.Height;
+            double clippedArea = (double)(cr - cl) * (cb - ct);
+            // Pencerenin en az %50'si bu monitörün çalışma alanında olmalı (diğer monitörden taşan pencereyi ele)
+            if (clippedArea < rawArea * 0.50) return false;
+
+            var visibleFrame = new RECT(cl, ct, cr, cb);
+
+            // 4 kenar da hedef bölgeye tam oturmalı + IoU >= 0.85
+            if (Math.Abs(visibleFrame.Left - zoneRect.Left) > edgeTol ||
+                Math.Abs(visibleFrame.Top - zoneRect.Top) > edgeTol ||
+                Math.Abs(visibleFrame.Right - zoneRect.Right) > edgeTol ||
+                Math.Abs(visibleFrame.Bottom - zoneRect.Bottom) > edgeTol)
+                return false;
+
+            return ComputeIoU(visibleFrame, zoneRect) >= 0.85;
         }
 
         /// <summary>
@@ -246,32 +273,19 @@ namespace SnappyLayout.Core
             if (frame.Width <= 0 || frame.Height <= 0) return -1;
 
             int edgeTol = (int)Math.Round(24 * Math.Max(1.0, area.Monitor.Scale));
+            var workArea = area.Monitor.WorkArea;
 
             if (layout == null)
             {
                 var zr = WindowPlacer.ZoneToPixels(area, new Rect(0, 0, 1, 1));
-                if (Math.Abs(frame.Left - zr.Left) <= edgeTol &&
-                    Math.Abs(frame.Top - zr.Top) <= edgeTol &&
-                    Math.Abs(frame.Right - zr.Right) <= edgeTol &&
-                    Math.Abs(frame.Bottom - zr.Bottom) <= edgeTol &&
-                    ComputeIoU(frame, zr) >= 0.85)
-                {
-                    return 0;
-                }
-                return -1;
+                return MatchesZone(frame, zr, workArea, edgeTol) ? 0 : -1;
             }
 
             for (int i = 0; i < layout.Zones.Count; i++)
             {
                 var zr = WindowPlacer.ZoneToPixels(area, layout.GetZoneRect(layout.Zones[i]));
-                if (Math.Abs(frame.Left - zr.Left) <= edgeTol &&
-                    Math.Abs(frame.Top - zr.Top) <= edgeTol &&
-                    Math.Abs(frame.Right - zr.Right) <= edgeTol &&
-                    Math.Abs(frame.Bottom - zr.Bottom) <= edgeTol &&
-                    ComputeIoU(frame, zr) >= 0.85)
-                {
+                if (MatchesZone(frame, zr, workArea, edgeTol))
                     return i;
-                }
             }
             return -1;
         }

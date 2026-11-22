@@ -9,7 +9,7 @@ namespace SnappyLayout
     public static class AppInfo
     {
         public const string Name = "Snappy Layouts";
-        public const string Version = "1.12";
+        public const string Version = "1.13";
         public const string Author = "YUSUF KILINÇ";
         public const string AuthorDateTr = "Kasım 2026";
         public const string AuthorDateEn = "November 2026";
@@ -20,6 +20,9 @@ namespace SnappyLayout
         /// <summary>Sürüm geçmişi (en yeni en üstte).</summary>
         public static readonly List<(string Version, string Date, string Tr, string En)> History = new List<(string, string, string, string)>
         {
+            ("1.13", "22.11.2026",
+             "Spotify gibi minimum pencere yüksekliği/genişliği dayatan uygulamalarda (veya MSIX/Store uygulamalarında) görev çubuğu altına taşan dış kenar payı nedeniyle Snap Layout kutularında ikonun görünmemesi sorunu giderildi; bölge eşleştirmesi artık monitörün görünür çalışma alanına (WorkArea) kırpılarak yapılır.",
+             "Fixed app icons failing to appear in Snap Layout zones for minimum-size-constrained apps (such as Spotify extending slightly behind the taskbar in a quarter zone) and MSIX/Store apps by clipping window frames to the monitor's visible WorkArea during zone matching and removing the WindowsApps File.Exists restriction on icon extraction."),
             ("1.12", "22.11.2026",
              "Snap Layouts Flyout üst seçici düzeni 3 temiz satıra ayrıldı: 1. satırda fiziksel monitörler, 2. satırda yeşil 'Tam Fiziksel Monitör' + sanal monitör butonları, 3. satırda ise (3+ sanal monitör varsa) birleştirilmiş sanal ekran butonları (örn. Virtual 1 + Virtual 2) yer alır; tüm satırlar her zaman ekrana taşmadan sığacak şekilde otomatik boyutlandırılır ve konumlandırılır.",
              "Organized the Snap Layouts Flyout header into 3 clean dedicated rows: Row 1 for Physical Monitors, Row 2 for Full Physical Monitor + Virtual Monitor buttons, and Row 3 (when 3+ virtual monitors exist) for Combined Span buttons (e.g., Virtual 1 + Virtual 2), with automatic width clamping and repositioning so the flyout always fits cleanly within the screen without overflowing."),
